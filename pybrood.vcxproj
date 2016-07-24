@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <ItemGroup Label="ProjectConfigurations">
+        <!-- <ProjectConfiguration Include="Debug|Win32">
+            <Configuration>Debug</Configuration>
+            <Platform>Win32</Platform>
+        </ProjectConfiguration> -->
+        <ProjectConfiguration Include="Release|Win32">
+            <Configuration>Release</Configuration>
+            <Platform>Win32</Platform>
+        </ProjectConfiguration>
+    </ItemGroup>
+    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+    <PropertyGroup>
+        <ConfigurationType>DynamicLibrary</ConfigurationType>
+        <PlatformToolset>v140</PlatformToolset>
+    </PropertyGroup>
+    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+    <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+        <ClCompile>
+            <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+            <IntrinsicFunctions>true</IntrinsicFunctions>
+            <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+            <OmitFramePointers>true</OmitFramePointers>
+            <AdditionalIncludeDirectories>../bwapi/bwapi/include/;../pybind11/include/;C:\Users\IEUser\AppData\Local\Programs\Python\Python35-32\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+            <PreprocessorDefinitions>NOMINMAX;WIN32;NDEBUG;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+            <StringPooling>true</StringPooling>
+            <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+            <BufferSecurityCheck>false</BufferSecurityCheck>
+            <RuntimeTypeInfo>false</RuntimeTypeInfo>
+            <WarningLevel>Level4</WarningLevel>
+            <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+            <FloatingPointModel>Fast</FloatingPointModel>
+            <DisableSpecificWarnings>4238;4480;4481</DisableSpecificWarnings>
+            <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+            <MultiProcessorCompilation>true</MultiProcessorCompilation>
+        </ClCompile>
+        <Link>
+            <!-- <AdditionalDependencies>Vfw32.lib;Version.lib;%(AdditionalDependencies)</AdditionalDependencies> -->
+            <AdditionalDependencies>..\bwapi\bwapi\lib\BWAPI.lib;..\bwapi\bwapi\lib\BWAPIClient.lib;C:\Users\IEUser\AppData\Local\Programs\Python\Python35-32\libs\python35.lib</AdditionalDependencies>
+            <GenerateDebugInformation>true</GenerateDebugInformation>
+            <OptimizeReferences>true</OptimizeReferences>
+            <EnableCOMDATFolding>true</EnableCOMDATFolding>
+            <RandomizedBaseAddress>false</RandomizedBaseAddress>
+            <TargetMachine>MachineX86</TargetMachine>
+            <SubSystem>Windows</SubSystem>
+        </Link>
+        <PostBuildEvent>
+            <Message>Copying as .pyd</Message>
+            <Command>COPY /Y "$(OutDir)$(TargetName)$(TargetExt)" "$(OutDir)$(TargetName).pyd"</Command>
+        </PostBuildEvent>
+    </ItemDefinitionGroup>
+    <ItemGroup>
+        <ClCompile Include="bwapi.cpp" />
+    </ItemGroup>
+    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+</Project>
