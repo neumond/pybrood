@@ -38,7 +38,7 @@
         <Link>
             <!-- <AdditionalDependencies>Vfw32.lib;Version.lib;%(AdditionalDependencies)</AdditionalDependencies> -->
             <AdditionalDependencies>..\bwapi\bwapi\lib\BWAPI.lib;..\bwapi\bwapi\lib\BWAPIClient.lib;C:\Users\IEUser\AppData\Local\Programs\Python\Python35-32\libs\python35.lib</AdditionalDependencies>
-            <GenerateDebugInformation>true</GenerateDebugInformation>
+            <GenerateDebugInformation>false</GenerateDebugInformation>
             <OptimizeReferences>true</OptimizeReferences>
             <EnableCOMDATFolding>true</EnableCOMDATFolding>
             <RandomizedBaseAddress>false</RandomizedBaseAddress>
