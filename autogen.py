@@ -8,6 +8,19 @@ mod_name = 'k_' + MAPPED_CLASS.lower()
 derived_class = MAPPED_CLASS + 'Weakref'
 
 
+weakreffing_map = {
+    'Force': 'ForceWeakref',
+    'Player': 'PlayerWeakref',
+    'Unit': 'UnitWeakref',
+}
+
+returned_sets = {
+    'Playerset',
+    'Forceset',
+    'Unitset',
+}
+
+
 print('''#ifndef MODCODE
 
 class {derclass}
@@ -64,15 +77,24 @@ def prep_arg(a):
 
 
 def fmt_func(ret_type, func_name, args):
-    out_line = '''{ret} {fname}({args_as_is}){{
-    return obj->{fname}({arg_names});
+    final_ret = ret_type
+    inner_expr = 'obj->{fname}({arg_names})'.format(
+        fname=func_name, arg_names=', '.join(n for rt, n, av in args)
+    )
+    if ret_type in weakreffing_map:
+        # py::set getPlayers(){
+        #     return set_converter<PlayerWeakref, BWAPI::Playerset>(obj->getPlayers());
+        # }
+        inner_expr = '{}({})'.format(weakreffing_map[ret_type], inner_expr)
+        final_ret = weakreffing_map[ret_type]
+    return '''{ret} {fname}({args_as_is}){{
+    return {inner};
 }}'''.format(
-        ret=ret_type,
+        ret=final_ret,
         fname=func_name,
         args_as_is=', '.join(map(prep_arg, args)),
-        arg_names=', '.join(n for rt, n, av in args),
+        inner=inner_expr,
     )
-    return out_line
 
 
 mod_defs = []
