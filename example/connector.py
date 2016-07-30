@@ -19,7 +19,15 @@ def debug_code():
     print(force)
     print(force.id)
     print(force.name)
-    pybrood.Force()
+    # pybrood.Force()
+    fs = pybrood.game.get_forces()
+    print(fs)
+    print(type(fs))
+    print(list(fs))
+    for f in fs:
+        print(f)
+        print(f.id)
+        print(f.name)
 
 
 def main():
