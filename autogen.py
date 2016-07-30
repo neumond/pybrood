@@ -1,5 +1,6 @@
 from sys import stdin
 import re
+from collections import defaultdict
 
 
 MAPPED_CLASS = 'Unit'
@@ -75,6 +76,8 @@ def fmt_func(ret_type, func_name, args):
 
 
 mod_defs = []
+prop_names = set()
+meth_names = set()
 
 
 def transform_case(name):
@@ -104,19 +107,51 @@ def accumulate_mod(ret_type, func_name, args):
         t.startswith(('is_', 'get_')) or
         t in ('exists', )
     ):
-        if t.startswith(('is_', 'get_')):
+        if t == 'get_upgrade':
+            t = 'current_upgrade'
+        elif t.startswith(('is_', 'get_')):
             t = '_'.join(t.split('_')[1:])
         mod_defs.append(
             '{modname}.def_property_readonly("{trans_name}", &PyBinding::{derclass}::{fname});'.format(
                 modname=mod_name, fname=func_name, derclass=derived_class, trans_name=t
             )
         )
+        assert t not in prop_names, t
+        assert t not in meth_names, t
+        prop_names.add(t)
     else:
-        mod_defs.append(
+        signature = '({ret} (PyBinding::{derclass}::*)({atypes}))'.format(
+            ret=ret_type, derclass=derived_class,
+            atypes=', '.join(rt for rt, n, av in args)
+        )
+        mod_defs.append((
+            func_name,
+            '{modname}.def("{trans_name}", {sign} &PyBinding::{derclass}::{fname});'.format(
+                modname=mod_name, fname=func_name, derclass=derived_class, trans_name=t,
+                sign=signature
+            ),
             '{modname}.def("{trans_name}", &PyBinding::{derclass}::{fname});'.format(
                 modname=mod_name, fname=func_name, derclass=derived_class, trans_name=t
-            )
-        )
+            ),
+        ))
+        assert t not in prop_names, t
+        meth_names.add(t)
+
+
+def assemble_mod_defs():
+    name_freq = defaultdict(lambda: 0)
+    for x in mod_defs:
+        if isinstance(x, str):
+            continue
+        name_freq[x[0]] += 1
+    for x in mod_defs:
+        if isinstance(x, str):
+            yield x
+        else:
+            if name_freq[x[0]] > 1:
+                yield x[1]
+            else:
+                yield x[2]
 
 
 for line in stdin:
@@ -150,5 +185,5 @@ py::class_<PyBinding::{derclass}> {modname}(m, "{mclass}");
 #endif
 '''.format(
     mclass=MAPPED_CLASS, modname=mod_name, derclass=derived_class,
-    moddefs='\n'.join(mod_defs),
+    moddefs='\n'.join(assemble_mod_defs()),
 ))
