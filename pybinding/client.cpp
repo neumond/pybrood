@@ -1,12 +1,13 @@
-bool isConnected(){
+py::module m_Client = m.def_submodule("client");
+m_Client.def("is_connected", []() -> bool {
     return BWAPI::BWAPIClient.isConnected();
-}
-bool connect(){
+});
+m_Client.def("connect", []() -> bool {
     return BWAPI::BWAPIClient.connect();
-}
-void disconnect(){
+});
+m_Client.def("disconnect", [](){
     BWAPI::BWAPIClient.disconnect();
-}
-void update(){
+});
+m_Client.def("update", [](){
     BWAPI::BWAPIClient.update();
-}
+});
