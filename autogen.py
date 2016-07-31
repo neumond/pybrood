@@ -62,24 +62,60 @@ def parse_arg(line):
     }
 
 
+def split_function_args(line):
+    b, after_line = line.rsplit(')', 1)
+    lvl = 0
+    for i, ch in enumerate(reversed(b)):
+        if ch == ')':
+            lvl += 1
+        elif ch == '(':
+            lvl -= 1
+            if lvl < 0:
+                break
+    else:
+        raise ValueError('Bad function definition ' + line)
+    args_line = b[-i:] if i > 0 else ''
+    fname_line = b[:-i-1]
+    return fname_line, args_line, after_line
+
+
 def parse_func(line):
-    a, b = line.rsplit('(', 1)
-    b, c = b.rsplit(')', 1)
-    ret_type, func_name = nametype_split(a.strip())
+    fname_line, args_line, after_line = split_function_args(line)
+    if '=' in after_line:
+        after_line = after_line.split('=', 1)[0]
+
+    ret_type, func_name = nametype_split(fname_line.strip())
+    ret_type = squash_spaces(ret_type.strip())
+    while ret_type.split(' ', 1)[0] in ('virtual',):
+        ret_type = ret_type.split(' ', 1)[1]
+
+    after = squash_spaces(after_line.strip())
     return {
         'rtype': no_bwapi_in_type(ret_type),
         'name': func_name,
-        'args': list(map(parse_arg, filter(lambda x: x, b.strip().split(',')))),
+        'args': list(map(parse_arg, filter(lambda x: x, args_line.strip().split(',')))),
+        'after': after.split(' ') if after else []
     }
 
 
-def prep_arg(a):
+def fmt_arg(a):
     result = '{} {}'.format(a['rtype'], a['name'])
     if a['opt_value'] is not None:
         result += ' = {}'.format(a['opt_value'])
     if a['const']:
         result = 'const ' + result
     return result
+
+
+def fmt_func_head(f):
+    after = ' '.join(f['after'])
+    if after:
+        after = ' ' + after + ' '
+    return '{} {}({}){}'.format(
+        f['rtype'], f['name'],
+        ', '.join(fmt_arg(a) for a in f['args']),
+        after
+    )
 
 
 def fmt_func(f):
@@ -91,10 +127,10 @@ def fmt_func(f):
             a_expr.append('{}.obj'.format(a['name']))
             aa = a.copy()
             aa['rtype'] = weakreffing_map[a['rtype']]
-            a_sig.append(prep_arg(aa))
+            a_sig.append(fmt_arg(aa))
         else:
             a_expr.append(a['name'])
-            a_sig.append(prep_arg(a))
+            a_sig.append(fmt_arg(a))
     inner_expr = 'obj->{fname}({arg_names})'.format(
         fname=f['name'], arg_names=', '.join(a_expr)
     )
@@ -234,19 +270,20 @@ public:
         mclass=ma.mapped_class, derclass=ma.derived_class
     ))
 
+    all_lines = []
     for line in f.lines():
         line = line.strip()
         if not line:
             continue
         if line.startswith('//'):
             continue
-        if line.startswith('virtual '):
-            line = line[len('virtual '):]
-        if line.endswith(' = 0;'):
-            line = line[:-len(' = 0;')] + ';'
-        if line.endswith(' const;'):
-            line = line[:-len(' const;')] + ';'
-        fnc = parse_func(line)
+        all_lines.append(line)
+    all_lines = '\n'.join(all_lines)
+    for func in all_lines.split(';'):
+        func = func.strip()
+        if not func:
+            continue
+        fnc = parse_func(func)
         for t in enum_types(fnc):
             if t not in KNOWN_TYPES:
                 print('UNKNOWN TYPE', t, file=stderr)
@@ -296,8 +333,9 @@ class UnitFile:
             return t
         if t == 'get_upgrade':
             return 'current_upgrade'
-        elif t.startswith(('is_', 'get_')):
+        elif t.startswith(('get_',)):
             return '_'.join(t.split('_')[1:])
+        return t
 
 
 file_parser(UnitFile)
