@@ -84,13 +84,19 @@ def prep_arg(a):
 
 def fmt_func(f):
     final_ret = f['rtype']
-    # a_inv, a_sig = [], []
-    # for a in f['args']:
-    #     if a['rtype'] in weakreffing_map:
-    #         x
-    #     a_out.append(a['name'])
+    a_expr, a_sig = [], []
+    for a in f['args']:
+        assert a['rtype'] not in returned_sets
+        if a['rtype'] in weakreffing_map:
+            a_expr.append('{}.obj'.format(a['name']))
+            aa = a.copy()
+            aa['rtype'] = weakreffing_map[a['rtype']]
+            a_sig.append(prep_arg(aa))
+        else:
+            a_expr.append(a['name'])
+            a_sig.append(prep_arg(a))
     inner_expr = 'obj->{fname}({arg_names})'.format(
-        fname=f['name'], arg_names=', '.join(a['name'] for a in f['args'])
+        fname=f['name'], arg_names=', '.join(a_expr)
     )
     if f['rtype'] in weakreffing_map:
         inner_expr = '{}({})'.format(weakreffing_map[f['rtype']], inner_expr)
@@ -105,7 +111,7 @@ def fmt_func(f):
 }}'''.format(
         ret=final_ret,
         fname=f['name'],
-        args_as_is=', '.join(map(prep_arg, f['args'])),
+        args_as_is=', '.join(a_sig),
         inner=inner_expr,
     )
 
@@ -175,9 +181,17 @@ class ModuleAccumulator:
             self.prop_names.add(t)
         else:
             t = self.rename_rule(f, t, False)
+            ats = []
+            for a in f['args']:
+                if a['rtype'] in weakreffing_map:
+                    aa = a.copy()
+                    aa['rtype'] = 'PyBinding::' + weakreffing_map[a['rtype']]
+                    ats.append(aa)
+                else:
+                    ats.append(a)
             signature = '({ret} (PyBinding::{derclass}::*)({atypes}))'.format(
                 ret=f['rtype'], derclass=self.derived_class,
-                atypes=', '.join(arg_type_for_signature(a) for a in f['args'])
+                atypes=', '.join(arg_type_for_signature(a) for a in ats)
             )
             self.mod_defs.append((
                 f['name'],

@@ -1,7 +1,9 @@
 py::module m_Game = m.def_submodule("game");
 
 
-// virtual Playerset & 	allies ()=0
+m_Game.def("allies", []() -> py::set {
+    return PyBinding::set_converter<PyBinding::PlayerWeakref, BWAPI::Playerset>(BWAPI::Broodwar->allies());
+});
 // virtual bool 	canBuildHere (TilePosition position, UnitType type, Unit builder=nullptr, bool checkExplored=false)=0
 // virtual bool 	canMake (UnitType type, Unit builder=nullptr) const =0
 // virtual bool 	canResearch (TechType type, Unit unit=nullptr, bool checkCanIssueCommandType=true)=0
@@ -15,8 +17,12 @@ m_Game.def("elapsed_time", []() -> int {
 m_Game.def("enable_flag", [](int flag){
     BWAPI::Broodwar->enableFlag(flag);
 });
-// virtual Playerset & 	enemies ()=0
-// virtual Player 	enemy () const =0
+m_Game.def("enemies", []() -> py::set {
+    return PyBinding::set_converter<PyBinding::PlayerWeakref, BWAPI::Playerset>(BWAPI::Broodwar->enemies());
+});
+m_Game.def("enemy", []() -> PyBinding::PlayerWeakref {
+    return PyBinding::PlayerWeakref(BWAPI::Broodwar->enemy());
+});
 // virtual const Regionset & 	getAllRegions () const =0
 // virtual const Unitset & 	getAllUnits () const =0
 // virtual int 	getAPM (bool includeSelects=false) const =0

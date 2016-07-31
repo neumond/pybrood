@@ -2,9 +2,8 @@
 
 class PlayerWeakref
 {
-protected:
-    BWAPI::Player obj;
 public:
+    BWAPI::Player obj;
     PlayerWeakref(BWAPI::Player iobj) : obj(iobj){};
     int getID(){ return obj->getID(); };
     std::string getName(){ return obj->getName(); };

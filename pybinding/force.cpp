@@ -2,9 +2,8 @@
 
 class ForceWeakref
 {
-protected:
-    BWAPI::Force obj;
 public:
+    BWAPI::Force obj;
     ForceWeakref(BWAPI::Force iobj) : obj(iobj){};
     int getID(){ return obj->getID(); };
     std::string getName(){ return obj->getName(); };
