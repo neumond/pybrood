@@ -33,7 +33,7 @@ def parse_arg(line):
         is_const = True
     a_type, a_name = nametype_split(line)
     return {
-        'rtype': no_bwapi_in_type(a_type),
+        'type': no_bwapi_in_type(a_type),
         'name': a_name,
         'opt_value': opt_value,
         'const': is_const

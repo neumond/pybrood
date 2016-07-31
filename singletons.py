@@ -1,27 +1,26 @@
 from sys import stderr
 from cdeclparser import lines_to_funclines, parse_func
-from cdumper import fmt_arg, transform_case, arg_type_for_signature, enum_types
-
-
-KNOWN_TYPES = {
-    'void', 'int', 'bool', 'double', 'std::string', 'std::string &',
-    # 'Unit', 'Force', 'Player',
-    # 'Unitset', 'Forceset', 'Playerset',
-}
+from cdumper import transform_case
+from typereplacer import replace_all_args, replace_return
 
 
 def fmt_func(f, obj, pb_module_name):
-    t = transform_case(f['name'])
-    ret_type = '' if f['rtype'] == 'void' else ' -> {} '.format(f['rtype'])
-    arg_names = ', '.join(a['name'] for a in f['args'])
-    arg_sig = ', '.join(fmt_arg(a) for a in f['args'])
-    ret_expr = '' if f['rtype'] == 'void' else 'return '
-    return '''{pb_module_name}.def("{t}", []({arg_sig}){ret_type}{{
-    {ret_expr}{obj}{f_name}({arg_names});
+    a_lines, a_exprs, a_codes, a_sigs = replace_all_args(f, line_prepend_ns=True)
+    assert all(x is None for x in a_codes), 'Argument preparation code is not supported'
+    r_type, r_expr = replace_return(f, prepend_ns=True)
+    inner = '{obj}{f_name}({a_exprs})'.format(
+        obj=obj, f_name=f['name'],
+        a_exprs=', '.join(a_exprs)
+    )
+    return '''{pb_module_name}.def("{t}", []({a_sigs}){r_type}{{
+    {r_expr}
 }});
 '''.format(
-        pb_module_name=pb_module_name, obj=obj, t=t, f_name=f['name'], ret_type=ret_type,
-        arg_names=arg_names, arg_sig=arg_sig, ret_expr=ret_expr
+        pb_module_name=pb_module_name,
+        t=transform_case(f['name']),
+        a_sigs=', '.join(a_lines),
+        r_type='' if r_type == 'void' else ' -> {} '.format(r_type),
+        r_expr=r_expr.format(inner)
     )
 
 
@@ -30,30 +29,14 @@ def file_parser(f, out_file):
 
     out_file.write('''py::module {pb_module_name} = m.def_submodule("{f_module}");
 '''.format(pb_module_name=pb_module_name, f_module=f.module))
-    # m_Client.def("is_connected", []() -> bool {
-    #     return BWAPI::BWAPIClient.isConnected();
-    # });
-    # m_Client.def("connect", []() -> bool {
-    #     return BWAPI::BWAPIClient.connect();
-    # });
-    # m_Client.def("disconnect", [](){
-    #     BWAPI::BWAPIClient.disconnect();
-    # });
-    # m_Client.def("update", [](){
-    #     BWAPI::BWAPIClient.update();
-    # });
-    # '''.format(
-    #         mclass=ma.mapped_class, derclass=ma.derived_class
-    #     ))
-
     for func in lines_to_funclines(f.lines()):
         fnc = parse_func(func)
-        for t in enum_types(fnc):
-            if t not in KNOWN_TYPES:
-                print('UNKNOWN TYPE', t, file=stderr)
-                break
+        try:
+            output = fmt_func(fnc, f.obj, pb_module_name)
+        except AssertionError as e:
+            print(e, file=stderr)
         else:
-            out_file.write(fmt_func(fnc, f.obj, pb_module_name))
+            out_file.write(output)
 
 
 class BaseFile:

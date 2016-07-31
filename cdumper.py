@@ -5,8 +5,10 @@ def indent_lines(lines, shift=4):
     return ''.join(map(lambda x: ind + x + '\n', lines))
 
 
-def fmt_arg(a):
-    result = '{} {}'.format(a['rtype'], a['name'])
+def fmt_arg(a, ns=None):
+    result = '{} {}'.format(a['type'], a['name'])
+    if ns is not None:
+        result = ns + result
     if a['opt_value'] is not None:
         result += ' = {}'.format(a['opt_value'])
     if a['const']:
@@ -25,8 +27,10 @@ def fmt_func_head(f):
     )
 
 
-def arg_type_for_signature(a):
-    r = a['rtype']
+def arg_type_for_signature(a, ns=None):
+    r = a['type']
+    if ns is not None:
+        r = ns + r
     if a['const']:
         r = 'const ' + r
     return r
@@ -35,7 +39,7 @@ def arg_type_for_signature(a):
 def enum_types(f):
     yield f['rtype']
     for a in f['args']:
-        yield a['rtype']
+        yield a['type']
 
 
 def transform_case(name):

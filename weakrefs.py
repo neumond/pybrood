@@ -1,61 +1,25 @@
 from sys import stderr
 from collections import defaultdict
-from cdumper import fmt_arg, indent_lines, transform_case, arg_type_for_signature, enum_types
+from cdumper import indent_lines, transform_case
 from cdeclparser import parse_func, lines_to_funclines
-
-
-weakreffing_map = {
-    'Force': 'ForceWeakref',
-    'Player': 'PlayerWeakref',
-    'Unit': 'UnitWeakref',
-    'UnitType': 'UnitTypeWeakref',
-}
-
-returned_sets = {
-    'Forceset': 'Force',
-    'Playerset': 'Player',
-    'Unitset': 'Unit',
-}
-
-KNOWN_TYPES = {
-    'int', 'bool', 'double', 'std::string',
-    'Unit', 'Force', 'Player',
-    'Unitset', 'Forceset', 'Playerset',
-}
+from typereplacer import replace_all_args, replace_return
 
 
 def fmt_func(f, obj_op):
-    final_ret = f['rtype']
-    a_expr, a_sig = [], []
-    for a in f['args']:
-        assert a['rtype'] not in returned_sets
-        if a['rtype'] in weakreffing_map:
-            a_expr.append('{}.obj'.format(a['name']))
-            aa = a.copy()
-            aa['rtype'] = weakreffing_map[a['rtype']]
-            a_sig.append(fmt_arg(aa))
-        else:
-            a_expr.append(a['name'])
-            a_sig.append(fmt_arg(a))
-    inner_expr = 'obj{obj_op}{fname}({arg_names})'.format(
-        fname=f['name'], obj_op=obj_op, arg_names=', '.join(a_expr)
+    a_lines, a_exprs, a_codes, a_sigs = replace_all_args(f, sig_prepend_ns=True)
+    assert all(x is None for x in a_codes), 'Argument preparation code is not supported'
+    inner_expr = 'obj{obj_op}{fname}({a_exprs})'.format(
+        obj_op=obj_op, fname=f['name'], a_exprs=', '.join(a_exprs)
     )
-    if f['rtype'] in weakreffing_map:
-        inner_expr = '{}({})'.format(weakreffing_map[f['rtype']], inner_expr)
-        final_ret = weakreffing_map[f['rtype']]
-    elif f['rtype'] in returned_sets:
-        final_ret = 'py::set'
-        inner_expr = 'PyBinding::set_converter<{wtype}, BWAPI::{set_type}>({inner})'.format(
-            set_type=f['rtype'], inner=inner_expr, wtype=weakreffing_map[returned_sets[f['rtype']]]
-        )
-    return '''{ret} {fname}({args_as_is}){{
-    return {inner};
+    r_type, r_expr = replace_return(f)
+    r_expr = r_expr.format(inner_expr)
+    code = '''{r_type} {fname}({a_lines}){{
+    {inner}
 }}'''.format(
-        ret=final_ret,
-        fname=f['name'],
-        args_as_is=', '.join(a_sig),
-        inner=inner_expr,
+        r_type=r_type, fname=f['name'], inner=r_expr, a_lines=', '.join(a_lines)
     )
+    sig = '{r_type} {{}}({a_sigs})'.format(r_type=r_type, a_sigs=', '.join(a_sigs))
+    return code, sig
 
 
 class ModuleAccumulator:
@@ -69,7 +33,7 @@ class ModuleAccumulator:
         self.ro_property_rule = ro_property_rule
         self.rename_rule = rename_rule
 
-    def _add_property(self, f, t):
+    def _add_property(self, f, t, sig):
         t = self.rename_rule(f, t, True)
         self.mod_defs.append(
             '{modname}.def_property_readonly("{trans_name}", &PyBinding::{derclass}::{fname});'.format(
@@ -80,25 +44,14 @@ class ModuleAccumulator:
         assert t not in self.meth_names, t
         self.prop_names.add(t)
 
-    def _add_function(self, f, t):
+    def _add_function(self, f, t, sig):
         t = self.rename_rule(f, t, False)
-        ats = []
-        for a in f['args']:
-            if a['rtype'] in weakreffing_map:
-                aa = a.copy()
-                aa['rtype'] = 'PyBinding::' + weakreffing_map[a['rtype']]
-                ats.append(aa)
-            else:
-                ats.append(a)
-        signature = '({ret} (PyBinding::{derclass}::*)({atypes}))'.format(
-            ret=f['rtype'], derclass=self.derived_class,
-            atypes=', '.join(arg_type_for_signature(a) for a in ats)
-        )
+        sig = sig.format('(PyBinding::{derclass}::*)'.format(derclass=self.derived_class))
         self.mod_defs.append((
             f['name'],
-            '{modname}.def("{trans_name}", {sign} &PyBinding::{derclass}::{fname});'.format(
+            '{modname}.def("{trans_name}", ({sign}) &PyBinding::{derclass}::{fname});'.format(
                 modname=self.mod_name, fname=f['name'], derclass=self.derived_class, trans_name=t,
-                sign=signature
+                sign=sig
             ),
             '{modname}.def("{trans_name}", &PyBinding::{derclass}::{fname});'.format(
                 modname=self.mod_name, fname=f['name'], derclass=self.derived_class, trans_name=t
@@ -107,12 +60,12 @@ class ModuleAccumulator:
         assert t not in self.prop_names, t
         self.meth_names.add(t)
 
-    def __call__(self, f):
+    def __call__(self, f, sig):
         t = transform_case(f['name'])
         if not f['args'] and f['rtype'] != 'void' and self.ro_property_rule(f, t):
-            self._add_property(f, t)
+            self._add_property(f, t, sig)
         else:
-            self._add_function(f, t)
+            self._add_function(f, t, sig)
 
     def assemble(self):
         name_freq = defaultdict(lambda: 0)
@@ -145,13 +98,13 @@ public:
 
     for func in lines_to_funclines(f.lines()):
         fnc = parse_func(func)
-        for t in enum_types(fnc):
-            if t not in KNOWN_TYPES:
-                print('UNKNOWN TYPE', t, file=stderr)
-                break
+        try:
+            code, sig = fmt_func(fnc, f.obj_op)
+        except AssertionError as e:
+            print(e, file=stderr)
         else:
-            ma(fnc)
-            out_file.write(indent_lines(fmt_func(fnc, f.obj_op), shift=4))
+            ma(fnc, sig)
+            out_file.write(indent_lines(code, shift=4))
 
     out_file.write('''}};
 
