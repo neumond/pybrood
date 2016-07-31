@@ -6,9 +6,10 @@ namespace py = pybind11;
 
 namespace PyBinding {
     #include "pybinding/common.cpp"
-    #include "pybinding/force.cpp"
-    #include "pybinding/player.cpp"
+    #include "pybinding/force_auto.cpp"
+    #include "pybinding/player_auto.cpp"
     #include "pybinding/unit_auto.cpp"
+    #include "pybinding/unittype_auto.cpp"
 }
 
 PYBIND11_PLUGIN(pybrood) {
@@ -16,11 +17,12 @@ PYBIND11_PLUGIN(pybrood) {
 
     #define MODCODE
 
-    #include "pybinding/force.cpp"
-    #include "pybinding/player.cpp"
     #include "pybinding/client.cpp"
     #include "pybinding/game.cpp"
+    #include "pybinding/force_auto.cpp"
+    #include "pybinding/player_auto.cpp"
     #include "pybinding/unit_auto.cpp"
+    #include "pybinding/unittype_auto.cpp"
 
     return m.ptr();
 }

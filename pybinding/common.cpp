@@ -10,3 +10,4 @@ inline py::set set_converter(BWSetContainer src){
 class PlayerWeakref;
 class ForceWeakref;
 class UnitWeakref;
+class UnitTypeWeakref;

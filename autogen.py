@@ -7,6 +7,7 @@ weakreffing_map = {
     'Force': 'ForceWeakref',
     'Player': 'PlayerWeakref',
     'Unit': 'UnitWeakref',
+    'UnitType': 'UnitTypeWeakref',
 }
 
 returned_sets = {
@@ -30,7 +31,7 @@ def indent_lines(lines, shift=4):
     if isinstance(lines, str):
         lines = lines.split('\n')
     ind = ' ' * shift
-    return '\n'.join(map(lambda x: ind + x, lines))
+    return ''.join(map(lambda x: ind + x + '\n', lines))
 
 
 def nametype_split(line):
@@ -118,7 +119,7 @@ def fmt_func_head(f):
     )
 
 
-def fmt_func(f):
+def fmt_func(f, obj_op):
     final_ret = f['rtype']
     a_expr, a_sig = [], []
     for a in f['args']:
@@ -131,8 +132,8 @@ def fmt_func(f):
         else:
             a_expr.append(a['name'])
             a_sig.append(fmt_arg(a))
-    inner_expr = 'obj->{fname}({arg_names})'.format(
-        fname=f['name'], arg_names=', '.join(a_expr)
+    inner_expr = 'obj{obj_op}{fname}({arg_names})'.format(
+        fname=f['name'], obj_op=obj_op, arg_names=', '.join(a_expr)
     )
     if f['rtype'] in weakreffing_map:
         inner_expr = '{}({})'.format(weakreffing_map[f['rtype']], inner_expr)
@@ -186,7 +187,7 @@ def enum_types(f):
 
 
 KNOWN_TYPES = {
-    'int', 'bool', 'double',
+    'int', 'bool', 'double', 'std::string',
     'Unit', 'Force', 'Player',
     'Unitset', 'Forceset', 'Playerset',
 }
@@ -258,15 +259,16 @@ class ModuleAccumulator:
                     yield x[2]
 
 
-def file_parser(f):
+def file_parser(f, out_file):
     ma = ModuleAccumulator(f.mapped_class, f.ro_property_rule, f.rename_rule)
-    print('''#ifndef MODCODE
+    out_file.write('''#ifndef MODCODE
 
 class {derclass}
 {{
 public:
     BWAPI::{mclass} obj;
-    {derclass}(BWAPI::{mclass} iobj) : obj(iobj){{}};'''.format(
+    {derclass}(BWAPI::{mclass} iobj) : obj(iobj){{}};
+'''.format(
         mclass=ma.mapped_class, derclass=ma.derived_class
     ))
 
@@ -290,9 +292,9 @@ public:
                 break
         else:
             ma(fnc)
-            print(indent_lines(fmt_func(fnc), shift=4))
+            out_file.write(indent_lines(fmt_func(fnc, f.obj_op), shift=4))
 
-    print('''}};
+    out_file.write('''}};
 
 #else
 
@@ -309,7 +311,28 @@ py::class_<PyBinding::{derclass}> {modname}(m, "{mclass}");
     ))
 
 
-class UnitFile:
+class BaseFile:
+    mapped_class = NotImplemented
+    obj_op = '->'
+
+    @staticmethod
+    def lines():
+        raise NotImplementedError
+
+    @staticmethod
+    def ro_property_rule(f, t):
+        return t.startswith(('is_', 'get_'))
+
+    @staticmethod
+    def rename_rule(f, t, is_property):
+        if not is_property:
+            return t
+        elif t.startswith(('get_',)):
+            return '_'.join(t.split('_')[1:])
+        return t
+
+
+class UnitFile(BaseFile):
     mapped_class = 'Unit'
 
     @staticmethod
@@ -338,4 +361,45 @@ class UnitFile:
         return t
 
 
-file_parser(UnitFile)
+class UnitTypeFile(BaseFile):
+    mapped_class = 'UnitType'
+    obj_op = '.'
+
+    @staticmethod
+    def lines():
+        with open('../bwapi/bwapi/include/BWAPI/UnitType.h') as f:
+            for i, line in enumerate(f, start=1):
+                if 279 <= i <= 902:
+                    yield line
+
+
+class ForceFile(BaseFile):
+    mapped_class = 'Force'
+
+    @staticmethod
+    def lines():
+        with open('../bwapi/bwapi/include/BWAPI/Force.h') as f:
+            for i, line in enumerate(f, start=1):
+                if 25 <= i <= 63:
+                    yield line
+
+
+class PlayerFile(BaseFile):
+    mapped_class = 'Player'
+
+    @staticmethod
+    def lines():
+        with open('../bwapi/bwapi/include/BWAPI/Player.h') as f:
+            for i, line in enumerate(f, start=1):
+                if 38 <= i <= 641:
+                    yield line
+
+
+with open('pybinding/unit_auto.cpp', 'w') as f:
+    file_parser(UnitFile, f)
+with open('pybinding/unittype_auto.cpp', 'w') as f:
+    file_parser(UnitTypeFile, f)
+with open('pybinding/force_auto.cpp', 'w') as f:
+    file_parser(ForceFile, f)
+with open('pybinding/player_auto.cpp', 'w') as f:
+    file_parser(PlayerFile, f)
