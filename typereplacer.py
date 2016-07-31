@@ -5,8 +5,11 @@ from functools import partial
 # http://pybind11.readthedocs.io/en/latest/basics.html#supported-data-types
 PRIMITIVE_TYPES = {
     'int8_t', 'uint8_t', 'int16_t', 'uint16_t', 'int32_t', 'uint32_t', 'int64_t', 'uint64_t',
-    'ssize_t', 'size_t', 'float', 'double', 'bool', 'char', 'wchar_t', 'const char *',
-    'const wchar_t *', 'std::string', 'std::wstring', 'int',
+    'ssize_t', 'size_t', 'float', 'double', 'bool', 'char', 'wchar_t', 'std::string', 'std::wstring', 'int'
+}
+
+CONST_PRIMITIVE_TYPES = {
+    'char *', 'wchar_t *'
 }
 
 WEAKREF_MAP = {
@@ -51,6 +54,8 @@ def replace_arg(a, sig_prepend_ns=False, line_prepend_ns=False):
     line_ns = get_ns_prepend(a) if line_prepend_ns else None
 
     if a['type'] in PRIMITIVE_TYPES:
+        return fmt_arg(a, ns=line_ns), a['name'], None, arg_type_for_signature(a, ns=sig_ns)
+    if a['const'] and a['type'] in CONST_PRIMITIVE_TYPES:
         return fmt_arg(a, ns=line_ns), a['name'], None, arg_type_for_signature(a, ns=sig_ns)
     if a['type'] in WEAKREF_MAP:
         assert not a['const'], 'Const arguments not supported in weakref types ' + repr(a)
