@@ -19,10 +19,22 @@ WEAKREF_MAP = {
     'UnitType': 'UnitTypeWeakref',
 }
 
+# return types only
 WEAKREF_SET_MAP = {
     'Forceset': 'Force',
     'Playerset': 'Player',
     'Unitset': 'Unit',
+    'const Unitset&': 'Unit',
+    'const Unitset &': 'Unit',
+    'const Forceset&': 'Force',
+    'const Forceset &': 'Force',
+    'const Playerset&': 'Player',
+    'const Playerset &': 'Player',
+}
+WEAKREF_SET_REV_MAP = {
+    'Unit': 'Unitset',
+    'Force': 'Forceset',
+    'Player': 'Playerset',
 }
 
 
@@ -100,10 +112,11 @@ def replace_return(f, prepend_ns=False):
             wt = 'PyBinding::' + wt
         return wt, 'return {wt}({{}});'.format(wt=wt)
     if f['rtype'] in WEAKREF_SET_MAP:
-        wt = WEAKREF_MAP[WEAKREF_SET_MAP[f['rtype']]]
+        base_t = WEAKREF_SET_MAP[f['rtype']]
+        wt = WEAKREF_MAP[base_t]
         if prepend_ns:
             wt = 'PyBinding::' + wt
         return 'py::set', 'return PyBinding::set_converter<{wt}, BWAPI::{bwt}>({{}});'.format(
-            wt=wt, bwt=f['rtype']
+            wt=wt, bwt=WEAKREF_SET_REV_MAP[base_t]
         )
     assert False, 'Bad return type ' + repr(f)
