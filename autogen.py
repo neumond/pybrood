@@ -1,11 +1,6 @@
-from sys import stdin
+from sys import stderr
 import re
 from collections import defaultdict
-
-
-MAPPED_CLASS = 'Unit'
-mod_name = 'k_' + MAPPED_CLASS.lower()
-derived_class = MAPPED_CLASS + 'Weakref'
 
 
 weakreffing_map = {
@@ -15,21 +10,10 @@ weakreffing_map = {
 }
 
 returned_sets = {
-    'Playerset',
-    'Forceset',
-    'Unitset',
+    'Forceset': 'Force',
+    'Playerset': 'Player',
+    'Unitset': 'Unit',
 }
-
-
-print('''#ifndef MODCODE
-
-class {derclass}
-{{
-public:
-    BWAPI::{mclass} obj;
-    {derclass}(BWAPI::{mclass} iobj) : obj(iobj){{}};'''.format(
-    mclass=MAPPED_CLASS, derclass=derived_class
-))
 
 
 def squash_spaces(line):
@@ -49,57 +33,81 @@ def indent_lines(lines, shift=4):
     return '\n'.join(map(lambda x: ind + x, lines))
 
 
+def nametype_split(line):
+    line = line.strip()
+    c = 0
+    for ch in reversed(line):
+        if ch.isalnum() or ch == '_':
+            c += 1
+        else:
+            break
+    return squash_spaces(line[:-c].strip()), line[-c:].strip()
+
+
 def parse_arg(line):
     line = line.strip()
-    opt_value = None
+    opt_value, is_const = None, False
     if '=' in line:
         line, opt_value = line.split('=')
         line, opt_value = line.strip(), opt_value.strip()
     if line.startswith('const '):
         line = line[len('const '):].strip()
-    a_type, a_name = squash_spaces(line).split(' ')
-    return no_bwapi_in_type(a_type), a_name, opt_value
+        is_const = True
+    a_type, a_name = nametype_split(line)
+    return {
+        'rtype': no_bwapi_in_type(a_type),
+        'name': a_name,
+        'opt_value': opt_value,
+        'const': is_const
+    }
 
 
 def parse_func(line):
-    a, b = line.split('(', 1)
-    b, c = b.split(')', 1)
-    ret_type, func_name = squash_spaces(a.strip()).split(' ')
-    return no_bwapi_in_type(ret_type), func_name, list(map(parse_arg, filter(lambda x: x, b.strip().split(','))))
+    a, b = line.rsplit('(', 1)
+    b, c = b.rsplit(')', 1)
+    ret_type, func_name = nametype_split(a.strip())
+    return {
+        'rtype': no_bwapi_in_type(ret_type),
+        'name': func_name,
+        'args': list(map(parse_arg, filter(lambda x: x, b.strip().split(',')))),
+    }
 
 
 def prep_arg(a):
-    rt, n, av = a
-    result = '{} {}'.format(rt, n)
-    if av is not None:
-        result += ' = {}'.format(av)
+    result = '{} {}'.format(a['rtype'], a['name'])
+    if a['opt_value'] is not None:
+        result += ' = {}'.format(a['opt_value'])
+    if a['const']:
+        result = 'const ' + result
     return result
 
 
-def fmt_func(ret_type, func_name, args):
-    final_ret = ret_type
+def fmt_func(f):
+    final_ret = f['rtype']
+    # a_inv, a_sig = [], []
+    # for a in f['args']:
+    #     if a['rtype'] in weakreffing_map:
+    #         x
+    #     a_out.append(a['name'])
     inner_expr = 'obj->{fname}({arg_names})'.format(
-        fname=func_name, arg_names=', '.join(n for rt, n, av in args)
+        fname=f['name'], arg_names=', '.join(a['name'] for a in f['args'])
     )
-    if ret_type in weakreffing_map:
-        # py::set getPlayers(){
-        #     return set_converter<PlayerWeakref, BWAPI::Playerset>(obj->getPlayers());
-        # }
-        inner_expr = '{}({})'.format(weakreffing_map[ret_type], inner_expr)
-        final_ret = weakreffing_map[ret_type]
+    if f['rtype'] in weakreffing_map:
+        inner_expr = '{}({})'.format(weakreffing_map[f['rtype']], inner_expr)
+        final_ret = weakreffing_map[f['rtype']]
+    elif f['rtype'] in returned_sets:
+        final_ret = 'py::set'
+        inner_expr = 'PyBinding::set_converter<{wtype}, BWAPI::{set_type}>({inner})'.format(
+            set_type=f['rtype'], inner=inner_expr, wtype=weakreffing_map[returned_sets[f['rtype']]]
+        )
     return '''{ret} {fname}({args_as_is}){{
     return {inner};
 }}'''.format(
         ret=final_ret,
-        fname=func_name,
-        args_as_is=', '.join(map(prep_arg, args)),
+        fname=f['name'],
+        args_as_is=', '.join(map(prep_arg, f['args'])),
         inner=inner_expr,
     )
-
-
-mod_defs = []
-prop_names = set()
-meth_names = set()
 
 
 def transform_case(name):
@@ -122,79 +130,118 @@ def transform_case(name):
     return '_'.join(filter(lambda x: x, out))
 
 
-def accumulate_mod(ret_type, func_name, args):
-    # print(ret_type, func_name, args)
-    t = transform_case(func_name)
-    if not args and ret_type != 'void' and (
-        t.startswith(('is_', 'get_')) or
-        t in ('exists', )
-    ):
-        if t == 'get_upgrade':
-            t = 'current_upgrade'
-        elif t.startswith(('is_', 'get_')):
-            t = '_'.join(t.split('_')[1:])
-        mod_defs.append(
-            '{modname}.def_property_readonly("{trans_name}", &PyBinding::{derclass}::{fname});'.format(
-                modname=mod_name, fname=func_name, derclass=derived_class, trans_name=t
+def arg_type_for_signature(a):
+    r = a['rtype']
+    if a['const']:
+        r = 'const ' + r
+    return r
+
+
+def enum_types(f):
+    yield f['rtype']
+    for a in f['args']:
+        yield a['rtype']
+
+
+KNOWN_TYPES = {
+    'int', 'bool', 'double',
+    'Unit', 'Force', 'Player',
+    'Unitset', 'Forceset', 'Playerset',
+}
+
+
+class ModuleAccumulator:
+    def __init__(self, mapped_class, ro_property_rule, rename_rule):
+        self.mod_defs = []
+        self.prop_names = set()
+        self.meth_names = set()
+        self.mapped_class = mapped_class
+        self.mod_name = 'k_' + mapped_class.lower()
+        self.derived_class = mapped_class + 'Weakref'
+        self.ro_property_rule = ro_property_rule
+        self.rename_rule = rename_rule
+
+    def __call__(self, f):
+        t = transform_case(f['name'])
+        if not f['args'] and f['rtype'] != 'void' and self.ro_property_rule(f, t):
+            t = self.rename_rule(f, t, True)
+            self.mod_defs.append(
+                '{modname}.def_property_readonly("{trans_name}", &PyBinding::{derclass}::{fname});'.format(
+                    modname=self.mod_name, fname=f['name'], derclass=self.derived_class, trans_name=t
+                )
             )
-        )
-        assert t not in prop_names, t
-        assert t not in meth_names, t
-        prop_names.add(t)
-    else:
-        signature = '({ret} (PyBinding::{derclass}::*)({atypes}))'.format(
-            ret=ret_type, derclass=derived_class,
-            atypes=', '.join(rt for rt, n, av in args)
-        )
-        mod_defs.append((
-            func_name,
-            '{modname}.def("{trans_name}", {sign} &PyBinding::{derclass}::{fname});'.format(
-                modname=mod_name, fname=func_name, derclass=derived_class, trans_name=t,
-                sign=signature
-            ),
-            '{modname}.def("{trans_name}", &PyBinding::{derclass}::{fname});'.format(
-                modname=mod_name, fname=func_name, derclass=derived_class, trans_name=t
-            ),
-        ))
-        assert t not in prop_names, t
-        meth_names.add(t)
-
-
-def assemble_mod_defs():
-    name_freq = defaultdict(lambda: 0)
-    for x in mod_defs:
-        if isinstance(x, str):
-            continue
-        name_freq[x[0]] += 1
-    for x in mod_defs:
-        if isinstance(x, str):
-            yield x
+            assert t not in self.prop_names, t
+            assert t not in self.meth_names, t
+            self.prop_names.add(t)
         else:
-            if name_freq[x[0]] > 1:
-                yield x[1]
+            t = self.rename_rule(f, t, False)
+            signature = '({ret} (PyBinding::{derclass}::*)({atypes}))'.format(
+                ret=f['rtype'], derclass=self.derived_class,
+                atypes=', '.join(arg_type_for_signature(a) for a in f['args'])
+            )
+            self.mod_defs.append((
+                f['name'],
+                '{modname}.def("{trans_name}", {sign} &PyBinding::{derclass}::{fname});'.format(
+                    modname=self.mod_name, fname=f['name'], derclass=self.derived_class, trans_name=t,
+                    sign=signature
+                ),
+                '{modname}.def("{trans_name}", &PyBinding::{derclass}::{fname});'.format(
+                    modname=self.mod_name, fname=f['name'], derclass=self.derived_class, trans_name=t
+                ),
+            ))
+            assert t not in self.prop_names, t
+            self.meth_names.add(t)
+
+    def assemble(self):
+        name_freq = defaultdict(lambda: 0)
+        for x in self.mod_defs:
+            if isinstance(x, str):
+                continue
+            name_freq[x[0]] += 1
+        for x in self.mod_defs:
+            if isinstance(x, str):
+                yield x
             else:
-                yield x[2]
+                if name_freq[x[0]] > 1:
+                    yield x[1]
+                else:
+                    yield x[2]
 
 
-for line in stdin:
-    line = line.strip()
-    if not line:
-        continue
-    if line.startswith('//'):
-        continue
-    if line.startswith('virtual '):
-        line = line[len('virtual '):]
-    if line.endswith(' const = 0;'):
-        line = line[:-len(' const = 0;')] + ';'
-    if line.endswith(' const;'):
-        line = line[:-len(' const;')] + ';'
+def file_parser(f):
+    ma = ModuleAccumulator(f.mapped_class, f.ro_property_rule, f.rename_rule)
+    print('''#ifndef MODCODE
 
-    fnc = parse_func(line)
-    accumulate_mod(*fnc)
-    print(indent_lines(fmt_func(*fnc), shift=4))
+class {derclass}
+{{
+public:
+    BWAPI::{mclass} obj;
+    {derclass}(BWAPI::{mclass} iobj) : obj(iobj){{}};'''.format(
+        mclass=ma.mapped_class, derclass=ma.derived_class
+    ))
 
+    for line in f.lines():
+        line = line.strip()
+        if not line:
+            continue
+        if line.startswith('//'):
+            continue
+        if line.startswith('virtual '):
+            line = line[len('virtual '):]
+        if line.endswith(' = 0;'):
+            line = line[:-len(' = 0;')] + ';'
+        if line.endswith(' const;'):
+            line = line[:-len(' const;')] + ';'
+        fnc = parse_func(line)
+        for t in enum_types(fnc):
+            if t not in KNOWN_TYPES:
+                print('UNKNOWN TYPE', t, file=stderr)
+                break
+        else:
+            ma(fnc)
+            print(indent_lines(fmt_func(fnc), shift=4))
 
-print('''}};
+    print('''}};
 
 #else
 
@@ -206,6 +253,37 @@ py::class_<PyBinding::{derclass}> {modname}(m, "{mclass}");
 
 #endif
 '''.format(
-    mclass=MAPPED_CLASS, modname=mod_name, derclass=derived_class,
-    moddefs='\n'.join(assemble_mod_defs()),
-))
+        mclass=f.mapped_class, modname=ma.mod_name, derclass=ma.derived_class,
+        moddefs='\n'.join(ma.assemble()),
+    ))
+
+
+class UnitFile:
+    mapped_class = 'Unit'
+
+    @staticmethod
+    def lines():
+        with open('../bwapi/bwapi/include/BWAPI/Unit.h') as f:
+            for i, line in enumerate(f, start=1):
+                # lines 60..2458
+                if 60 <= i <= 2458:
+                    yield line
+
+    @staticmethod
+    def ro_property_rule(f, t):
+        return (
+            t.startswith(('is_', 'get_')) or
+            t in ('exists', )
+        )
+
+    @staticmethod
+    def rename_rule(f, t, is_property):
+        if not is_property:
+            return t
+        if t == 'get_upgrade':
+            return 'current_upgrade'
+        elif t.startswith(('is_', 'get_')):
+            return '_'.join(t.split('_')[1:])
+
+
+file_parser(UnitFile)
