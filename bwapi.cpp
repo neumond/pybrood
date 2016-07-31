@@ -17,8 +17,8 @@ PYBIND11_PLUGIN(pybrood) {
 
     #define MODCODE
 
-    #include "pybinding/client.cpp"
-    #include "pybinding/game.cpp"
+    #include "pybinding/client_auto.cpp"
+    #include "pybinding/game_auto.cpp"
     #include "pybinding/force_auto.cpp"
     #include "pybinding/player_auto.cpp"
     #include "pybinding/unit_auto.cpp"
