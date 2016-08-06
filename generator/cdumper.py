@@ -1,10 +1,3 @@
-def indent_lines(lines, shift=4):
-    if isinstance(lines, str):
-        lines = lines.split('\n')
-    ind = ' ' * shift
-    return ''.join(map(lambda x: ind + x + '\n', lines))
-
-
 def fmt_arg(a, ns=None):
     result = '{} {}'.format(a['type'], a['name'])
     if ns is not None:

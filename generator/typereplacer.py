@@ -1,4 +1,4 @@
-from cdumper import fmt_arg, arg_type_for_signature
+from .cdumper import fmt_arg, arg_type_for_signature
 from functools import partial
 
 

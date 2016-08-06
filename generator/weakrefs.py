@@ -1,13 +1,10 @@
 from sys import stderr
 from collections import defaultdict
-from cdumper import transform_case
-from cdeclparser import parse_func, lines_to_statements, flines, squash_spaces
-from typereplacer import replace_all_args, replace_return
-import jinja2
+from .cdumper import transform_case
+from .cdeclparser import parse_func, lines_to_statements
+from .typereplacer import replace_all_args, replace_return
 from html import unescape as html_unescape
-
-
-jin_env = jinja2.Environment(loader=jinja2.FileSystemLoader('.'), autoescape=False)
+from .utils import jin_env, squash_spaces, flines
 
 
 def fmt_func(f, obj_op):

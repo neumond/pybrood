@@ -1,7 +1,7 @@
 from sys import stderr
-from cdeclparser import lines_to_statements, parse_func
-from cdumper import transform_case
-from typereplacer import replace_all_args, replace_return
+from .cdeclparser import lines_to_statements, parse_func
+from .cdumper import transform_case
+from .typereplacer import replace_all_args, replace_return
 
 
 def fmt_func(f, obj, pb_module_name):

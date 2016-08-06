@@ -1,8 +1,4 @@
-import re
-
-
-def squash_spaces(line):
-    return re.sub('\s+', ' ', line)
+from .utils import squash_spaces
 
 
 def nametype_split(line):
@@ -91,12 +87,3 @@ def lines_to_statements(lines):
         if not func:
             continue
         yield func
-
-
-class flines:
-    def __init__(self, fname):
-        with open(fname) as f:
-            self.lines = tuple(line for line in f)
-
-    def __call__(self, start, end):
-        return self.lines[start-1:end]  # 1-based, inclusive
