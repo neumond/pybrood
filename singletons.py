@@ -1,5 +1,5 @@
 from sys import stderr
-from cdeclparser import lines_to_funclines, parse_func
+from cdeclparser import lines_to_statements, parse_func
 from cdumper import transform_case
 from typereplacer import replace_all_args, replace_return
 
@@ -29,7 +29,7 @@ def file_parser(f, out_file):
 
     out_file.write('''py::module {pb_module_name} = m.def_submodule("{f_module}");
 '''.format(pb_module_name=pb_module_name, f_module=f.module))
-    for func in lines_to_funclines(f.lines()):
+    for func in lines_to_statements(f.lines()):
         fnc = parse_func(func)
         try:
             output = fmt_func(fnc, f.obj, pb_module_name)
@@ -46,18 +46,6 @@ class BaseFile:
     @staticmethod
     def lines():
         raise NotImplementedError
-
-    # @staticmethod
-    # def ro_property_rule(f, t):
-    #     return t.startswith(('is_', 'get_'))
-    #
-    # @staticmethod
-    # def rename_rule(f, t, is_property):
-    #     if not is_property:
-    #         return t
-    #     elif t.startswith(('get_',)):
-    #         return '_'.join(t.split('_')[1:])
-    #     return t
 
 
 class GameFile(BaseFile):

@@ -76,7 +76,7 @@ def parse_func(line):
     }
 
 
-def lines_to_funclines(lines):
+def lines_to_statements(lines):
     all_lines = []
     for line in lines:
         line = line.strip()
@@ -91,3 +91,12 @@ def lines_to_funclines(lines):
         if not func:
             continue
         yield func
+
+
+class flines:
+    def __init__(self, fname):
+        with open(fname) as f:
+            self.lines = tuple(line for line in f)
+
+    def __call__(self, start, end):
+        return self.lines[start-1:end]  # 1-based, inclusive

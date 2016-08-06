@@ -17,6 +17,20 @@ WEAKREF_MAP = {
     'Player': 'PlayerWeakref',
     'Unit': 'UnitWeakref',
     'UnitType': 'UnitTypeWeakref',
+    'BulletType': 'BulletTypeWeakref',
+    'DamageType': 'DamageTypeWeakref',
+    'UpgradeType': 'UpgradeTypeWeakref',
+    'WeaponType': 'WeaponTypeWeakref',
+    'PlayerType': 'PlayerTypeWeakref',
+}
+
+POINTER_FORCE_TYPES = {
+    'UnitType',
+    'BulletType',
+    'DamageType',
+    'UpgradeType',
+    'WeaponType',
+    'PlayerType',
 }
 
 # return types only
@@ -30,11 +44,13 @@ WEAKREF_SET_MAP = {
     'const Forceset &': 'Force',
     'const Playerset&': 'Player',
     'const Playerset &': 'Player',
+    # 'const UnitType::set&': 'UnitType',
 }
 WEAKREF_SET_REV_MAP = {
     'Unit': 'Unitset',
     'Force': 'Forceset',
     'Player': 'Playerset',
+    # 'UnitType': 'UnitType::set',
 }
 
 
@@ -74,7 +90,8 @@ def replace_arg(a, sig_prepend_ns=False, line_prepend_ns=False):
         assert a['opt_value'] is None, 'Value defaults not supported in weakref types ' + repr(a)
         na = a.copy()
         na['type'] = WEAKREF_MAP[a['type']]
-        return fmt_arg(na, ns=line_ns), na['name'] + '.obj', None, arg_type_for_signature(na, ns=sig_ns)
+        ptr = '*' if a['type'] in POINTER_FORCE_TYPES else ''
+        return fmt_arg(na, ns=line_ns), ptr + na['name'] + '.obj', None, arg_type_for_signature(na, ns=sig_ns)
     assert False, 'Bad argument ' + repr(a)
 
 
@@ -110,7 +127,8 @@ def replace_return(f, prepend_ns=False):
         wt = WEAKREF_MAP[f['rtype']]
         if prepend_ns:
             wt = 'PyBinding::' + wt
-        return wt, 'return {wt}({{}});'.format(wt=wt)
+        ptr = '&' if f['rtype'] in POINTER_FORCE_TYPES else ''
+        return wt, 'return {wt}({p}{{}});'.format(wt=wt, p=ptr)
     if f['rtype'] in WEAKREF_SET_MAP:
         base_t = WEAKREF_SET_MAP[f['rtype']]
         wt = WEAKREF_MAP[base_t]
