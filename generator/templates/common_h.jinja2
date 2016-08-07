@@ -8,10 +8,18 @@ namespace py = pybind11;
 namespace PyBinding {
 
 template <class Weakref, class BWSetContainer>
-inline py::set set_converter(BWSetContainer src){
+inline py::set set_converter(const BWSetContainer&amp; src){
     py::set out;
     for (auto it = src.cbegin(); it != src.cend(); ++it )
         out.add(py::cast(Weakref(*it)));
+    return out;
+}
+
+template <class Weakref, class BWSetContainer>
+inline py::set ptr_set_converter(const BWSetContainer&amp; src){
+    py::set out;
+    for (auto it = src.cbegin(); it != src.cend(); ++it )
+        out.add(py::cast(Weakref(&amp;(*it))));
     return out;
 }
 

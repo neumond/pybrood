@@ -5,7 +5,7 @@
 
 namespace PyBinding {
 
-{{ weakref_class }}::{{ weakref_class }}(BWAPI::{{ bw_class }}{% if make_pointer %}*{% endif %} iobj) : obj(iobj){};
+{{ weakref_class }}::{{ weakref_class }}(const BWAPI::{{ bw_class }}{% if make_pointer %}*{% endif %} iobj) : obj(iobj){};
 
 {% for method in methods %}
 {{ method.rtype }} {{ weakref_class }}::{{ method.head_nortype }}{

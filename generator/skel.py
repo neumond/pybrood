@@ -4,6 +4,7 @@ from os.path import join, isdir, relpath
 from .utils import jin_env
 from pathlib import PureWindowsPath
 from .typereplacer import WEAKREF_MAP
+from html import unescape as html_unescape
 
 
 def makedir(*path):
@@ -22,9 +23,9 @@ def pre():
         f.write('msbuild /p:PlatformToolset=v140 /p:Configuration=Release /p:Platform=Win32')
 
     with open(join(GEN_OUTPUT_DIR, 'include', 'common.h'), 'w') as f:
-        f.write(jin_env.get_template('common_h.jinja2').render(
+        f.write(html_unescape(jin_env.get_template('common_h.jinja2').render(
             classes=WEAKREF_MAP.values(),
-        ))
+        )))
 
 
 def post():
@@ -36,7 +37,7 @@ def post():
         ))
 
     with open(join(GEN_OUTPUT_DIR, 'pybrood.cpp'), 'w') as f:
-        f.write(jin_env.get_template('pybrood_cpp.jinja2').render(
+        f.write(html_unescape(jin_env.get_template('pybrood_cpp.jinja2').render(
             cpp_files=listdir(join(GEN_OUTPUT_DIR, 'pybind')),
             h_files=filter(lambda x: x != 'common.h', listdir(join(GEN_OUTPUT_DIR, 'include'))),
-        ))
+        )))

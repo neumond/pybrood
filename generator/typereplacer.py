@@ -27,6 +27,7 @@ for Sub in weakrefs.BaseWeakrefFile.__subclasses__():
 WEAKREF_SET_MAP = {
     'Forceset': 'Force',
     'Playerset': 'Player',
+    'Playerset&': 'Player',
     'Unitset': 'Unit',
     'const Unitset&': 'Unit',
     'const Unitset &': 'Unit',
@@ -34,15 +35,19 @@ WEAKREF_SET_MAP = {
     'const Forceset &': 'Force',
     'const Playerset&': 'Player',
     'const Playerset &': 'Player',
-    # 'const UnitType::set&': 'UnitType',
+    'const UnitType::set&': 'UnitType',
+    'const SetContainer<TechType>&': 'TechType',
+    'const SetContainer<UpgradeType>&': 'UpgradeType',
 }
 # from multiple ways choose single TODO
 # this is used to cast via set_converter only
 WEAKREF_SET_REV_MAP = {
-    'Unit': 'Unitset',
-    'Force': 'Forceset',
-    'Player': 'Playerset',
-    # 'UnitType': 'UnitType::set',
+    'Unit': 'BWAPI::Unitset',
+    'Force': 'BWAPI::Forceset',
+    'Player': 'BWAPI::Playerset',
+    'UnitType': 'BWAPI::UnitType::set',
+    'TechType': 'BWAPI::SetContainer<BWAPI::TechType>',
+    'UpgradeType': 'BWAPI::SetContainer<BWAPI::UpgradeType>',
 }
 
 
@@ -150,13 +155,13 @@ def replace_return(f, prepend_ns=False):
     if f['rtype'] in WEAKREF_SET_MAP:
         base_t = WEAKREF_SET_MAP[f['rtype']]
         wt = WEAKREF_MAP[base_t]
-        sc = 'set_converter'
+        sc = 'ptr_set_converter' if base_t in POINTER_FORCE_TYPES else 'set_converter'
         if prepend_ns:
             wt = 'PyBinding::' + wt
             sc = 'PyBinding::' + sc
         return (
             'py::set',
-            'return {sc}<{wt}, BWAPI::{bwt}>({{}});'.format(
+            'return {sc}<{wt}, {bwt}>({{}});'.format(
                 sc=sc, wt=wt, bwt=WEAKREF_SET_REV_MAP[base_t]
             ),
             {INCLUDE_MAP[base_t]}

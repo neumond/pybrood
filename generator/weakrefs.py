@@ -320,3 +320,51 @@ class RaceFile(BaseWeakrefFile):
     def enum_lines():
         f = flines(join(BWAPI_INCLUDE_DIR, 'Race.h'))
         yield from f(98, 103)
+
+
+class TechTypeFile(BaseWeakrefFile):
+    mapped_class = 'TechType'
+    make_obj_pointer = True
+    enum_namespace = 'BWAPI::TechTypes'
+
+    @staticmethod
+    def lines():
+        f = flines(join(BWAPI_INCLUDE_DIR, 'TechType.h'))
+        yield from f(79, 154)
+
+    @staticmethod
+    def enum_lines():
+        f = flines(join(BWAPI_INCLUDE_DIR, 'TechType.h'))
+        yield from f(165, 210)
+
+
+class UnitCommandTypeFile(BaseWeakrefFile):
+    mapped_class = 'UnitCommandType'
+    make_obj_pointer = True
+    enum_namespace = 'BWAPI::UnitCommandTypes'
+
+    @staticmethod
+    def lines():
+        f = flines(join(BWAPI_INCLUDE_DIR, 'UnitCommandType.h'))
+        yield from f(77, 77)
+
+    @staticmethod
+    def enum_lines():
+        f = flines(join(BWAPI_INCLUDE_DIR, 'UnitCommandType.h'))
+        yield from f(89, 134)
+
+
+class ExplosionTypeFile(BaseWeakrefFile):
+    mapped_class = 'ExplosionType'
+    make_obj_pointer = True
+    enum_namespace = 'BWAPI::ExplosionTypes'
+
+    @staticmethod
+    def lines():
+        f = flines(join(BWAPI_INCLUDE_DIR, 'ExplosionType.h'))
+        yield from f(56, 56)
+
+    @staticmethod
+    def enum_lines():
+        f = flines(join(BWAPI_INCLUDE_DIR, 'ExplosionType.h'))
+        yield from f(68, 92)
