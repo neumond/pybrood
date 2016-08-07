@@ -163,69 +163,6 @@ class BaseWeakrefFile:
         return cls.mapped_class + 'Weakref'
 
 
-class UnitFile(BaseWeakrefFile):
-    mapped_class = 'Unit'
-
-    @staticmethod
-    def lines():
-        with open(join(BWAPI_INCLUDE_DIR, 'Unit.h')) as f:
-            for i, line in enumerate(f, start=1):
-                # lines 60..2458
-                if 60 <= i <= 2458:
-                    yield line
-
-    @staticmethod
-    def ro_property_rule(f, t):
-        return (
-            t.startswith(('is_', 'get_')) or
-            t in ('exists', )
-        )
-
-    @staticmethod
-    def rename_rule(f, t, is_property):
-        if not is_property:
-            return t
-        if t == 'get_upgrade':
-            return 'current_upgrade'
-        elif t.startswith(('get_',)):
-            return '_'.join(t.split('_')[1:])
-        return t
-
-
-class UnitTypeFile(BaseWeakrefFile):
-    mapped_class = 'UnitType'
-    make_obj_pointer = True
-    enum_namespace = 'BWAPI::UnitTypes'
-
-    @staticmethod
-    def lines():
-        f = flines(join(BWAPI_INCLUDE_DIR, 'UnitType.h'))
-        yield from f(279, 902)
-
-    @staticmethod
-    def enum_lines():
-        f = flines(join(BWAPI_INCLUDE_DIR, 'UnitType.h'))
-        yield from f(951, 1234)
-
-
-class ForceFile(BaseWeakrefFile):
-    mapped_class = 'Force'
-
-    @staticmethod
-    def lines():
-        f = flines(join(BWAPI_INCLUDE_DIR, 'Force.h'))
-        yield from f(25, 63)
-
-
-class PlayerFile(BaseWeakrefFile):
-    mapped_class = 'Player'
-
-    @staticmethod
-    def lines():
-        f = flines(join(BWAPI_INCLUDE_DIR, 'Player.h'))
-        yield from f(38, 641)
-
-
 class BulletTypeFile(BaseWeakrefFile):
     mapped_class = 'BulletType'
     make_obj_pointer = True
@@ -258,36 +195,38 @@ class DamageTypeFile(BaseWeakrefFile):
         yield from f(60, 66)
 
 
-class UpgradeTypeFile(BaseWeakrefFile):
-    mapped_class = 'UpgradeType'
+class ExplosionTypeFile(BaseWeakrefFile):
+    mapped_class = 'ExplosionType'
     make_obj_pointer = True
-    enum_namespace = 'BWAPI::UpgradeTypes'
+    enum_namespace = 'BWAPI::ExplosionTypes'
 
     @staticmethod
     def lines():
-        f = flines(join(BWAPI_INCLUDE_DIR, 'UpgradeType.h'))
-        yield from f(93, 172)
+        f = flines(join(BWAPI_INCLUDE_DIR, 'ExplosionType.h'))
+        yield from f(56, 56)
 
     @staticmethod
     def enum_lines():
-        f = flines(join(BWAPI_INCLUDE_DIR, 'UpgradeType.h'))
-        yield from f(183, 245)
+        f = flines(join(BWAPI_INCLUDE_DIR, 'ExplosionType.h'))
+        yield from f(68, 92)
 
 
-class WeaponTypeFile(BaseWeakrefFile):
-    mapped_class = 'WeaponType'
-    make_obj_pointer = True
-    enum_namespace = 'BWAPI::WeaponTypes'
+class ForceFile(BaseWeakrefFile):
+    mapped_class = 'Force'
 
     @staticmethod
     def lines():
-        f = flines(join(BWAPI_INCLUDE_DIR, 'WeaponType.h'))
-        yield from f(153, 305)
+        f = flines(join(BWAPI_INCLUDE_DIR, 'Force.h'))
+        yield from f(25, 63)
+
+
+class PlayerFile(BaseWeakrefFile):
+    mapped_class = 'Player'
 
     @staticmethod
-    def enum_lines():
-        f = flines(join(BWAPI_INCLUDE_DIR, 'WeaponType.h'))
-        yield from f(330, 439)
+    def lines():
+        f = flines(join(BWAPI_INCLUDE_DIR, 'Player.h'))
+        yield from f(38, 641)
 
 
 class PlayerTypeFile(BaseWeakrefFile):
@@ -338,6 +277,35 @@ class TechTypeFile(BaseWeakrefFile):
         yield from f(165, 210)
 
 
+class UnitFile(BaseWeakrefFile):
+    mapped_class = 'Unit'
+
+    @staticmethod
+    def lines():
+        with open(join(BWAPI_INCLUDE_DIR, 'Unit.h')) as f:
+            for i, line in enumerate(f, start=1):
+                # lines 60..2458
+                if 60 <= i <= 2458:
+                    yield line
+
+    @staticmethod
+    def ro_property_rule(f, t):
+        return (
+            t.startswith(('is_', 'get_')) or
+            t in ('exists', )
+        )
+
+    @staticmethod
+    def rename_rule(f, t, is_property):
+        if not is_property:
+            return t
+        if t == 'get_upgrade':
+            return 'current_upgrade'
+        elif t.startswith(('get_',)):
+            return '_'.join(t.split('_')[1:])
+        return t
+
+
 class UnitCommandTypeFile(BaseWeakrefFile):
     mapped_class = 'UnitCommandType'
     make_obj_pointer = True
@@ -354,17 +322,49 @@ class UnitCommandTypeFile(BaseWeakrefFile):
         yield from f(89, 134)
 
 
-class ExplosionTypeFile(BaseWeakrefFile):
-    mapped_class = 'ExplosionType'
+class UnitTypeFile(BaseWeakrefFile):
+    mapped_class = 'UnitType'
     make_obj_pointer = True
-    enum_namespace = 'BWAPI::ExplosionTypes'
+    enum_namespace = 'BWAPI::UnitTypes'
 
     @staticmethod
     def lines():
-        f = flines(join(BWAPI_INCLUDE_DIR, 'ExplosionType.h'))
-        yield from f(56, 56)
+        f = flines(join(BWAPI_INCLUDE_DIR, 'UnitType.h'))
+        yield from f(279, 902)
 
     @staticmethod
     def enum_lines():
-        f = flines(join(BWAPI_INCLUDE_DIR, 'ExplosionType.h'))
-        yield from f(68, 92)
+        f = flines(join(BWAPI_INCLUDE_DIR, 'UnitType.h'))
+        yield from f(951, 1234)
+
+
+class UpgradeTypeFile(BaseWeakrefFile):
+    mapped_class = 'UpgradeType'
+    make_obj_pointer = True
+    enum_namespace = 'BWAPI::UpgradeTypes'
+
+    @staticmethod
+    def lines():
+        f = flines(join(BWAPI_INCLUDE_DIR, 'UpgradeType.h'))
+        yield from f(93, 172)
+
+    @staticmethod
+    def enum_lines():
+        f = flines(join(BWAPI_INCLUDE_DIR, 'UpgradeType.h'))
+        yield from f(183, 245)
+
+
+class WeaponTypeFile(BaseWeakrefFile):
+    mapped_class = 'WeaponType'
+    make_obj_pointer = True
+    enum_namespace = 'BWAPI::WeaponTypes'
+
+    @staticmethod
+    def lines():
+        f = flines(join(BWAPI_INCLUDE_DIR, 'WeaponType.h'))
+        yield from f(153, 305)
+
+    @staticmethod
+    def enum_lines():
+        f = flines(join(BWAPI_INCLUDE_DIR, 'WeaponType.h'))
+        yield from f(330, 439)
