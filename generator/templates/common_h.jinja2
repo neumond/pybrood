@@ -23,6 +23,21 @@ inline py::set ptr_set_converter(const BWSetContainer&amp; src){
     return out;
 }
 
+typedef std::array<int, 2> UniversalPosition;
+
+template <class Point>
+inline UniversalPosition convert_position(const Point&amp; src){
+    return {src.x, src.y};
+}
+
+{% for t in ('Position', 'WalkPosition', 'TilePosition') %}
+namespace {{ t }}s
+{
+    {% for k in ('Invalid', 'None', 'Unknown', 'Origin')
+     %}const UniversalPosition {{ k }} = convert_position<BWAPI::{{ t }}>(BWAPI::{{ t }}s::{{ k }});
+    {% endfor %}
+}
+{% endfor %}
 
 {% for k in classes
  %}class {{ k }};

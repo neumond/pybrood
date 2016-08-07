@@ -23,6 +23,8 @@ for Sub in weakrefs.BaseWeakrefFile.__subclasses__():
         POINTER_FORCE_TYPES.add(Sub.mapped_class)
     INCLUDE_MAP[Sub.mapped_class] = Sub.header_file_name()
 
+POSITION_TYPES = {'Position', 'WalkPosition', 'TilePosition'}
+
 # return types only
 WEAKREF_SET_MAP = {
     'Bulletset': 'Bullet',
@@ -58,7 +60,7 @@ WEAKREF_SET_REV_MAP = {
 
 
 def get_ns_prepend(a):
-    if a['type'] in WEAKREF_MAP:
+    if a['type'] in WEAKREF_MAP or a['type'] in POSITION_TYPES:
         return 'PyBinding::'
     return None
 
@@ -118,6 +120,17 @@ def replace_arg(a, sig_prepend_ns=False, line_prepend_ns=False):
             fmt_arg(na, ns=line_ns, opt_value=False),
             {INCLUDE_MAP[a['type']]}
         )
+    if a['type'] in POSITION_TYPES:
+        na = a.copy()
+        na['type'] = 'UniversalPosition'
+        return (
+            fmt_arg(na, ns=line_ns),
+            'BWAPI::{point}({name}[0], {name}[1])'.format(point=a['type'], name=na['name']),
+            None,
+            arg_type_for_signature(na, ns=sig_ns),
+            fmt_arg(na, ns=line_ns, opt_value=False),
+            set()
+        )
     assert False, 'Bad argument ' + repr(a)
 
 
@@ -175,5 +188,16 @@ def replace_return(f, prepend_ns=False):
                 sc=sc, wt=wt, bwt=WEAKREF_SET_REV_MAP[base_t]
             ),
             {INCLUDE_MAP[base_t]}
+        )
+    if f['rtype'] in POSITION_TYPES:
+        rt = 'UniversalPosition'
+        sc = 'convert_position'
+        if prepend_ns:
+            rt = 'PyBinding::' + rt
+            sc = 'PyBinding::' + sc
+        return (
+            rt,
+            'return {sc}<BWAPI::{tpoint}>({{}});'.format(sc=sc, tpoint=f['rtype']),
+            set()
         )
     assert False, 'Bad return type ' + repr(f)
