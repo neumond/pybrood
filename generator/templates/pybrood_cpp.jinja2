@@ -7,8 +7,8 @@
 PYBIND11_PLUGIN(pybrood) {
     py::module m("pybrood", "BWAPI python module");
 
-    {% for f in cpp_files %}
-    #include "pybind/{{ f }}"
+    {% for f in cpp_files
+     %}#include "pybind/{{ f }}"
     {% endfor %}
 
     return m.ptr();

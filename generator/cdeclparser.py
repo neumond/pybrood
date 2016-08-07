@@ -72,7 +72,7 @@ def parse_func(line):
     }
 
 
-def lines_to_statements(lines):
+def lines_to_statements(lines, separator=';'):
     all_lines = []
     for line in lines:
         line = line.strip()
@@ -82,7 +82,7 @@ def lines_to_statements(lines):
             continue
         all_lines.append(line)
     all_lines = '\n'.join(all_lines)
-    for func in all_lines.split(';'):
+    for func in all_lines.split(separator):
         func = func.strip()
         if not func:
             continue
