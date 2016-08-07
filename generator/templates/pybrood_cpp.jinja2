@@ -7,6 +7,15 @@
 PYBIND11_PLUGIN(pybrood) {
     py::module m("pybrood", "BWAPI python module");
 
+    {% for x in ('', 'WALK', 'TILE')
+     %}m.attr("{{ x }}POSITION_SCALE") = py::cast(BWAPI::{{ x }}POSITION_SCALE);
+    {% endfor %}
+
+    {% for ns in ('Position', 'WalkPosition', 'TilePosition')
+     %}{% for k in ('Invalid', 'None', 'Unknown', 'Origin')
+     %}m.attr("{{ ns|upper }}_{{ k|upper }}") = py::cast(PyBinding::{{ ns }}s::{{ k }});
+    {% endfor %}{% endfor %}
+
     {% for f in cpp_files
      %}#include "pybind/{{ f }}"
     {% endfor %}
