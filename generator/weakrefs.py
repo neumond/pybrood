@@ -2,7 +2,6 @@ from sys import stderr
 from collections import defaultdict
 from .cdumper import transform_case
 from .cdeclparser import parse_func, lines_to_statements
-from .typereplacer import replace_all_args, replace_return
 from html import unescape as html_unescape
 from .utils import jin_env, squash_spaces, flines
 from .config import BWAPI_INCLUDE_DIR, GEN_OUTPUT_DIR
@@ -10,6 +9,7 @@ from os.path import join
 
 
 def fmt_func(f, obj_op):
+    from .typereplacer import replace_all_args, replace_return
     a_lines, a_exprs, a_codes, a_sigs, a_lines_nodef, a_incs = replace_all_args(f, sig_prepend_ns=True)
     assert all(x is None for x in a_codes), 'Argument preparation code is not supported'
     inner_expr = 'obj{obj_op}{fname}({a_exprs})'.format(
@@ -80,7 +80,7 @@ class ModuleAccumulator:
 
 def file_parser(f):
     ma = ModuleAccumulator(f.ro_property_rule, f.rename_rule)
-    methods, includes = [], {'{}.h'.format(f.mapped_class.lower())}
+    methods, includes = [], {f.header_file_name()}
     for func in lines_to_statements(f.lines()):
         fnc = parse_func(func)
         try:
@@ -108,7 +108,7 @@ def file_parser(f):
 
     return {
         'bw_class': f.mapped_class,
-        'weakref_class': f.mapped_class + 'Weakref',
+        'weakref_class': f.weakref_class(),
         'methods': methods,
         'module_defs': list(ma.assemble()),
         'enums': enums,
@@ -147,12 +147,20 @@ class BaseWeakrefFile:
     def perform(cls):
         context = file_parser(cls)
         lcl = cls.mapped_class.lower()
-        with open(join(GEN_OUTPUT_DIR, 'include', '{}.h'.format(lcl)), 'w') as f:
+        with open(join(GEN_OUTPUT_DIR, 'include', cls.header_file_name()), 'w') as f:
             f.write(html_unescape(jin_env.get_template('weakref/h.jinja2').render(**context)))
         with open(join(GEN_OUTPUT_DIR, 'src', '{}.cpp'.format(lcl)), 'w') as f:
             f.write(html_unescape(jin_env.get_template('weakref/cpp.jinja2').render(**context)))
         with open(join(GEN_OUTPUT_DIR, 'pybind', '{}.cpp'.format(lcl)), 'w') as f:
             f.write(html_unescape(jin_env.get_template('weakref/pybind.jinja2').render(**context)))
+
+    @classmethod
+    def header_file_name(cls):
+        return '{}.h'.format(cls.mapped_class.lower())
+
+    @classmethod
+    def weakref_class(cls):
+        return cls.mapped_class + 'Weakref'
 
 
 class UnitFile(BaseWeakrefFile):
@@ -296,3 +304,19 @@ class PlayerTypeFile(BaseWeakrefFile):
     def enum_lines():
         f = flines(join(BWAPI_INCLUDE_DIR, 'PlayerType.h'))
         yield from f(68, 78)
+
+
+class RaceFile(BaseWeakrefFile):
+    mapped_class = 'Race'
+    make_obj_pointer = True
+    enum_namespace = 'BWAPI::Races'
+
+    @staticmethod
+    def lines():
+        f = flines(join(BWAPI_INCLUDE_DIR, 'Race.h'))
+        yield from f(46, 87)
+
+    @staticmethod
+    def enum_lines():
+        f = flines(join(BWAPI_INCLUDE_DIR, 'Race.h'))
+        yield from f(98, 103)

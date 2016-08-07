@@ -1,5 +1,6 @@
 from .cdumper import fmt_arg, arg_type_for_signature
 from functools import partial
+from . import weakrefs
 
 
 # http://pybind11.readthedocs.io/en/latest/basics.html#supported-data-types
@@ -12,38 +13,15 @@ CONST_PRIMITIVE_TYPES = {
     'char *', 'wchar_t *'
 }
 
-WEAKREF_MAP = {
-    'Force': 'ForceWeakref',
-    'Player': 'PlayerWeakref',
-    'Unit': 'UnitWeakref',
-    'UnitType': 'UnitTypeWeakref',
-    'BulletType': 'BulletTypeWeakref',
-    'DamageType': 'DamageTypeWeakref',
-    'UpgradeType': 'UpgradeTypeWeakref',
-    'WeaponType': 'WeaponTypeWeakref',
-    'PlayerType': 'PlayerTypeWeakref',
-}
+WEAKREF_MAP = {}
+POINTER_FORCE_TYPES = set()
+INCLUDE_MAP = {}
 
-POINTER_FORCE_TYPES = {
-    'UnitType',
-    'BulletType',
-    'DamageType',
-    'UpgradeType',
-    'WeaponType',
-    'PlayerType',
-}
-
-INCLUDE_MAP = {
-    'Force': 'force.h',
-    'Player': 'player.h',
-    'Unit': 'unit.h',
-    'UnitType': 'unittype.h',
-    'BulletType': 'bullettype.h',
-    'DamageType': 'damagetype.h',
-    'UpgradeType': 'upgradetype.h',
-    'WeaponType': 'weapontype.h',
-    'PlayerType': 'playertype.h',
-}
+for Sub in weakrefs.BaseWeakrefFile.__subclasses__():
+    WEAKREF_MAP[Sub.mapped_class] = Sub.weakref_class()
+    if Sub.make_obj_pointer:
+        POINTER_FORCE_TYPES.add(Sub.mapped_class)
+    INCLUDE_MAP[Sub.mapped_class] = Sub.header_file_name()
 
 # return types only
 WEAKREF_SET_MAP = {
@@ -58,6 +36,8 @@ WEAKREF_SET_MAP = {
     'const Playerset &': 'Player',
     # 'const UnitType::set&': 'UnitType',
 }
+# from multiple ways choose single TODO
+# this is used to cast via set_converter only
 WEAKREF_SET_REV_MAP = {
     'Unit': 'Unitset',
     'Force': 'Forceset',

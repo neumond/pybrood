@@ -5,15 +5,8 @@ from . import skel
 
 skel.pre()
 
-weakrefs.UnitFile.perform()
-weakrefs.UnitTypeFile.perform()
-weakrefs.ForceFile.perform()
-weakrefs.PlayerFile.perform()
-weakrefs.BulletTypeFile.perform()
-weakrefs.DamageTypeFile.perform()
-weakrefs.UpgradeTypeFile.perform()
-weakrefs.WeaponTypeFile.perform()
-weakrefs.PlayerTypeFile.perform()
+for Sub in weakrefs.BaseWeakrefFile.__subclasses__():
+    Sub.perform()
 
 singletons.main()
 
