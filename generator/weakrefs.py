@@ -5,22 +5,28 @@ from .cdeclparser import parse_func, lines_to_statements
 from .typereplacer import replace_all_args, replace_return
 from html import unescape as html_unescape
 from .utils import jin_env, squash_spaces, flines
+from .config import BWAPI_INCLUDE_DIR, GEN_OUTPUT_DIR
+from os.path import join
 
 
 def fmt_func(f, obj_op):
-    a_lines, a_exprs, a_codes, a_sigs = replace_all_args(f, sig_prepend_ns=True)
+    a_lines, a_exprs, a_codes, a_sigs, a_lines_nodef, a_incs = replace_all_args(f, sig_prepend_ns=True)
     assert all(x is None for x in a_codes), 'Argument preparation code is not supported'
     inner_expr = 'obj{obj_op}{fname}({a_exprs})'.format(
         obj_op=obj_op, fname=f['name'], a_exprs=', '.join(a_exprs)
     )
-    r_type, r_expr = replace_return(f)
+    r_type, r_expr, r_incs = replace_return(f)
     r_expr = r_expr.format(inner_expr)
-    code = '''{r_type} {fname}({a_lines}){{
-    {inner}
-}}'''.format(
-        r_type=r_type, fname=f['name'], inner=r_expr, a_lines=', '.join(a_lines)
-    )
-    return code, {'rtype': r_type, 'args': ', '.join(a_sigs)}
+    head = '{r_type} {fname}({{}})'.format(r_type=r_type, fname=f['name'])
+    return {
+        'fwd': head.format(', '.join(a_lines_nodef)),
+        'head': head.format(', '.join(a_lines)),
+        'body': r_expr,
+        'sign': {'rtype': r_type, 'args': ', '.join(a_sigs)},
+        'incs': a_incs | r_incs,
+        'rtype': r_type,
+        'head_nortype': '{fname}({args})'.format(fname=f['name'], args=', '.join(a_lines)),
+    }
 
 
 class ModuleAccumulator:
@@ -74,16 +80,17 @@ class ModuleAccumulator:
 
 def file_parser(f):
     ma = ModuleAccumulator(f.ro_property_rule, f.rename_rule)
-    methods = []
+    methods, includes = [], {'{}.h'.format(f.mapped_class.lower())}
     for func in lines_to_statements(f.lines()):
         fnc = parse_func(func)
         try:
-            code, sig = fmt_func(fnc, '->')
+            fobj = fmt_func(fnc, '->')
         except AssertionError as e:
             print(e, file=stderr)
         else:
-            ma(fnc, sig)
-            methods.append(code)
+            ma(fnc, fobj['sign'])
+            methods.append(fobj)
+            includes |= fobj['incs']
 
     enums = []
     try:
@@ -99,17 +106,19 @@ def file_parser(f):
             assert len(expr) == 4
             enums.append(expr[3])
 
-    return html_unescape(jin_env.get_template('weakref.jinja2').render(
-        bw_class=f.mapped_class,
-        methods=methods,
-        module_defs=ma.assemble(),
-        enums=enums,
-        enum_namespace=f.enum_namespace,
-        make_pointer=f.make_obj_pointer,
-    ))
+    return {
+        'bw_class': f.mapped_class,
+        'weakref_class': f.mapped_class + 'Weakref',
+        'methods': methods,
+        'module_defs': list(ma.assemble()),
+        'enums': enums,
+        'enum_namespace': f.enum_namespace,
+        'make_pointer': f.make_obj_pointer,
+        'includes': includes,
+    }
 
 
-class BaseFile:
+class BaseWeakrefFile:
     mapped_class = NotImplemented
     enum_namespace = NotImplemented
     make_obj_pointer = False
@@ -136,17 +145,22 @@ class BaseFile:
 
     @classmethod
     def perform(cls):
-        with open('pybinding/' + cls.out_file, 'w') as f:
-            f.write(file_parser(cls))
+        context = file_parser(cls)
+        lcl = cls.mapped_class.lower()
+        with open(join(GEN_OUTPUT_DIR, 'include', '{}.h'.format(lcl)), 'w') as f:
+            f.write(html_unescape(jin_env.get_template('weakref/h.jinja2').render(**context)))
+        with open(join(GEN_OUTPUT_DIR, 'src', '{}.cpp'.format(lcl)), 'w') as f:
+            f.write(html_unescape(jin_env.get_template('weakref/cpp.jinja2').render(**context)))
+        with open(join(GEN_OUTPUT_DIR, 'pybind', '{}.cpp'.format(lcl)), 'w') as f:
+            f.write(html_unescape(jin_env.get_template('weakref/pybind.jinja2').render(**context)))
 
 
-class UnitFile(BaseFile):
+class UnitFile(BaseWeakrefFile):
     mapped_class = 'Unit'
-    out_file = 'unit_auto.cpp'
 
     @staticmethod
     def lines():
-        with open('../bwapi/bwapi/include/BWAPI/Unit.h') as f:
+        with open(join(BWAPI_INCLUDE_DIR, 'Unit.h')) as f:
             for i, line in enumerate(f, start=1):
                 # lines 60..2458
                 if 60 <= i <= 2458:
@@ -170,135 +184,115 @@ class UnitFile(BaseFile):
         return t
 
 
-class UnitTypeFile(BaseFile):
+class UnitTypeFile(BaseWeakrefFile):
     mapped_class = 'UnitType'
     make_obj_pointer = True
     enum_namespace = 'BWAPI::UnitTypes'
-    out_file = 'unittype_auto.cpp'
 
     @staticmethod
     def lines():
-        f = flines('../bwapi/bwapi/include/BWAPI/UnitType.h')
+        f = flines(join(BWAPI_INCLUDE_DIR, 'UnitType.h'))
         yield from f(279, 902)
 
     @staticmethod
     def enum_lines():
-        f = flines('../bwapi/bwapi/include/BWAPI/UnitType.h')
+        f = flines(join(BWAPI_INCLUDE_DIR, 'UnitType.h'))
         yield from f(951, 1234)
 
 
-class ForceFile(BaseFile):
+class ForceFile(BaseWeakrefFile):
     mapped_class = 'Force'
-    out_file = 'force_auto.cpp'
 
     @staticmethod
     def lines():
-        f = flines('../bwapi/bwapi/include/BWAPI/Force.h')
+        f = flines(join(BWAPI_INCLUDE_DIR, 'Force.h'))
         yield from f(25, 63)
 
 
-class PlayerFile(BaseFile):
+class PlayerFile(BaseWeakrefFile):
     mapped_class = 'Player'
-    out_file = 'player_auto.cpp'
 
     @staticmethod
     def lines():
-        f = flines('../bwapi/bwapi/include/BWAPI/Player.h')
+        f = flines(join(BWAPI_INCLUDE_DIR, 'Player.h'))
         yield from f(38, 641)
 
 
-class BulletTypeFile(BaseFile):
+class BulletTypeFile(BaseWeakrefFile):
     mapped_class = 'BulletType'
     make_obj_pointer = True
     enum_namespace = 'BWAPI::BulletTypes'
-    out_file = 'bullettype_auto.cpp'
 
     @staticmethod
     def lines():
-        f = flines('../bwapi/bwapi/include/BWAPI/BulletType.h')
+        f = flines(join(BWAPI_INCLUDE_DIR, 'BulletType.h'))
         yield from f(75, 75)
 
     @staticmethod
     def enum_lines():
-        f = flines('../bwapi/bwapi/include/BWAPI/BulletType.h')
+        f = flines(join(BWAPI_INCLUDE_DIR, 'BulletType.h'))
         yield from f(87, 123)
 
 
-class DamageTypeFile(BaseFile):
+class DamageTypeFile(BaseWeakrefFile):
     mapped_class = 'DamageType'
     make_obj_pointer = True
     enum_namespace = 'BWAPI::DamageTypes'
-    out_file = 'damagetype_auto.cpp'
 
     @staticmethod
     def lines():
-        f = flines('../bwapi/bwapi/include/BWAPI/DamageType.h')
+        f = flines(join(BWAPI_INCLUDE_DIR, 'DamageType.h'))
         yield from f(48, 48)
 
     @staticmethod
     def enum_lines():
-        f = flines('../bwapi/bwapi/include/BWAPI/DamageType.h')
+        f = flines(join(BWAPI_INCLUDE_DIR, 'DamageType.h'))
         yield from f(60, 66)
 
 
-class UpgradeTypeFile(BaseFile):
+class UpgradeTypeFile(BaseWeakrefFile):
     mapped_class = 'UpgradeType'
     make_obj_pointer = True
     enum_namespace = 'BWAPI::UpgradeTypes'
-    out_file = 'upgradetype_auto.cpp'
 
     @staticmethod
     def lines():
-        f = flines('../bwapi/bwapi/include/BWAPI/UpgradeType.h')
+        f = flines(join(BWAPI_INCLUDE_DIR, 'UpgradeType.h'))
         yield from f(93, 172)
 
     @staticmethod
     def enum_lines():
-        f = flines('../bwapi/bwapi/include/BWAPI/UpgradeType.h')
+        f = flines(join(BWAPI_INCLUDE_DIR, 'UpgradeType.h'))
         yield from f(183, 245)
 
 
-class WeaponTypeFile(BaseFile):
+class WeaponTypeFile(BaseWeakrefFile):
     mapped_class = 'WeaponType'
     make_obj_pointer = True
     enum_namespace = 'BWAPI::WeaponTypes'
-    out_file = 'weapontype_auto.cpp'
 
     @staticmethod
     def lines():
-        f = flines('../bwapi/bwapi/include/BWAPI/WeaponType.h')
+        f = flines(join(BWAPI_INCLUDE_DIR, 'WeaponType.h'))
         yield from f(153, 305)
 
     @staticmethod
     def enum_lines():
-        f = flines('../bwapi/bwapi/include/BWAPI/WeaponType.h')
+        f = flines(join(BWAPI_INCLUDE_DIR, 'WeaponType.h'))
         yield from f(330, 439)
 
 
-class PlayerTypeFile(BaseFile):
+class PlayerTypeFile(BaseWeakrefFile):
     mapped_class = 'PlayerType'
     make_obj_pointer = True
     enum_namespace = 'BWAPI::PlayerTypes'
-    out_file = 'playertype_auto.cpp'
 
     @staticmethod
     def lines():
-        f = flines('../bwapi/bwapi/include/BWAPI/PlayerType.h')
+        f = flines(join(BWAPI_INCLUDE_DIR, 'PlayerType.h'))
         yield from f(45, 57)
 
     @staticmethod
     def enum_lines():
-        f = flines('../bwapi/bwapi/include/BWAPI/PlayerType.h')
+        f = flines(join(BWAPI_INCLUDE_DIR, 'PlayerType.h'))
         yield from f(68, 78)
-
-
-def main():
-    UnitFile.perform()
-    UnitTypeFile.perform()
-    ForceFile.perform()
-    PlayerFile.perform()
-    BulletTypeFile.perform()
-    DamageTypeFile.perform()
-    UpgradeTypeFile.perform()
-    WeaponTypeFile.perform()
-    PlayerTypeFile.perform()

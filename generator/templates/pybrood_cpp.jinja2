@@ -1,0 +1,15 @@
+#include "include/common.h"
+{% for f in h_files
+%}#include "include/{{ f }}"
+{% endfor %}
+
+
+PYBIND11_PLUGIN(pybrood) {
+    py::module m("pybrood", "BWAPI python module");
+
+    {% for f in cpp_files %}
+    #include "pybind/{{ f }}"
+    {% endfor %}
+
+    return m.ptr();
+}

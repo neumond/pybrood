@@ -1,5 +1,4 @@
-/Release/
 /example/pybrood.pyd
-*_auto.cpp
-__pycache__/
+/output/
 *.pyc
+__pycache__/

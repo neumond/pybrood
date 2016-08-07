@@ -1,0 +1,16 @@
+#include "../include/common.h"
+{% for inc in includes
+ %}#include "../include/{{ inc }}"
+{% endfor %}
+
+namespace PyBinding {
+
+{{ weakref_class }}::{{ weakref_class }}(BWAPI::{{ bw_class }}{% if make_pointer %}*{% endif %} iobj) : obj(iobj){};
+
+{% for method in methods %}
+{{ method.rtype }} {{ weakref_class }}::{{ method.head_nortype }}{
+    {{ method.body|indent(4, false) }}
+}
+{% endfor %}
+
+}

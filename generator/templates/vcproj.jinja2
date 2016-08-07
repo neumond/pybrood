@@ -22,7 +22,7 @@
             <IntrinsicFunctions>true</IntrinsicFunctions>
             <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
             <OmitFramePointers>true</OmitFramePointers>
-            <AdditionalIncludeDirectories>../bwapi/bwapi/include/;../pybind11/include/;C:\Users\IEUser\AppData\Local\Programs\Python\Python35-32\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+            <AdditionalIncludeDirectories>{{ bwapi_dir }}\bwapi\include\;{{ pybind_dir }}\include\;C:\Users\IEUser\AppData\Local\Programs\Python\Python35-32\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
             <PreprocessorDefinitions>NOMINMAX;WIN32;NDEBUG;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
             <StringPooling>true</StringPooling>
             <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -37,7 +37,7 @@
         </ClCompile>
         <Link>
             <!-- <AdditionalDependencies>Vfw32.lib;Version.lib;%(AdditionalDependencies)</AdditionalDependencies> -->
-            <AdditionalDependencies>..\bwapi\bwapi\lib\BWAPI.lib;..\bwapi\bwapi\lib\BWAPIClient.lib;C:\Users\IEUser\AppData\Local\Programs\Python\Python35-32\libs\python35.lib</AdditionalDependencies>
+            <AdditionalDependencies>{{ bwapi_dir }}\bwapi\lib\BWAPI.lib;{{ bwapi_dir }}\bwapi\lib\BWAPIClient.lib;C:\Users\IEUser\AppData\Local\Programs\Python\Python35-32\libs\python35.lib;%(AdditionalDependencies)</AdditionalDependencies>
             <GenerateDebugInformation>false</GenerateDebugInformation>
             <OptimizeReferences>true</OptimizeReferences>
             <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -51,7 +51,10 @@
         </PostBuildEvent>
     </ItemDefinitionGroup>
     <ItemGroup>
-        <ClCompile Include="bwapi.cpp" />
+        {% for f in cpp_files
+         %}<ClCompile Include="src/{{ f }}" />
+        {% endfor %}
+        <ClCompile Include="pybrood.cpp" />
     </ItemGroup>
     <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

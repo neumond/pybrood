@@ -2,12 +2,14 @@ from sys import stderr
 from .cdeclparser import lines_to_statements, parse_func
 from .cdumper import transform_case
 from .typereplacer import replace_all_args, replace_return
+from .config import BWAPI_INCLUDE_DIR, GEN_OUTPUT_DIR
+from os.path import join
 
 
 def fmt_func(f, obj, pb_module_name):
-    a_lines, a_exprs, a_codes, a_sigs = replace_all_args(f, line_prepend_ns=True)
+    a_lines, a_exprs, a_codes, a_sigs, _, __ = replace_all_args(f, line_prepend_ns=True)
     assert all(x is None for x in a_codes), 'Argument preparation code is not supported'
-    r_type, r_expr = replace_return(f, prepend_ns=True)
+    r_type, r_expr, _ = replace_return(f, prepend_ns=True)
     inner = '{obj}{f_name}({a_exprs})'.format(
         obj=obj, f_name=f['name'],
         a_exprs=', '.join(a_exprs)
@@ -54,7 +56,7 @@ class GameFile(BaseFile):
 
     @staticmethod
     def lines():
-        with open('../bwapi/bwapi/include/BWAPI/Game.h') as f:
+        with open(join(BWAPI_INCLUDE_DIR, 'Game.h')) as f:
             for i, line in enumerate(f, start=1):
                 if 55 <= i <= 1705:
                     yield line
@@ -66,14 +68,14 @@ class ClientFile(BaseFile):
 
     @staticmethod
     def lines():
-        with open('../bwapi/bwapi/include/BWAPI/Client/Client.h') as f:
+        with open(join(BWAPI_INCLUDE_DIR, 'Client', 'Client.h')) as f:
             for i, line in enumerate(f, start=1):
                 if 20 <= i <= 23:
                     yield line
 
 
 def main():
-    with open('pybinding/game_auto.cpp', 'w') as f:
+    with open(join(GEN_OUTPUT_DIR, 'pybind', 'game.cpp'), 'w') as f:
         file_parser(GameFile, f)
-    with open('pybinding/client_auto.cpp', 'w') as f:
+    with open(join(GEN_OUTPUT_DIR, 'pybind', 'client.cpp'), 'w') as f:
         file_parser(ClientFile, f)

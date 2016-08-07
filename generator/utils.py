@@ -2,7 +2,7 @@ import jinja2
 import re
 
 
-jin_env = jinja2.Environment(loader=jinja2.PackageLoader('generator', '.'), autoescape=False)
+jin_env = jinja2.Environment(loader=jinja2.PackageLoader('generator', 'templates'), autoescape=False)
 
 
 def indent_lines(lines, shift=4):

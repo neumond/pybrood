@@ -1,18 +1,3 @@
-#ifndef MODCODE
-
-{% set weakref_class = bw_class + 'Weakref' %}
-class {{ weakref_class }}
-{
-public:
-    BWAPI::{{ bw_class }}{% if make_pointer %}*{% endif %} obj;
-    {{ weakref_class }}(BWAPI::{{ bw_class }}{% if make_pointer %}*{% endif %} iobj) : obj(iobj){};
-    {% for method in methods
-     %}{{ method|indent(4, false) }}
-    {% endfor %}
-};
-
-#else
-
 {% set pybind_class = 'class_' + bw_class.lower() %}
 {% set py_class = '_' + bw_class %}
 py::class_&lt;PyBinding::{{ weakref_class }}&gt; {{ pybind_class }}(m, "{{ py_class }}");
@@ -27,12 +12,11 @@ py::class_&lt;PyBinding::{{ weakref_class }}&gt; {{ pybind_class }}(m, "{{ py_cl
   %}&amp;PyBinding::{{ weakref_class }}::{{ mdef.method_name }});
 {% endfor %}
 
+
 {% if enums %}
 {% set pybind_submodule = 'enum_' + bw_class.lower() %}
 py::module {{ pybind_submodule }} = m.def_submodule("{{ bw_class }}");
 {% for e in enums
  %}{{ pybind_submodule }}.attr("{{ e }}") = py::cast({{ enum_namespace }}::{{ e }});
 {% endfor %}
-
 {% endif %}
-#endif

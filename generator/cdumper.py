@@ -1,8 +1,8 @@
-def fmt_arg(a, ns=None):
+def fmt_arg(a, ns=None, opt_value=True):
     result = '{} {}'.format(a['type'], a['name'])
     if ns is not None:
         result = ns + result
-    if a['opt_value'] is not None:
+    if opt_value and a['opt_value'] is not None:
         result += ' = {}'.format(a['opt_value'])
     if a['const']:
         result = 'const ' + result

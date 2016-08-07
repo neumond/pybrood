@@ -1,3 +1,12 @@
+#pragma once
+#include <pybind11/pybind11.h>
+#include <BWAPI.h>
+#include <BWAPI/Client.h>
+
+namespace py = pybind11;
+
+namespace PyBinding {
+
 template <class Weakref, class BWSetContainer>
 inline py::set set_converter(BWSetContainer src){
     py::set out;
@@ -7,12 +16,8 @@ inline py::set set_converter(BWSetContainer src){
 }
 
 
-class UnitWeakref;
-class UnitTypeWeakref;
-class ForceWeakref;
-class PlayerWeakref;
-class BulletTypeWeakref;
-class DamageTypeWeakref;
-class UpgradeTypeWeakref;
-class WeaponTypeWeakref;
-class PlayerTypeWeakref;
+{% for k in classes
+ %}class {{ k }};
+{% endfor %}
+
+}

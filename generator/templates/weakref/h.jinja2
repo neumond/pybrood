@@ -1,0 +1,16 @@
+#pragma once
+#include "common.h"
+
+namespace PyBinding {
+
+class {{ weakref_class }}
+{
+public:
+    BWAPI::{{ bw_class }}{% if make_pointer %}*{% endif %} obj;
+    {{ weakref_class }}(BWAPI::{{ bw_class }}{% if make_pointer %}*{% endif %} iobj);
+    {% for method in methods
+     %}{{ method.fwd }};
+    {% endfor %}
+};
+
+}
