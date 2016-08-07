@@ -3,3 +3,90 @@ Forceset ..
 Playerset ..
 Regionset ..
 Добавить всем наследникам Type общие методы
+
+
+TODO: implement __all__ for:
+BulletType
+DamageType
+Error
+ExplosionType
+GameType
+Order
+PlayerType
+Race
+TechType
+UnitCommandType
+UnitSizeType
+UnitType
+UpgradeType
+WeaponType
+
+
++ AIModule.h
++ ArithmaticFilter.h
+BestFilter.h
++ Bullet.h
+Bulletset.h
+  set methods ? (empty)
++ BulletType.h
+Client.h
+Color.h
+ComparisonFilter.h
+Constants.h
+  only TILE_SIZE constant
+CoordinateType.h
+  pure enum
++ DamageType.h
++ Error.h
+Event.h
+EventType.h
+  pure enum
++ ExplosionType.h
+Filters.h
+Flag.h
+  pure enum
++ Force.h
+Forceset.h
+  set methods
+Game.h
++ GameType.h
+Input.h
+  pure enums
++ Interface.h
+  есть возможность вешать эвенты на сущности, но это по сути уже частичная
+  имплементация самого AI алгоритма. и работает оно тупо проверяя указанный
+  колбэк с определённой периодичностью.
+  явно не то, ради чего стоит усложнять биндинг
++ InterfaceEvent.h
+Latency.h
+  pure enum
++ Order.h
++ Player.h
+Playerset.h
+  set methods
++ PlayerType.h
+Position.h
+PositionUnit.h
++ Race.h
++ Region.h
+Regionset.h
+  set methods
++ SetContainer.h
++ TechType.h
+TournamentAction.h
+  pure enum
++ Type.h
+UnaryFilter.h
++ Unit.h
+UnitCommand.h
++ UnitCommandType.h
+Unitset.h
+  set methods
++ UnitSizeType.h
+UnitType.h
+  constants from line 905
+  static methods from line 926 (including __all__)
++ UpgradeType.h
+WeaponType.h
+  static methods from line 311 (including __all__)
++ WindowsTypes.h
