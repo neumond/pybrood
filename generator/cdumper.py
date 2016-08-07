@@ -1,5 +1,7 @@
-def fmt_arg(a, ns=None, opt_value=True):
-    result = '{} {}'.format(a['type'], a['name'])
+def fmt_arg(a, ns=None, opt_value=True, name=True):
+    result = a['type']
+    if name:
+        result += ' ' + a['name']
     if ns is not None:
         result = ns + result
     if opt_value and a['opt_value'] is not None:
@@ -18,15 +20,6 @@ def fmt_func_head(f):
         ', '.join(fmt_arg(a) for a in f['args']),
         after
     )
-
-
-def arg_type_for_signature(a, ns=None):
-    r = a['type']
-    if ns is not None:
-        r = ns + r
-    if a['const']:
-        r = 'const ' + r
-    return r
 
 
 def enum_types(f):

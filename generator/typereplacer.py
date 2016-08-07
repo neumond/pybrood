@@ -1,4 +1,4 @@
-from .cdumper import fmt_arg, arg_type_for_signature
+from .cdumper import fmt_arg
 from functools import partial
 from . import weakrefs
 
@@ -65,85 +65,65 @@ def get_ns_prepend(a):
     return None
 
 
-def replace_arg(a, sig_prepend_ns=False, line_prepend_ns=False):
+def replace_arg(a):
     '''Fix incoming argument
 
     void doSomething(int a, Unit u);
 
     Returns:
-    1. Argument line for binding wrapper, e.g.
-        'int a'
-        'UnitWeakref u'
+    newa, expr, code, incls, use_ns
+    1. Transformed argument data, e.g.
+        {'name': 'a', 'type': 'int'}
     2. Argument transform expression, for passing into inner function, e.g.
         'a'
         'u.obj'
     3. Argument transform code, serving intermediate data for expression above, e.g.
         'Unit temp_obj = database->fetch_by_id(u.id);\ntemp_obj->reindex();'
-    4. Argument signature to assemble method/function type, e.g.
-        'int'
-        'UnitWeakref'
-    5. Same as 1, but without default values.
-    6. Set of include files to deal with mentioned types.
+    4. Set of include files to deal with mentioned types.
+    5. Boolean value whether an argument exists in PyBinding:: namespace.
     '''
-    sig_ns = get_ns_prepend(a) if sig_prepend_ns else None
-    line_ns = get_ns_prepend(a) if line_prepend_ns else None
-
-    if a['type'] in PRIMITIVE_TYPES:
-        return (
-            fmt_arg(a, ns=line_ns),
-            a['name'],
-            None,
-            arg_type_for_signature(a, ns=sig_ns),
-            fmt_arg(a, ns=line_ns, opt_value=False),
-            set()
-        )
-    if a['const'] and a['type'] in CONST_PRIMITIVE_TYPES:
-        return (
-            fmt_arg(a, ns=line_ns),
-            a['name'],
-            None,
-            arg_type_for_signature(a, ns=sig_ns),
-            fmt_arg(a, ns=line_ns, opt_value=False),
-            set()
-        )
+    if (a['type'] in PRIMITIVE_TYPES) or (a['const'] and a['type'] in CONST_PRIMITIVE_TYPES):
+        return a, a['name'], None, set(), False
     if a['type'] in WEAKREF_MAP:
         assert not a['const'], 'Const arguments not supported in weakref types ' + repr(a)
         assert a['opt_value'] is None, 'Value defaults not supported in weakref types ' + repr(a)
         na = a.copy()
         na['type'] = WEAKREF_MAP[a['type']]
         ptr = '*' if a['type'] in POINTER_FORCE_TYPES else ''
-        return (
-            fmt_arg(na, ns=line_ns),
-            ptr + na['name'] + '.obj',
-            None,
-            arg_type_for_signature(na, ns=sig_ns),
-            fmt_arg(na, ns=line_ns, opt_value=False),
-            {INCLUDE_MAP[a['type']]}
-        )
+        expr = ptr + na['name'] + '.obj'
+        return na, expr, None, {INCLUDE_MAP[a['type']]}, True
     if a['type'] in POSITION_TYPES:
         na = a.copy()
         na['type'] = 'UniversalPosition'
-        return (
-            fmt_arg(na, ns=line_ns),
-            'BWAPI::{point}({name}[0], {name}[1])'.format(point=a['type'], name=na['name']),
-            None,
-            arg_type_for_signature(na, ns=sig_ns),
-            fmt_arg(na, ns=line_ns, opt_value=False),
-            set()
-        )
+        expr = 'BWAPI::{point}({name}[0], {name}[1])'.format(point=a['type'], name=na['name'])
+        return na, expr, None, set(), True
     assert False, 'Bad argument ' + repr(a)
+
+
+def replace_arg_wrap(a, sig_prepend_ns=False, line_prepend_ns=False):
+    newa, expr, code, incls, use_ns = replace_arg(a)
+    sig_ns = 'PyBinding::' if sig_prepend_ns and use_ns else None
+    line_ns = 'PyBinding::' if line_prepend_ns and use_ns else None
+    return (
+        fmt_arg(newa, ns=line_ns),
+        expr,
+        code,
+        fmt_arg(newa, opt_value=False, name=False, ns=sig_ns),
+        fmt_arg(newa, opt_value=False, ns=line_ns),
+        incls
+    )
 
 
 def replace_all_args(f, **kw):
     if not f['args']:
         return (), (), (), (), (), set()
-    fun = partial(replace_arg, **kw)
+    fun = partial(replace_arg_wrap, **kw)
     result = list(zip(*map(fun, f['args'])))
     result.append(set.union(*result.pop()))
     return tuple(result)
 
 
-def replace_return(f, prepend_ns=False):
+def replace_return_raw(f):
     '''Fix return value
 
     void doSomething();
@@ -157,47 +137,41 @@ def replace_return(f, prepend_ns=False):
         'py::set'
     2. Value transform expression/code, for passing into inner functions, e.g.
         None
-        'return UnitWeakref({});'
-        'return PyBinding::set_converter<PyBinding::ForceWeakref, BWAPI::Forceset>({});'
+        'return UnitWeakref({expr});'
+        'return {ns}set_converter<{ns}ForceWeakref, BWAPI::Forceset>({expr});'
     3. Set of include files to deal with mentioned types.
     '''
     if f['rtype'] == 'void':
-        return 'void', '{};', set()
+        return 'void', '{expr};', set()
     if f['rtype'] in PRIMITIVE_TYPES:
-        return f['rtype'], 'return {};', set()
+        return f['rtype'], 'return {expr};', set()
     if f['rtype'].startswith('const '):
         mt = f['rtype'].split(' ', 1)[1].lstrip()
         if mt in CONST_PRIMITIVE_TYPES:
-            return f['rtype'], 'return {};', set()
+            return f['rtype'], 'return {expr};', set()
     if f['rtype'] in WEAKREF_MAP:
         wt = WEAKREF_MAP[f['rtype']]
-        if prepend_ns:
-            wt = 'PyBinding::' + wt
         ptr = '&' if f['rtype'] in POINTER_FORCE_TYPES else ''
-        return wt, 'return {wt}({p}{{}});'.format(wt=wt, p=ptr), {INCLUDE_MAP[f['rtype']]}
+        expr = 'return {{ns}}{wt}({p}{{expr}});'.format(wt=wt, p=ptr)
+        return '{ns}' + wt, expr, {INCLUDE_MAP[f['rtype']]}
     if f['rtype'] in WEAKREF_SET_MAP:
         base_t = WEAKREF_SET_MAP[f['rtype']]
         wt = WEAKREF_MAP[base_t]
         sc = 'ptr_set_converter' if base_t in POINTER_FORCE_TYPES else 'set_converter'
-        if prepend_ns:
-            wt = 'PyBinding::' + wt
-            sc = 'PyBinding::' + sc
-        return (
-            'py::set',
-            'return {sc}<{wt}, {bwt}>({{}});'.format(
-                sc=sc, wt=wt, bwt=WEAKREF_SET_REV_MAP[base_t]
-            ),
-            {INCLUDE_MAP[base_t]}
+        expr = 'return {{ns}}{sc}<{{ns}}{wt}, {bwt}>({{expr}});'.format(
+            sc=sc, wt=wt, bwt=WEAKREF_SET_REV_MAP[base_t]
         )
+        return 'py::set', expr, {INCLUDE_MAP[base_t]}
     if f['rtype'] in POSITION_TYPES:
-        rt = 'UniversalPosition'
-        sc = 'convert_position'
-        if prepend_ns:
-            rt = 'PyBinding::' + rt
-            sc = 'PyBinding::' + sc
         return (
-            rt,
-            'return {sc}<BWAPI::{tpoint}>({{}});'.format(sc=sc, tpoint=f['rtype']),
+            '{ns}UniversalPosition',
+            'return {{ns}}convert_position<BWAPI::{tpoint}>({{expr}});'.format(tpoint=f['rtype']),
             set()
         )
     assert False, 'Bad return type ' + repr(f)
+
+
+def replace_return(f, prepend_ns=False):
+    rtype, expr, incls = replace_return_raw(f)
+    ns = 'PyBinding::' if prepend_ns else ''
+    return rtype.format(ns=ns), expr.format(ns=ns, expr='{}'), incls
