@@ -25,16 +25,21 @@ for Sub in weakrefs.BaseWeakrefFile.__subclasses__():
 
 # return types only
 WEAKREF_SET_MAP = {
+    'Bulletset': 'Bullet',
+
     'Forceset': 'Force',
+    'const Forceset&': 'Force',
+    'const Forceset &': 'Force',
+
     'Playerset': 'Player',
     'Playerset&': 'Player',
+    'const Playerset&': 'Player',
+    'const Playerset &': 'Player',
+
     'Unitset': 'Unit',
     'const Unitset&': 'Unit',
     'const Unitset &': 'Unit',
-    'const Forceset&': 'Force',
-    'const Forceset &': 'Force',
-    'const Playerset&': 'Player',
-    'const Playerset &': 'Player',
+
     'const UnitType::set&': 'UnitType',
     'const SetContainer<TechType>&': 'TechType',
     'const SetContainer<UpgradeType>&': 'UpgradeType',
@@ -45,6 +50,7 @@ WEAKREF_SET_REV_MAP = {
     'Unit': 'BWAPI::Unitset',
     'Force': 'BWAPI::Forceset',
     'Player': 'BWAPI::Playerset',
+    'Bullet': 'BWAPI::Bulletset',
     'UnitType': 'BWAPI::UnitType::set',
     'TechType': 'BWAPI::SetContainer<BWAPI::TechType>',
     'UpgradeType': 'BWAPI::SetContainer<BWAPI::UpgradeType>',

@@ -163,6 +163,23 @@ class BaseWeakrefFile:
         return cls.mapped_class + 'Weakref'
 
 
+class TypeMixin:
+    # manually pass couple of baseclass methods from 'Type.h'
+    @staticmethod
+    def lines():
+        yield 'int getID() const;'
+        yield 'const std::string &getName() const'
+
+
+class BulletFile(BaseWeakrefFile):
+    mapped_class = 'Bullet'
+
+    @staticmethod
+    def lines():
+        f = flines(join(BWAPI_INCLUDE_DIR, 'Bullet.h'))
+        yield from f(39, 167)
+
+
 class BulletTypeFile(BaseWeakrefFile):
     mapped_class = 'BulletType'
     make_obj_pointer = True
@@ -170,8 +187,7 @@ class BulletTypeFile(BaseWeakrefFile):
 
     @staticmethod
     def lines():
-        f = flines(join(BWAPI_INCLUDE_DIR, 'BulletType.h'))
-        yield from f(75, 75)
+        yield from TypeMixin.lines()
 
     @staticmethod
     def enum_lines():
@@ -186,13 +202,27 @@ class DamageTypeFile(BaseWeakrefFile):
 
     @staticmethod
     def lines():
-        f = flines(join(BWAPI_INCLUDE_DIR, 'DamageType.h'))
-        yield from f(48, 48)
+        yield from TypeMixin.lines()
 
     @staticmethod
     def enum_lines():
         f = flines(join(BWAPI_INCLUDE_DIR, 'DamageType.h'))
         yield from f(60, 66)
+
+
+class ErrorFile(BaseWeakrefFile):
+    mapped_class = 'Error'
+    make_obj_pointer = True
+    enum_namespace = 'BWAPI::Errors'
+
+    @staticmethod
+    def lines():
+        yield from TypeMixin.lines()
+
+    @staticmethod
+    def enum_lines():
+        f = flines(join(BWAPI_INCLUDE_DIR, 'Error.h'))
+        yield from f(75, 102)
 
 
 class ExplosionTypeFile(BaseWeakrefFile):
@@ -202,8 +232,7 @@ class ExplosionTypeFile(BaseWeakrefFile):
 
     @staticmethod
     def lines():
-        f = flines(join(BWAPI_INCLUDE_DIR, 'ExplosionType.h'))
-        yield from f(56, 56)
+        yield from TypeMixin.lines()
 
     @staticmethod
     def enum_lines():
@@ -218,6 +247,36 @@ class ForceFile(BaseWeakrefFile):
     def lines():
         f = flines(join(BWAPI_INCLUDE_DIR, 'Force.h'))
         yield from f(25, 63)
+
+
+class GameTypeFile(BaseWeakrefFile):
+    mapped_class = 'GameType'
+    make_obj_pointer = True
+    enum_namespace = 'BWAPI::GameTypes'
+
+    @staticmethod
+    def lines():
+        yield from TypeMixin.lines()
+
+    @staticmethod
+    def enum_lines():
+        f = flines(join(BWAPI_INCLUDE_DIR, 'GameType.h'))
+        yield from f(62, 76)
+
+
+class OrderFile(BaseWeakrefFile):
+    mapped_class = 'Order'
+    make_obj_pointer = True
+    enum_namespace = 'BWAPI::Orders'
+
+    @staticmethod
+    def lines():
+        yield from TypeMixin.lines()
+
+    @staticmethod
+    def enum_lines():
+        f = flines(join(BWAPI_INCLUDE_DIR, 'Order.h'))
+        yield from f(235, 390)
 
 
 class PlayerFile(BaseWeakrefFile):
@@ -236,6 +295,7 @@ class PlayerTypeFile(BaseWeakrefFile):
 
     @staticmethod
     def lines():
+        yield from TypeMixin.lines()
         f = flines(join(BWAPI_INCLUDE_DIR, 'PlayerType.h'))
         yield from f(45, 57)
 
@@ -252,6 +312,7 @@ class RaceFile(BaseWeakrefFile):
 
     @staticmethod
     def lines():
+        yield from TypeMixin.lines()
         f = flines(join(BWAPI_INCLUDE_DIR, 'Race.h'))
         yield from f(46, 87)
 
@@ -261,6 +322,15 @@ class RaceFile(BaseWeakrefFile):
         yield from f(98, 103)
 
 
+class RegionFile(BaseWeakrefFile):
+    mapped_class = 'Region'
+
+    @staticmethod
+    def lines():
+        f = flines(join(BWAPI_INCLUDE_DIR, 'Region.h'))
+        yield from f(30, 132)
+
+
 class TechTypeFile(BaseWeakrefFile):
     mapped_class = 'TechType'
     make_obj_pointer = True
@@ -268,6 +338,7 @@ class TechTypeFile(BaseWeakrefFile):
 
     @staticmethod
     def lines():
+        yield from TypeMixin.lines()
         f = flines(join(BWAPI_INCLUDE_DIR, 'TechType.h'))
         yield from f(79, 154)
 
@@ -313,13 +384,27 @@ class UnitCommandTypeFile(BaseWeakrefFile):
 
     @staticmethod
     def lines():
-        f = flines(join(BWAPI_INCLUDE_DIR, 'UnitCommandType.h'))
-        yield from f(77, 77)
+        yield from TypeMixin.lines()
 
     @staticmethod
     def enum_lines():
         f = flines(join(BWAPI_INCLUDE_DIR, 'UnitCommandType.h'))
         yield from f(89, 134)
+
+
+class UnitSizeTypeFile(BaseWeakrefFile):
+    mapped_class = 'UnitSizeType'
+    make_obj_pointer = True
+    enum_namespace = 'BWAPI::UnitSizeTypes'
+
+    @staticmethod
+    def lines():
+        yield from TypeMixin.lines()
+
+    @staticmethod
+    def enum_lines():
+        f = flines(join(BWAPI_INCLUDE_DIR, 'UnitSizeType.h'))
+        yield from f(55, 60)
 
 
 class UnitTypeFile(BaseWeakrefFile):
@@ -329,6 +414,7 @@ class UnitTypeFile(BaseWeakrefFile):
 
     @staticmethod
     def lines():
+        yield from TypeMixin.lines()
         f = flines(join(BWAPI_INCLUDE_DIR, 'UnitType.h'))
         yield from f(279, 902)
 
@@ -345,6 +431,7 @@ class UpgradeTypeFile(BaseWeakrefFile):
 
     @staticmethod
     def lines():
+        yield from TypeMixin.lines()
         f = flines(join(BWAPI_INCLUDE_DIR, 'UpgradeType.h'))
         yield from f(93, 172)
 
@@ -361,6 +448,7 @@ class WeaponTypeFile(BaseWeakrefFile):
 
     @staticmethod
     def lines():
+        yield from TypeMixin.lines()
         f = flines(join(BWAPI_INCLUDE_DIR, 'WeaponType.h'))
         yield from f(153, 305)
 
