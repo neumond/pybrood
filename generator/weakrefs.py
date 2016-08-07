@@ -168,7 +168,7 @@ class TypeMixin:
     @staticmethod
     def lines():
         yield 'int getID() const;'
-        yield 'const std::string &getName() const'
+        yield 'const std::string &getName() const;'
 
 
 class BulletFile(BaseWeakrefFile):

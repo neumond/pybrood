@@ -10,7 +10,7 @@ PRIMITIVE_TYPES = {
 }
 
 CONST_PRIMITIVE_TYPES = {
-    'char *', 'wchar_t *'
+    'char *', 'wchar_t *', 'std::string &',
 }
 
 WEAKREF_MAP = {}
@@ -152,6 +152,10 @@ def replace_return(f, prepend_ns=False):
         return 'void', '{};', set()
     if f['rtype'] in PRIMITIVE_TYPES:
         return f['rtype'], 'return {};', set()
+    if f['rtype'].startswith('const '):
+        mt = f['rtype'].split(' ', 1)[1].lstrip()
+        if mt in CONST_PRIMITIVE_TYPES:
+            return f['rtype'], 'return {};', set()
     if f['rtype'] in WEAKREF_MAP:
         wt = WEAKREF_MAP[f['rtype']]
         if prepend_ns:

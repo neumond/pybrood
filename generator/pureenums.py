@@ -43,3 +43,83 @@ class CoordinateTypeFile(BasePureEnumFile):
     def enum_lines():
         f = flines(join(BWAPI_INCLUDE_DIR, 'CoordinateType.h'))
         yield from f(10, 20)
+
+
+class EventTypeFile(BasePureEnumFile):
+    py_name = 'EventType'
+    bw_class_full = 'BWAPI::EventType::Enum'
+
+    @staticmethod
+    def enum_lines():
+        f = flines(join(BWAPI_INCLUDE_DIR, 'EventType.h'))
+        yield from f(10, 29)
+
+
+class FlagFile(BasePureEnumFile):
+    py_name = 'Flag'
+    bw_class_full = 'BWAPI::Flag::Enum'
+
+    @staticmethod
+    def enum_lines():
+        f = flines(join(BWAPI_INCLUDE_DIR, 'Flag.h'))
+        yield from f(12, 20)
+
+
+class MouseButtonFile(BasePureEnumFile):
+    py_name = 'MouseButton'
+    bw_class_full = 'BWAPI::MouseButton'
+
+    @staticmethod
+    def enum_lines():
+        f = flines(join(BWAPI_INCLUDE_DIR, 'Input.h'))
+        yield from f(8, 11)
+
+
+class KeyFile(BasePureEnumFile):
+    py_name = 'Key'
+    bw_class_full = 'BWAPI::Key'
+
+    @staticmethod
+    def enum_lines():
+        f = flines(join(BWAPI_INCLUDE_DIR, 'Input.h'))
+        yield from f(18, 249)
+
+
+class LatencyFile(BasePureEnumFile):
+    py_name = 'Latency'
+    bw_class_full = 'BWAPI::Latency::Enum'
+
+    @staticmethod
+    def enum_lines():
+        f = flines(join(BWAPI_INCLUDE_DIR, 'Latency.h'))
+        yield from f(12, 18)
+
+
+class TournamentActionFile(BasePureEnumFile):
+    py_name = 'TournamentAction'
+    bw_class_full = 'BWAPI::Tournament::ActionID'
+
+    @staticmethod
+    def enum_lines():
+        f = flines(join(BWAPI_INCLUDE_DIR, 'TournamentAction.h'))
+        yield from f(13, 50)
+
+
+class TextColorFile(BasePureEnumFile):
+    py_name = 'TextColor'
+    bw_class_full = 'BWAPI::Text::Enum'
+
+    @staticmethod
+    def enum_lines():
+        f = flines(join(BWAPI_INCLUDE_DIR, 'Color.h'))
+        yield from f(105, 185)
+
+
+class TextSizeFile(BasePureEnumFile):
+    py_name = 'TextSize'
+    bw_class_full = 'BWAPI::Text::Size::Enum'
+
+    @staticmethod
+    def enum_lines():
+        f = flines(join(BWAPI_INCLUDE_DIR, 'Color.h'))
+        yield from f(194, 204)

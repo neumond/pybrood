@@ -31,35 +31,31 @@ Bulletset.h
 + BulletType.h
 Client.h
 Color.h
+  Color type handling only, enums done
 ComparisonFilter.h
 Constants.h
   only TILE_SIZE constant
-CoordinateType.h
-  pure enum
++ CoordinateType.h
 + DamageType.h
 + Error.h
 Event.h
-EventType.h
-  pure enum
++ EventType.h
 + ExplosionType.h
 Filters.h
-Flag.h
-  pure enum
++ Flag.h
 + Force.h
 Forceset.h
   set methods
 Game.h
 + GameType.h
-Input.h
-  pure enums
++ Input.h
 + Interface.h
   есть возможность вешать эвенты на сущности, но это по сути уже частичная
   имплементация самого AI алгоритма. и работает оно тупо проверяя указанный
   колбэк с определённой периодичностью.
   явно не то, ради чего стоит усложнять биндинг
 + InterfaceEvent.h
-Latency.h
-  pure enum
++ Latency.h
 + Order.h
 + Player.h
 Playerset.h
@@ -73,8 +69,7 @@ Regionset.h
   set methods
 + SetContainer.h
 + TechType.h
-TournamentAction.h
-  pure enum
++ TournamentAction.h
 + Type.h
 UnaryFilter.h
 + Unit.h
