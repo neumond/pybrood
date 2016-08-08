@@ -60,15 +60,27 @@ def parse_func(line):
 
     ret_type, func_name = nametype_split(fname_line.strip())
     ret_type = squash_spaces(ret_type.strip())
-    while ret_type.split(' ', 1)[0] in ('virtual',):
-        ret_type = ret_type.split(' ', 1)[1]
+    ret_type = ret_type.split(' ')
+    ret_const = False
+    while True:
+        if ret_type[0] == 'virtual':
+            ret_type.pop(0)
+            continue
+        if ret_type[0] == 'const':
+            ret_type.pop(0)
+            ret_const = True
+            continue
+        break
+    ret_type = ' '.join(ret_type)
 
     after = squash_spaces(after_line.strip())
+    assert after in ('', 'const')
     return {
         'rtype': no_bwapi_in_type(ret_type),
+        'rconst': ret_const,
         'name': func_name,
         'args': list(map(parse_arg, filter(lambda x: x, args_line.strip().split(',')))),
-        'after': after.split(' ') if after else []
+        'selfconst': after == 'const',
     }
 
 

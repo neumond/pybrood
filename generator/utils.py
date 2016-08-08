@@ -1,5 +1,7 @@
 import jinja2
 import re
+from sys import stderr
+from itertools import count
 
 
 jin_env = jinja2.Environment(loader=jinja2.PackageLoader('generator', 'templates'), autoescape=False)
@@ -23,3 +25,31 @@ class flines:
 
     def __call__(self, start, end):
         return self.lines[start-1:end]  # 1-based, inclusive
+
+
+def transform_case(name):
+    upse, pos, out = 0, 0, []
+    for i, ch in enumerate(name):
+        if ch.isupper():
+            if upse == 0:
+                out.append(name[pos:i].lower())
+                pos = i
+            upse += 1
+        else:
+            if upse > 1:
+                out.append(name[pos:i].lower())
+                pos = i
+            upse = 0
+    if upse == 0:
+        out.append(name[pos:].lower())
+    else:
+        out.append(name[pos:].lower())
+    return '_'.join(filter(lambda x: x, out))
+
+
+ecount = count(start=1)
+
+
+def outerr(line):
+    n = next(ecount)
+    print('{}. {}'.format(n, line), file=stderr)

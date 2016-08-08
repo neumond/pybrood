@@ -1,0 +1,18 @@
+#pragma once
+#include "common.h"
+
+namespace PyBinding {
+namespace Wrapper {
+
+class {{ wrap_class }}
+{
+public:
+    const {{ source_ns }}{{ source_classptr }} obj;
+    {{ wrap_class }}({{ source_ns }}{{ source_classptr }} iobj);
+    {% for m in methods -%}
+    {{ m.rettype.format(ns="") }} {{ m.name }}({{ m.argline_signature.format(ns="") }});
+    {% endfor %}
+};
+
+}
+}

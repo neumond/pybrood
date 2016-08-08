@@ -1,0 +1,21 @@
+{%- set pybind_class = 'class_' + py_name.lower() -%}
+py::class_&lt;{{ source_ns }}{{ source_class }}&gt; {{ pybind_class }}(m, "{{ py_name }}");
+{{ pybind_class }}.def("__init__", []({{ source_ns }}{{ source_class }}&amp;){
+    throw std::runtime_error("{{ py_name }} objects can't be instantiated from python side");
+    // TODO: need this?
+});
+{% for m in methods -%}
+{{ pybind_class }}.{{ m.type }}("{{ m.py_name }}", {% if m.processed.transformed -%}
+    []({{ source_ns }}{{ source_class }}&amp; obj
+    {%- if m.processed.argline_full %}, {% endif -%}
+    {{ m.processed.argline_full.format(ns=helper_ns) }})
+    {%- if m.processed.rettype != "void" %} -> {{ m.processed.rettype.format(ns=helper_ns) }} {% endif -%}
+{
+{{ m.processed.func_body.format(ns=helper_ns)|indent(4, True) }}
+}
+{%- else -%}
+  {%- if m.require_signature -%}
+  ({{ m.processed.rettype.format(ns=helper_ns) }} ({{ source_ns }}{{ source_class }}::*)({{ m.processed.argline_signature.format(ns=helper_ns) }}))
+  {%- endif %} &amp;{{ source_ns }}{{ source_class }}::{{ m.processed.name }}
+{%- endif %});
+{% endfor -%}
