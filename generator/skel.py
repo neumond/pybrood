@@ -3,9 +3,9 @@ from os import mkdir, listdir
 from os.path import join, isdir, relpath
 from .utils import jin_env
 from pathlib import PureWindowsPath
-from .typereplacer import WRAPPED_SET
 from html import unescape as html_unescape
 from shutil import rmtree
+from .classes import BaseWrappedClassFile
 
 
 def makedir(*path):
@@ -25,9 +25,11 @@ def pre():
     with open(join(GEN_OUTPUT_DIR, 'build.bat'), 'w') as f:
         f.write('msbuild /p:PlatformToolset=v140 /p:Configuration=Release /p:Platform=Win32')
 
+    cs = [Sub.mapped_class for Sub in BaseWrappedClassFile.__subclasses__()]
+
     with open(join(GEN_OUTPUT_DIR, 'include', 'common.h'), 'w') as f:
         f.write(html_unescape(jin_env.get_template('common_h.jinja2').render(
-            classes=WRAPPED_SET,
+            classes=cs,
         )))
 
 

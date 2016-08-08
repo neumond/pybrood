@@ -68,24 +68,6 @@ class BaseClassFile:
             'helper_ns': 'PyBinding::Wrapper::',
         }
 
-    @staticmethod
-    def arg_transformer(a):
-        a['type'] = 'BWAPI::' + a['type']
-        if a['opt_value'] is not None and '::' in a['opt_value']:
-            a['opt_value'] = 'BWAPI::' + a['opt_value']
-
-    @staticmethod
-    def arg_expr(a):
-        return a['name']
-
-    @staticmethod
-    def ret_transformer(f):
-        f['rtype'] = 'BWAPI::' + f['rtype']
-
-    @staticmethod
-    def ret_expr(f):
-        return 'return {expr};'
-
 
 class BaseWrappedClassFile(BaseClassFile):
     @classmethod
@@ -147,25 +129,6 @@ class BaseWrappedClassFile(BaseClassFile):
     @classmethod
     def ret_expr(cls, f):
         return 'return {{ns}}{}({{expr}});'.format(cls.mapped_class)
-
-    @classmethod
-    def asis_arg_transformer(cls, a):
-        cls._arg_check(a)
-        a['type'] = 'BWAPI::' + a['type']
-        if a['opt_value'] is not None and '::' in a['opt_value']:
-            a['opt_value'] = 'BWAPI::' + a['opt_value']
-
-    @staticmethod
-    def asis_arg_expr(a):
-        return a['name']
-
-    @staticmethod
-    def asis_ret_transformer(f):
-        f['rtype'] = 'BWAPI::' + f['rtype']
-
-    @classmethod
-    def asis_ret_expr(cls, f):
-        return 'return {expr};'
 
     @classmethod
     def include_file(cls):

@@ -9,8 +9,6 @@ CONST_PRIMITIVE_TYPES = {
     'char *', 'wchar_t *',
 }
 
-DIRECT_SET = set()
-WRAPPED_SET = set()
 POSITION_TYPES = {'Position', 'WalkPosition', 'TilePosition'}
 
 # return types only
@@ -62,6 +60,40 @@ AS_IS_CONST_RETURN_TYPES = {}
 _NO_ACTION_RETURN = (lambda f: None, lambda f: 'return {expr};', set(), False)
 
 
+def _arg_bwapi_appender():
+    def arg_transformer(a):
+        a['type'] = 'BWAPI::' + a['type']
+        if a['opt_value'] is not None and '::' in a['opt_value']:
+            a['opt_value'] = 'BWAPI::' + a['opt_value']
+    return arg_transformer, lambda a: a['name'], None, set(), False
+
+
+def _ret_bwapi_appender():
+    def ret_transformer(f):
+        f['rtype'] = 'BWAPI::' + f['rtype']
+    return ret_transformer, lambda f: 'return {expr};', set(), False
+
+
+def _arg_position():
+    def arg_transformer(a):
+        a['type'] = 'PyBinding::UniversalPosition'
+        if a['opt_value'] is not None and '::' in a['opt_value']:
+            a['opt_value'] = 'PyBinding::' + a['opt_value']
+
+    def arg_expr(a):
+        return 'BWAPI::{point}({name}[0], {name}[1])'.format(point=a['type'], name=a['name'])
+    return arg_transformer, arg_expr, None, set(), True
+
+
+def _ret_position():
+    def ret_transformer(f):
+        f['rtype'] = 'PyBinding::UniversalPosition'
+
+    def ret_expr(f):
+        return 'return PyBinding::convert_position<BWAPI::{tpoint}>({{expr}});'.format(tpoint=f['rtype'])
+    return ret_transformer, ret_expr, set(), True
+
+
 def register_types():
     RETURN_TYPES['void'] = (lambda f: None, lambda f: '{expr};', set(), False)
     AS_IS_RETURN_TYPES['void'] = (lambda f: None, lambda f: '{expr};', set(), False)
@@ -90,15 +122,15 @@ def register_types():
     for Sub in classes.BaseClassFile.__subclasses__():
         if Sub is not classes.BaseWrappedClassFile:
             t = Sub.mapped_class
-            ARGUMENT_TYPES[t] = (Sub.arg_transformer, Sub.arg_expr, None, set(), False)
-            CONST_ARGUMENT_TYPES[t] = (Sub.arg_transformer, Sub.arg_expr, None, set(), False)
-            RETURN_TYPES[t] = (Sub.ret_transformer, Sub.ret_expr, set(), False)
-            CONST_RETURN_TYPES[t] = (Sub.ret_transformer, Sub.ret_expr, set(), False)
+            ARGUMENT_TYPES[t] = _arg_bwapi_appender()
+            CONST_ARGUMENT_TYPES[t] = _arg_bwapi_appender()
+            RETURN_TYPES[t] = _ret_bwapi_appender()
+            CONST_RETURN_TYPES[t] = _ret_bwapi_appender()
 
-            AS_IS_ARGUMENT_TYPES[t] = (Sub.arg_transformer, Sub.arg_expr, None, set(), False)
-            AS_IS_CONST_ARGUMENT_TYPES[t] = (Sub.arg_transformer, Sub.arg_expr, None, set(), False)
-            AS_IS_RETURN_TYPES[t] = (Sub.ret_transformer, Sub.ret_expr, set(), False)
-            AS_IS_CONST_RETURN_TYPES[t] = (Sub.ret_transformer, Sub.ret_expr, set(), False)
+            AS_IS_ARGUMENT_TYPES[t] = _arg_bwapi_appender()
+            AS_IS_CONST_ARGUMENT_TYPES[t] = _arg_bwapi_appender()
+            AS_IS_RETURN_TYPES[t] = _ret_bwapi_appender()
+            AS_IS_CONST_RETURN_TYPES[t] = _ret_bwapi_appender()
     for Sub in classes.BaseWrappedClassFile.__subclasses__():
         t = Sub.mapped_class
         ARGUMENT_TYPES[t] = (Sub.arg_transformer, Sub.arg_expr, None, {Sub.include_file()}, True)
@@ -106,10 +138,21 @@ def register_types():
         RETURN_TYPES[t] = (Sub.ret_transformer, Sub.ret_expr, {Sub.include_file()}, True)
         CONST_RETURN_TYPES[t] = (Sub.ret_transformer, Sub.ret_expr, {Sub.include_file()}, True)
 
-        AS_IS_ARGUMENT_TYPES[t] = (Sub.asis_arg_transformer, Sub.asis_arg_expr, None, {Sub.include_file()}, False)
-        AS_IS_CONST_ARGUMENT_TYPES[t] = (Sub.asis_arg_transformer, Sub.asis_arg_expr, None, {Sub.include_file()}, False)
-        AS_IS_RETURN_TYPES[t] = (Sub.asis_ret_transformer, Sub.asis_ret_expr, {Sub.include_file()}, False)
-        AS_IS_CONST_RETURN_TYPES[t] = (Sub.asis_ret_transformer, Sub.asis_ret_expr, {Sub.include_file()}, False)
+        AS_IS_ARGUMENT_TYPES[t] = _arg_bwapi_appender()
+        AS_IS_CONST_ARGUMENT_TYPES[t] = _arg_bwapi_appender()
+        AS_IS_RETURN_TYPES[t] = _ret_bwapi_appender()
+        AS_IS_CONST_RETURN_TYPES[t] = _ret_bwapi_appender()
+
+    for t in ('Position', 'WalkPosition', 'TilePosition'):
+        ARGUMENT_TYPES[t] = _arg_position()
+        CONST_ARGUMENT_TYPES[t] = _arg_position()
+        RETURN_TYPES[t] = _ret_position()
+        CONST_RETURN_TYPES[t] = _ret_position()
+
+        AS_IS_ARGUMENT_TYPES[t] = _arg_bwapi_appender()
+        AS_IS_CONST_ARGUMENT_TYPES[t] = _arg_bwapi_appender()
+        AS_IS_RETURN_TYPES[t] = _ret_bwapi_appender()
+        AS_IS_CONST_RETURN_TYPES[t] = _ret_bwapi_appender()
 
 
 def fmt_arg(a, opt_value=True, name=True):
@@ -160,31 +203,6 @@ def replace_arg(a, asis=False):
     newa = deepcopy(a)
     arg_transformer(newa)
     return newa, expr_maker(a), None if code_maker is None else code_maker(a), includes, transformed
-
-    # if (a['type'] in PRIMITIVE_TYPES) or (a['const'] and a['type'] in CONST_PRIMITIVE_TYPES):
-    #     return None
-    # if a['type'].endswith('&'):
-    #     axt = a['type'].rstrip('& ')
-    #     if axt in PRIMITIVE_TYPES:
-    #         return None
-    # if a['type'] in DIRECT_SET:
-    #     na = a.copy()
-    #     na['type'] = 'BWAPI::' + a['type']
-    #     return na, a['name'], None, set()
-    # if a['type'] in WRAPPED_SET:
-    #     assert not a['const'], 'Const arguments not supported in weakref types ' + repr(a)
-    #     assert a['opt_value'] is None, 'Value defaults not supported in weakref types ' + repr(a)
-    #     na = a.copy()
-    #     na['type'] = '{ns}' + a['type']
-    #     expr = na['name'] + '.obj'
-    #     return na, expr, None, set()
-    # if a['type'] in POSITION_TYPES:
-    #     na = a.copy()
-    #     na['type'] = '{ns}UniversalPosition'
-    #     expr = 'BWAPI::{point}({name}[0], {name}[1])'.format(point=a['type'], name=a['name'])
-    #     return na, expr, None, set()
-    #
-    # assert False, 'Bad argument ' + repr(a)
 
 
 def replace_all_args(f, asis=False):
@@ -240,16 +258,6 @@ def replace_return(f, asis=False):
     ret_transformer(newf)
     return newf, expr_maker(f), includes, transformed
 
-    # if f['rtype'] == 'void':
-    #     return 'void', '{expr};', set(), False
-    # if asis or f['rtype'] in PRIMITIVE_TYPES:
-    #     return bwapize_type(f['rtype']) if asis else f['rtype'], 'return {expr};', set(), False
-    # if f['rtype'].startswith('const '):
-    #     mt = f['rtype'].split(' ', 1)[1].lstrip()
-    #     if mt in CONST_PRIMITIVE_TYPES:
-    #         return f['rtype'], 'return {expr};', set(), False
-    # if f['rtype'] in DIRECT_SET:
-    #     return 'BWAPI::' + f['rtype'], 'return {expr};', set(), False
     # if f['rtype'] in WRAPPED_SET:
     #     wt = WRAPPED_SET[f['rtype']]
     #     expr = 'return {{ns}}{wt}({{expr}});'.format(wt=wt)
