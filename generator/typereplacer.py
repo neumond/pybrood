@@ -6,7 +6,7 @@ PRIMITIVE_TYPES = {
     'ssize_t', 'size_t', 'float', 'double', 'bool', 'char', 'wchar_t', 'std::string', 'std::wstring', 'int'
 }
 CONST_PRIMITIVE_TYPES = {
-    'char *', 'wchar_t *',
+    'char *', 'wchar_t *', 'std::string &', 'std::string&',
 }
 
 POSITION_TYPES = {'Position', 'WalkPosition', 'TilePosition'}
