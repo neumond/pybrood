@@ -56,7 +56,6 @@ class ClientFile(BaseClassFile):
 
 class ColorFile(BaseClassFile):
     mapped_class = 'Color'
-    enum_namespace = 'BWAPI::Color'
     constructors = '''
     TODO
     '''
@@ -67,50 +66,71 @@ class ColorFile(BaseClassFile):
         f = incflines('Color.h')
         yield from f(40, 53)
 
+
+class ColorEnumFile(BaseClassEnumFile):
+    mapped_class = 'Color'
+    namespace = 'BWAPI::Colors::'
+    py_name = 'colors'
+
     @staticmethod
-    def enum_lines():
+    def lines():
         f = incflines('Color.h')
         yield from f(61, 95)
 
 
 class DamageTypeFile(BaseClassFile):
     mapped_class = 'DamageType'
-    enum_namespace = 'BWAPI::DamageTypes'
 
     @staticmethod
     def lines():
         yield from TypeMixin.lines()
 
+
+class DamageTypeEnumFile(BaseClassEnumFile):
+    mapped_class = 'DamageType'
+    namespace = 'BWAPI::DamageTypes::'
+    py_name = 'damage_types'
+
     @staticmethod
-    def enum_lines():
+    def lines():
         f = incflines('DamageType.h')
         yield from f(60, 66)
 
 
 class ErrorFile(BaseClassFile):
     mapped_class = 'Error'
-    enum_namespace = 'BWAPI::Errors'
 
     @staticmethod
     def lines():
         yield from TypeMixin.lines()
 
+
+class ErrorEnumFile(BaseClassEnumFile):
+    mapped_class = 'Error'
+    namespace = 'BWAPI::Errors::'
+    py_name = 'errors'
+
     @staticmethod
-    def enum_lines():
+    def lines():
         f = incflines('Error.h')
         yield from f(75, 102)
 
 
 class ExplosionTypeFile(BaseClassFile):
     mapped_class = 'ExplosionType'
-    enum_namespace = 'BWAPI::ExplosionTypes'
 
     @staticmethod
     def lines():
         yield from TypeMixin.lines()
 
+
+class ExplosionTypeEnumFile(BaseClassEnumFile):
+    mapped_class = 'ExplosionType'
+    namespace = 'BWAPI::ExplosionTypes::'
+    py_name = 'explosion_types'
+
     @staticmethod
-    def enum_lines():
+    def lines():
         f = incflines('ExplosionType.h')
         yield from f(68, 92)
 
@@ -139,28 +159,38 @@ class GameFile(BaseWrappedClassFile):
 
 class GameTypeFile(BaseClassFile):
     mapped_class = 'GameType'
-    enum_namespace = 'BWAPI::GameTypes'
 
     @staticmethod
     def lines():
         yield from TypeMixin.lines()
 
+
+class GameTypeEnumFile(BaseClassEnumFile):
+    mapped_class = 'GameType'
+    namespace = 'BWAPI::GameTypes::'
+    py_name = 'game_types'
+
     @staticmethod
-    def enum_lines():
+    def lines():
         f = incflines('GameType.h')
         yield from f(62, 76)
 
 
 class OrderFile(BaseClassFile):
     mapped_class = 'Order'
-    enum_namespace = 'BWAPI::Orders'
 
     @staticmethod
     def lines():
         yield from TypeMixin.lines()
 
+
+class OrderEnumFile(BaseClassEnumFile):
+    mapped_class = 'Order'
+    namespace = 'BWAPI::Orders::'
+    py_name = 'orders'
+
     @staticmethod
-    def enum_lines():
+    def lines():
         f = incflines('Order.h')
         yield from f(235, 390)
 
@@ -176,7 +206,6 @@ class PlayerFile(BaseWrappedClassFile):
 
 class PlayerTypeFile(BaseClassFile):
     mapped_class = 'PlayerType'
-    enum_namespace = 'BWAPI::PlayerTypes'
 
     @staticmethod
     def lines():
@@ -184,15 +213,20 @@ class PlayerTypeFile(BaseClassFile):
         f = incflines('PlayerType.h')
         yield from f(45, 57)
 
+
+class PlayerTypeEnumFile(BaseClassEnumFile):
+    mapped_class = 'PlayerType'
+    namespace = 'BWAPI::PlayerTypes::'
+    py_name = 'player_types'
+
     @staticmethod
-    def enum_lines():
+    def lines():
         f = incflines('PlayerType.h')
         yield from f(68, 78)
 
 
 class RaceFile(BaseClassFile):
     mapped_class = 'Race'
-    enum_namespace = 'BWAPI::Races'
 
     @staticmethod
     def lines():
@@ -200,8 +234,14 @@ class RaceFile(BaseClassFile):
         f = incflines('Race.h')
         yield from f(46, 87)
 
+
+class RaceEnumFile(BaseClassEnumFile):
+    mapped_class = 'Race'
+    namespace = 'BWAPI::Races::'
+    py_name = 'races'
+
     @staticmethod
-    def enum_lines():
+    def lines():
         f = incflines('Race.h')
         yield from f(98, 103)
 
@@ -217,7 +257,6 @@ class RegionFile(BaseWrappedClassFile):
 
 class TechTypeFile(BaseClassFile):
     mapped_class = 'TechType'
-    enum_namespace = 'BWAPI::TechTypes'
 
     @staticmethod
     def lines():
@@ -225,8 +264,14 @@ class TechTypeFile(BaseClassFile):
         f = incflines('TechType.h')
         yield from f(79, 154)
 
+
+class TechTypeEnumFile(BaseClassEnumFile):
+    mapped_class = 'TechType'
+    namespace = 'BWAPI::TechTypes::'
+    py_name = 'tech_types'
+
     @staticmethod
-    def enum_lines():
+    def lines():
         f = incflines('TechType.h')
         yield from f(165, 210)
 
@@ -254,35 +299,44 @@ class UnitFile(BaseWrappedClassFile):
 
 class UnitCommandTypeFile(BaseClassFile):
     mapped_class = 'UnitCommandType'
-    enum_namespace = 'BWAPI::UnitCommandTypes'
 
     @staticmethod
     def lines():
         yield from TypeMixin.lines()
 
+
+class UnitCommandTypeEnumFile(BaseClassEnumFile):
+    mapped_class = 'UnitCommandType'
+    namespace = 'BWAPI::UnitCommandTypes::'
+    py_name = 'unit_command_types'
+
     @staticmethod
-    def enum_lines():
+    def lines():
         f = incflines('UnitCommandType.h')
         yield from f(89, 134)
 
 
 class UnitSizeTypeFile(BaseClassFile):
     mapped_class = 'UnitSizeType'
-    enum_namespace = 'BWAPI::UnitSizeTypes'
 
     @staticmethod
     def lines():
         yield from TypeMixin.lines()
 
+
+class UnitSizeTypeEnumFile(BaseClassEnumFile):
+    mapped_class = 'UnitSizeType'
+    namespace = 'BWAPI::UnitSizeTypes::'
+    py_name = 'unit_size_types'
+
     @staticmethod
-    def enum_lines():
+    def lines():
         f = incflines('UnitSizeType.h')
         yield from f(55, 60)
 
 
 class UnitTypeFile(BaseClassFile):
     mapped_class = 'UnitType'
-    enum_namespace = 'BWAPI::UnitTypes'
 
     @staticmethod
     def lines():
@@ -290,15 +344,20 @@ class UnitTypeFile(BaseClassFile):
         f = incflines('UnitType.h')
         yield from f(279, 902)
 
+
+class UnitTypeEnumFile(BaseClassEnumFile):
+    mapped_class = 'UnitType'
+    namespace = 'BWAPI::UnitTypes::'
+    py_name = 'unit_types'
+
     @staticmethod
-    def enum_lines():
+    def lines():
         f = incflines('UnitType.h')
         yield from f(951, 1234)
 
 
 class UpgradeTypeFile(BaseClassFile):
     mapped_class = 'UpgradeType'
-    enum_namespace = 'BWAPI::UpgradeTypes'
 
     @staticmethod
     def lines():
@@ -306,15 +365,20 @@ class UpgradeTypeFile(BaseClassFile):
         f = incflines('UpgradeType.h')
         yield from f(93, 172)
 
+
+class UpgradeTypeEnumFile(BaseClassEnumFile):
+    mapped_class = 'UpgradeType'
+    namespace = 'BWAPI::UpgradeTypes::'
+    py_name = 'upgrade_types'
+
     @staticmethod
-    def enum_lines():
+    def lines():
         f = incflines('UpgradeType.h')
         yield from f(183, 245)
 
 
 class WeaponTypeFile(BaseClassFile):
     mapped_class = 'WeaponType'
-    enum_namespace = 'BWAPI::WeaponTypes'
 
     @staticmethod
     def lines():
@@ -322,7 +386,13 @@ class WeaponTypeFile(BaseClassFile):
         f = incflines('WeaponType.h')
         yield from f(153, 305)
 
+
+class WeaponTypeEnumFile(BaseClassEnumFile):
+    mapped_class = 'WeaponType'
+    namespace = 'BWAPI::WeaponTypes::'
+    py_name = 'weapon_types'
+
     @staticmethod
-    def enum_lines():
+    def lines():
         f = incflines('WeaponType.h')
         yield from f(330, 439)
