@@ -9,6 +9,9 @@ def incflines(*fname):
     return flines(join(BWAPI_INCLUDE_DIR, *fname))
 
 
+POSITION_CONSTANTS = ('Invalid', 'None', 'Unknown', 'Origin')
+
+
 class TypeMixin:
     # manually pass couple of baseclass methods from 'Type.h'
     @staticmethod
@@ -225,6 +228,16 @@ class PlayerTypeEnumFile(BaseClassEnumFile):
         yield from f(68, 78)
 
 
+class PositionEnumFile(BaseClassEnumFile):
+    mapped_class = 'Position'
+    namespace = 'PyBinding::Positions::'
+    py_name = 'positions'
+
+    @classmethod
+    def items(cls):
+        return {x: cls.namespace + x for x in POSITION_CONSTANTS}
+
+
 class RaceFile(BaseClassFile):
     mapped_class = 'Race'
 
@@ -274,6 +287,16 @@ class TechTypeEnumFile(BaseClassEnumFile):
     def lines():
         f = incflines('TechType.h')
         yield from f(165, 210)
+
+
+class TilePositionEnumFile(BaseClassEnumFile):
+    mapped_class = 'TilePosition'
+    namespace = 'PyBinding::TilePositions::'
+    py_name = 'tile_positions'
+
+    @classmethod
+    def items(cls):
+        return {x: cls.namespace + x for x in POSITION_CONSTANTS}
 
 
 class UnitFile(BaseWrappedClassFile):
@@ -385,6 +408,16 @@ class WeaponTypeFile(BaseClassFile):
         yield from TypeMixin.lines()
         f = incflines('WeaponType.h')
         yield from f(153, 305)
+
+
+class WalkPositionEnumFile(BaseClassEnumFile):
+    mapped_class = 'WalkPosition'
+    namespace = 'PyBinding::WalkPositions::'
+    py_name = 'walk_positions'
+
+    @classmethod
+    def items(cls):
+        return {x: cls.namespace + x for x in POSITION_CONSTANTS}
 
 
 class WeaponTypeEnumFile(BaseClassEnumFile):
