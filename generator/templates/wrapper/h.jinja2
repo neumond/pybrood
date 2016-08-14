@@ -7,8 +7,8 @@ namespace Wrapper {
 class {{ wrap_class }}
 {
 public:
-    {{ source_ns }}{{ source_classptr }}{% if unboxed %}*{% endif %} obj;
-    {{ wrap_class }}({{ source_ns }}{{ source_classptr }}{% if unboxed %}*{% endif %});
+    {{ source_ns }}{{ source_classptr }}{{ initmod }} obj;
+    {{ wrap_class }}({{ source_ns }}{{ source_classptr }}{{ initmod }});
     {% for m in methods -%}
     {{ m.rettype.format(ns="") }} {{ m.name }}({{ m.argline_signature.format(ns="") }});
     {% endfor %}

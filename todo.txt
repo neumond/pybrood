@@ -10,6 +10,11 @@ Regionset ..
 добавляются ли динамически создаваемые классы в __subclasses__?
 
 
+нужно передавать как reference не врапаные константные типы (UnitType например, наследники Type), чтобы
+pybind не пытался их удалить.
+хотя.. по идее пайбинд их скопирует. с другой стороны внутри тайпа нет никакого стейта кроме int id.
+
+
 TODO: implement __all__ for:
 BulletType
 DamageType
@@ -38,8 +43,8 @@ Client.h
 Color.h
   Color type handling only, enums done
 ComparisonFilter.h
-Constants.h
-  only TILE_SIZE constant
++ Constants.h
+  only TILE_SIZE constant, она нигде не используется
 + CoordinateType.h
 + DamageType.h
 + Error.h

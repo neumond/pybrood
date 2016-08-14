@@ -9,7 +9,6 @@ from .typereplacer import process_function
 
 class BaseClassFile:
     mapped_class = NotImplemented
-    unboxed = True
 
     @staticmethod
     def lines():
@@ -67,12 +66,12 @@ class BaseClassFile:
             'py_name': cls.python_name(),
             'methods': list(ma.assemble()),
             'helper_ns': 'PyBinding::Wrapper::',
-            'unboxed': cls.unboxed,
         }
 
 
 class BaseWrappedClassFile(BaseClassFile):
     unboxed = False
+    wobj_op = 'obj->'
 
     @classmethod
     def perform(cls):
@@ -96,9 +95,9 @@ class BaseWrappedClassFile(BaseClassFile):
         ctx['source_ns'] = 'PyBinding::Wrapper::'
         return ctx
 
-    @staticmethod
-    def _context_collecting_hook(fnc):
-        processed = process_function(fnc, 'obj->{fname}({args})', asis=True)
+    @classmethod
+    def _context_collecting_hook(cls, fnc):
+        processed = process_function(fnc, cls.wobj_op + '{fname}({args})', asis=True)
         processed['orig'] = fnc
         return processed
 
@@ -110,7 +109,7 @@ class BaseWrappedClassFile(BaseClassFile):
             'wrap_class': cls.mapped_class,
             'methods': cls._collect,
             'header_file': cls.include_file(),
-            'unboxed': cls.unboxed,
+            'initmod': '*' if cls.unboxed else '',
         }
 
     @staticmethod

@@ -1,6 +1,6 @@
 {%- set pybind_attr = 'items_' + py_name.lower() -%}
 auto {{ pybind_attr }} = py::dict();
 {% for name, item in items.items() -%}
-{{ pybind_attr }}["{{ name }}"] = py::cast({{ item }});
+{{ pybind_attr }}["{{ name }}"] = py::cast({{ item }}, py::return_value_policy::reference);
 {% endfor %}
 m.attr("{{ py_name }}") = {{ pybind_attr }};

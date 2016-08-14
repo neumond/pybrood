@@ -9,7 +9,7 @@ def reconnect():
 
 def connection_checker():
     pybrood.client.update()
-    if not pybrood.client.is_connected():
+    if not pybrood.client.is_connected:
         print('Reconnecting...')
         reconnect()
 
@@ -20,14 +20,14 @@ def debug_code():
     print(force.id)
     print(force.name)
     # pybrood.Force()
-    fs = pybrood.game.get_forces()
-    print(fs)
-    print(type(fs))
-    print(list(fs))
-    for f in fs:
-        print(f)
-        print(f.id)
-        print(f.name)
+    # fs = pybrood.game.get_forces()
+    # print(fs)
+    # print(type(fs))
+    # print(list(fs))
+    # for f in fs:
+    #     print(f)
+    #     print(f.id)
+    #     print(f.name)
 
 
 def main():
@@ -35,13 +35,13 @@ def main():
     reconnect()
     while True:
         print('Waiting to enter match...')
-        while not pybrood.game.is_in_game():
+        while not pybrood.game.is_in_game:
             connection_checker()
         print('Starting match!')
 
         debug_code()
 
-        while pybrood.game.is_in_game():
+        while pybrood.game.is_in_game:
             # ...
             connection_checker()
         print('Game ended')
