@@ -9,6 +9,8 @@ from .typereplacer import process_function
 
 class BaseClassFile:
     mapped_class = NotImplemented
+    constructors = ()
+    force_lambda = set()
 
     @staticmethod
     def lines():
@@ -60,11 +62,16 @@ class BaseClassFile:
             else:
                 ma(fnc, processed)
                 cls._collect.append(hooked)
+        meths = list(ma.assemble())
+        for m in meths:
+            if m['orig_name'] in cls.force_lambda:
+                m['processed']['transformed'] = True
         return {
             'source_ns': 'BWAPI::',
             'source_class': cls.mapped_class,
             'py_name': cls.python_name(),
-            'methods': list(ma.assemble()),
+            'methods': meths,
+            'constructors': cls.constructors,
             'helper_ns': 'PyBinding::Wrapper::',
         }
 

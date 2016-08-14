@@ -1,9 +1,8 @@
 {%- set pybind_class = 'class_' + py_name.lower() -%}
 py::class_&lt;{{ source_ns }}{{ source_class }}&gt; {{ pybind_class }}(m, "{{ py_name }}");
-{#{{ pybind_class }}.def("__init__", []({{ source_ns }}{{ source_class }}&amp;){
-    throw std::runtime_error("{{ py_name }} objects can't be instantiated from python side");
-    // TODO: need this?
-}); #}
+{% for m in constructors -%}
+{{ pybind_class }}.def(py::init<{{ m }}>());
+{% endfor %}
 {% for m in methods -%}
 {{ pybind_class }}.{{ m.type }}("{{ m.py_name }}", {% if m.processed.transformed -%}
     []({{ source_ns }}{{ source_class }}&amp; obj

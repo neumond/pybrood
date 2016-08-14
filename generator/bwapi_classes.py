@@ -13,6 +13,8 @@ POSITION_CONSTANTS = ('Invalid', 'None', 'Unknown', 'Origin')
 
 
 class TypeMixin:
+    force_lambda = {'getID', 'getName'}
+
     # manually pass couple of baseclass methods from 'Type.h'
     @staticmethod
     def lines():
@@ -29,12 +31,8 @@ class BulletFile(BaseWrappedClassFile):
         yield from f(39, 167)
 
 
-class BulletTypeFile(BaseClassFile):
+class BulletTypeFile(TypeMixin, BaseClassFile):
     mapped_class = 'BulletType'
-
-    @staticmethod
-    def lines():
-        yield from TypeMixin.lines()
 
 
 class BulletTypeEnumFile(BaseClassEnumFile):
@@ -57,11 +55,9 @@ class ClientFile(BaseClassFile):
         yield from f(20, 23)
 
 
-class ColorFile(BaseClassFile):
+class ColorFile(TypeMixin, BaseClassFile):
     mapped_class = 'Color'
-    constructors = '''
-    TODO
-    '''
+    constructors = ('int', 'int, int, int')
 
     @staticmethod
     def lines():
@@ -81,7 +77,7 @@ class ColorEnumFile(BaseClassEnumFile):
         yield from f(61, 95)
 
 
-class DamageTypeFile(BaseClassFile):
+class DamageTypeFile(TypeMixin, BaseClassFile):
     mapped_class = 'DamageType'
 
     @staticmethod
@@ -100,7 +96,7 @@ class DamageTypeEnumFile(BaseClassEnumFile):
         yield from f(60, 66)
 
 
-class ErrorFile(BaseClassFile):
+class ErrorFile(TypeMixin, BaseClassFile):
     mapped_class = 'Error'
 
     @staticmethod
@@ -119,7 +115,7 @@ class ErrorEnumFile(BaseClassEnumFile):
         yield from f(75, 102)
 
 
-class ExplosionTypeFile(BaseClassFile):
+class ExplosionTypeFile(TypeMixin, BaseClassFile):
     mapped_class = 'ExplosionType'
 
     @staticmethod
@@ -161,7 +157,7 @@ class GameFile(BaseWrappedClassFile):
         # TODO: flush()
 
 
-class GameTypeFile(BaseClassFile):
+class GameTypeFile(TypeMixin, BaseClassFile):
     mapped_class = 'GameType'
 
     @staticmethod
@@ -180,7 +176,7 @@ class GameTypeEnumFile(BaseClassEnumFile):
         yield from f(62, 76)
 
 
-class OrderFile(BaseClassFile):
+class OrderFile(TypeMixin, BaseClassFile):
     mapped_class = 'Order'
 
     @staticmethod
@@ -208,7 +204,7 @@ class PlayerFile(BaseWrappedClassFile):
         yield from f(38, 641)
 
 
-class PlayerTypeFile(BaseClassFile):
+class PlayerTypeFile(TypeMixin, BaseClassFile):
     mapped_class = 'PlayerType'
 
     @staticmethod
@@ -239,7 +235,7 @@ class PlayerTypeEnumFile(BaseClassEnumFile):
 #         return {x: cls.namespace + x for x in POSITION_CONSTANTS}
 
 
-class RaceFile(BaseClassFile):
+class RaceFile(TypeMixin, BaseClassFile):
     mapped_class = 'Race'
 
     @staticmethod
@@ -269,7 +265,7 @@ class RegionFile(BaseWrappedClassFile):
         yield from f(30, 132)
 
 
-class TechTypeFile(BaseClassFile):
+class TechTypeFile(TypeMixin, BaseClassFile):
     mapped_class = 'TechType'
 
     @staticmethod
@@ -321,7 +317,7 @@ class UnitFile(BaseWrappedClassFile):
         return BaseClassFile.naming_rule(f, mtype)
 
 
-class UnitCommandTypeFile(BaseClassFile):
+class UnitCommandTypeFile(TypeMixin, BaseClassFile):
     mapped_class = 'UnitCommandType'
 
     @staticmethod
@@ -340,7 +336,7 @@ class UnitCommandTypeEnumFile(BaseClassEnumFile):
         yield from f(89, 134)
 
 
-class UnitSizeTypeFile(BaseClassFile):
+class UnitSizeTypeFile(TypeMixin, BaseClassFile):
     mapped_class = 'UnitSizeType'
 
     @staticmethod
@@ -359,7 +355,7 @@ class UnitSizeTypeEnumFile(BaseClassEnumFile):
         yield from f(55, 60)
 
 
-class UnitTypeFile(BaseClassFile):
+class UnitTypeFile(TypeMixin, BaseClassFile):
     mapped_class = 'UnitType'
 
     @staticmethod
@@ -380,7 +376,7 @@ class UnitTypeEnumFile(BaseClassEnumFile):
         yield from f(951, 1234)
 
 
-class UpgradeTypeFile(BaseClassFile):
+class UpgradeTypeFile(TypeMixin, BaseClassFile):
     mapped_class = 'UpgradeType'
 
     @staticmethod
@@ -401,7 +397,7 @@ class UpgradeTypeEnumFile(BaseClassEnumFile):
         yield from f(183, 245)
 
 
-class WeaponTypeFile(BaseClassFile):
+class WeaponTypeFile(TypeMixin, BaseClassFile):
     mapped_class = 'WeaponType'
 
     @staticmethod
