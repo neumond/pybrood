@@ -6,7 +6,17 @@ PRIMITIVE_TYPES = {
     'ssize_t', 'size_t', 'float', 'double', 'bool', 'char', 'wchar_t', 'std::string', 'std::wstring', 'int'
 }
 CONST_PRIMITIVE_TYPES = {
-    'char *', 'wchar_t *', 'std::string &', 'std::string&',
+    'char *', 'wchar_t *',
+}
+CONST_STRAIGHT_TYPES = {
+    'std::pair< UnitType, int >',
+}
+CONST_REF_STRAIGHT_TYPES = {
+    'std::string',
+    'UnitType::set',
+    'std::map< UnitType, int >',
+    'SetContainer<TechType>',
+    'SetContainer<UpgradeType>',
 }
 
 POSITION_TYPES = {'Position', 'WalkPosition', 'TilePosition'}
@@ -109,12 +119,21 @@ def register_types():
         AS_IS_RETURN_TYPES[t] = _NO_ACTION_RETURN
         AS_IS_CONST_RETURN_TYPES[t] = _NO_ACTION_RETURN
 
-    for t in CONST_PRIMITIVE_TYPES:
+    for t in CONST_PRIMITIVE_TYPES | CONST_STRAIGHT_TYPES:
         CONST_ARGUMENT_TYPES[t] = _NO_ACTION_ARGUMENT
         CONST_RETURN_TYPES[t] = _NO_ACTION_RETURN
 
         AS_IS_CONST_ARGUMENT_TYPES[t] = _NO_ACTION_ARGUMENT
         AS_IS_CONST_RETURN_TYPES[t] = _NO_ACTION_RETURN
+
+    for t in CONST_REF_STRAIGHT_TYPES:
+        for s in ('&', ' &'):
+            tt = t + s
+            CONST_ARGUMENT_TYPES[tt] = _NO_ACTION_ARGUMENT
+            CONST_RETURN_TYPES[tt] = _NO_ACTION_RETURN
+
+            AS_IS_CONST_ARGUMENT_TYPES[tt] = _NO_ACTION_ARGUMENT
+            AS_IS_CONST_RETURN_TYPES[tt] = _NO_ACTION_RETURN
 
     from . import classes
     from . import bwapi_classes  # noqa
