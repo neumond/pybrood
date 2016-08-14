@@ -1,7 +1,6 @@
-# from . import weakrefs
 # from . import singletons
 from . import skel
-# from . import pureenums
+from . import pureenums
 from . import classes
 from . import bwapi_classes  # noqa
 from .typereplacer import register_types
@@ -17,8 +16,8 @@ for Sub in classes.BaseWrappedClassFile.__subclasses__():
     Sub.perform()
 
 # singletons.main()
-#
-# for Sub in pureenums.BasePureEnumFile.__subclasses__():
-#     Sub.perform()
-#
+
+for Sub in pureenums.BasePureEnumFile.__subclasses__():
+    Sub.perform()
+
 skel.post()
