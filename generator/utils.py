@@ -37,8 +37,8 @@ def transform_case(name):
             upse += 1
         else:
             if upse > 1:
-                out.append(name[pos:i].lower())
-                pos = i
+                out.append(name[pos:i - 1].lower())
+                pos = i - 1
             upse = 0
     if upse == 0:
         out.append(name[pos:].lower())
