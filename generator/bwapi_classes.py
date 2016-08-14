@@ -1,4 +1,5 @@
 from .classes import BaseClassFile, BaseWrappedClassFile
+from .classenums import BaseClassEnumFile
 from os.path import join
 from .utils import flines
 from .config import BWAPI_INCLUDE_DIR
@@ -27,14 +28,19 @@ class BulletFile(BaseWrappedClassFile):
 
 class BulletTypeFile(BaseClassFile):
     mapped_class = 'BulletType'
-    enum_namespace = 'BWAPI::BulletTypes'
 
     @staticmethod
     def lines():
         yield from TypeMixin.lines()
 
+
+class BulletTypeEnumFile(BaseClassEnumFile):
+    mapped_class = 'BulletType'
+    namespace = 'BWAPI::BulletTypes::'
+    py_name = 'bullet_types'
+
     @staticmethod
-    def enum_lines():
+    def lines():
         f = incflines('BulletType.h')
         yield from f(87, 123)
 

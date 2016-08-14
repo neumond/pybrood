@@ -1,8 +1,6 @@
-{% if enums %}
-{%- set pybind_enum = 'enum_' + bw_class.lower() -%}
-auto {{ pybind_enum }} = py::dict();
-m.attr("{{ bw_class }}s") = {{ pybind_enum }};
-{% for e in enums -%}
-{{ pybind_enum }}["{{ e }}"] = py::cast(BWAPI::{{ bw_class }}s::{{ e }});
+{%- set pybind_attr = 'items_' + py_name.lower() -%}
+auto {{ pybind_attr }} = py::dict();
+{% for name, item in items.items() -%}
+{{ pybind_attr }}["{{ name }}"] = py::cast({{ item }});
 {% endfor %}
-{% endif %}
+m.attr("{{ py_name }}") = {{ pybind_attr }};

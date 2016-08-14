@@ -33,6 +33,14 @@ def pre():
         )))
 
 
+def all_cpp_files():
+    items = listdir(join(GEN_OUTPUT_DIR, 'pybind'))
+    a, b = [], []
+    for x in items:
+        (b if x.endswith('_items.cpp') else a).append(x)
+    return a + b
+
+
 def post():
     with open(join(GEN_OUTPUT_DIR, 'pybrood.vcxproj'), 'w') as f:
         f.write(jin_env.get_template('vcproj.jinja2').render(
@@ -43,6 +51,6 @@ def post():
 
     with open(join(GEN_OUTPUT_DIR, 'pybrood.cpp'), 'w') as f:
         f.write(html_unescape(jin_env.get_template('pybrood_cpp.jinja2').render(
-            cpp_files=listdir(join(GEN_OUTPUT_DIR, 'pybind')),
+            cpp_files=all_cpp_files(),
             h_files=filter(lambda x: x != 'common.h', listdir(join(GEN_OUTPUT_DIR, 'include'))),
         )))
