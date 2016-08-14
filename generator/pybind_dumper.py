@@ -52,10 +52,15 @@ class Accumulator:
 
     def assemble(self):
         name_freq = defaultdict(lambda: 0)
+        transformed = set()
         for x in self.mod_defs:
             if x['require_signature']:
                 name_freq[x['orig_name']] += 1
+            if x['processed']['transformed']:
+                transformed.add(x['orig_name'])
         for x in self.mod_defs:
             if x['require_signature'] and name_freq[x['orig_name']] == 1:
                 x['require_signature'] = False
+            if name_freq[x['orig_name']] > 1 and x['orig_name'] in transformed:
+                x['processed']['transformed'] = True
             yield x

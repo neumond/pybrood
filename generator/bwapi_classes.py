@@ -31,6 +31,15 @@ class BulletFile(BaseWrappedClassFile):
         yield from f(39, 167)
 
 
+class BulletSetFile(BaseClassFile):
+    mapped_class = 'Bulletset'
+
+    @staticmethod
+    def lines():
+        # f = incflines('Bulletset.h')
+        yield ''
+
+
 class BulletTypeFile(TypeMixin, BaseClassFile):
     mapped_class = 'BulletType'
 
@@ -143,6 +152,15 @@ class ForceFile(BaseWrappedClassFile):
         yield from f(25, 63)
 
 
+class ForceSetFile(BaseClassFile):
+    mapped_class = 'Forceset'
+
+    @staticmethod
+    def lines():
+        f = incflines('Forceset.h')
+        yield from f(18, 19)
+
+
 class GameFile(BaseWrappedClassFile):
     mapped_class = 'GameWrapper'
     unboxed = True
@@ -204,6 +222,15 @@ class PlayerFile(BaseWrappedClassFile):
         yield from f(38, 641)
 
 
+class PlayerSetFile(BaseClassFile):
+    mapped_class = 'Playerset'
+
+    @staticmethod
+    def lines():
+        f = incflines('Playerset.h')
+        yield from f(19, 41)
+
+
 class PlayerTypeFile(TypeMixin, BaseClassFile):
     mapped_class = 'PlayerType'
 
@@ -263,6 +290,15 @@ class RegionFile(BaseWrappedClassFile):
     def lines():
         f = incflines('Region.h')
         yield from f(30, 132)
+
+
+class RegionSetFile(BaseClassFile):
+    mapped_class = 'Regionset'
+
+    @staticmethod
+    def lines():
+        f = incflines('Regionset.h')
+        yield from f(19, 23)
 
 
 class TechTypeFile(TypeMixin, BaseClassFile):
@@ -334,6 +370,16 @@ class UnitCommandTypeEnumFile(BaseClassEnumFile):
     def lines():
         f = incflines('UnitCommandType.h')
         yield from f(89, 134)
+
+
+class UnitSetFile(BaseClassFile):
+    mapped_class = 'Unitset'
+    skip_funcs = {'setClientInfo'}
+
+    @staticmethod
+    def lines():
+        f = incflines('Unitset.h')
+        yield from f(27, 183)
 
 
 class UnitSizeTypeFile(TypeMixin, BaseClassFile):

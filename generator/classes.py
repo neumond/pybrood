@@ -11,6 +11,7 @@ class BaseClassFile:
     mapped_class = NotImplemented
     constructors = ()
     force_lambda = set()
+    skip_funcs = set()
 
     @staticmethod
     def lines():
@@ -54,6 +55,8 @@ class BaseClassFile:
         cls._collect = []
         ma = Accumulator(cls.member_type_rule, cls.naming_rule)
         for fnc in map(parse_func, lines_to_statements(cls.lines())):
+            if fnc['name'] in cls.skip_funcs:
+                continue
             try:
                 processed = process_function(fnc, 'obj.{fname}({args})')
                 hooked = cls._context_collecting_hook(fnc)
