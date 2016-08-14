@@ -1,4 +1,3 @@
-# from . import singletons
 from . import skel
 from . import pureenums
 from . import classes
@@ -14,8 +13,6 @@ for Sub in classes.BaseClassFile.__subclasses__():
         Sub.perform()
 for Sub in classes.BaseWrappedClassFile.__subclasses__():
     Sub.perform()
-
-# singletons.main()
 
 for Sub in pureenums.BasePureEnumFile.__subclasses__():
     Sub.perform()

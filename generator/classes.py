@@ -9,6 +9,7 @@ from .typereplacer import process_function
 
 class BaseClassFile:
     mapped_class = NotImplemented
+    unboxed = True
 
     @staticmethod
     def lines():
@@ -66,10 +67,13 @@ class BaseClassFile:
             'py_name': cls.python_name(),
             'methods': list(ma.assemble()),
             'helper_ns': 'PyBinding::Wrapper::',
+            'unboxed': cls.unboxed,
         }
 
 
 class BaseWrappedClassFile(BaseClassFile):
+    unboxed = False
+
     @classmethod
     def perform(cls):
         lcl = cls.python_name().lower()
@@ -106,6 +110,7 @@ class BaseWrappedClassFile(BaseClassFile):
             'wrap_class': cls.mapped_class,
             'methods': cls._collect,
             'header_file': cls.include_file(),
+            'unboxed': cls.unboxed,
         }
 
     @staticmethod

@@ -4,8 +4,8 @@ from .utils import flines
 from .config import BWAPI_INCLUDE_DIR
 
 
-def incflines(fname):
-    return flines(join(BWAPI_INCLUDE_DIR, fname))
+def incflines(*fname):
+    return flines(join(BWAPI_INCLUDE_DIR, *fname))
 
 
 class TypeMixin:
@@ -37,6 +37,15 @@ class BulletTypeFile(BaseClassFile):
     def enum_lines():
         f = incflines('BulletType.h')
         yield from f(87, 123)
+
+
+class ClientFile(BaseClassFile):
+    mapped_class = 'Client'
+
+    @staticmethod
+    def lines():
+        f = incflines('Client', 'Client.h')
+        yield from f(20, 23)
 
 
 class ColorFile(BaseClassFile):
@@ -107,6 +116,19 @@ class ForceFile(BaseWrappedClassFile):
     def lines():
         f = incflines('Force.h')
         yield from f(25, 63)
+
+
+class GameFile(BaseWrappedClassFile):
+    mapped_class = 'Game'
+    unboxed = True
+
+    @staticmethod
+    def lines():
+        f = incflines('Game.h')
+        yield from f(55, 1705)
+
+        # TODO: iostream operator <<
+        # TODO: flush()
 
 
 class GameTypeFile(BaseClassFile):
