@@ -1,4 +1,7 @@
 py::class_&lt;{{ bw_class_full }}&gt;(m, "{{ py_name }}")
 {%- for m in methods %}
-    .def("{{ m.name }}", &amp;{{ bw_class_full }}::{{ m.name }}){% if loop.last %};{% endif %}
+    .def("{{ m.name }}", {% if m.overload_signature -%}
+    ({{ m.overload_signature }}) {% endif -%}
+    &amp;{{ bw_class_full }}::{{ m.name }})
 {%- endfor -%}
+;

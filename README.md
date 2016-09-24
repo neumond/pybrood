@@ -10,6 +10,27 @@ Then run `build.bat` inside `output` folder.
 
 ## developer notes
 
+Standard pybind11 method handling:
+
+```
+.def("isResourceDepot", &BWAPI::UnitType::isResourceDepot)
+```
+
+First problem, overloaded methods:
+
+```
+.def("canUseTechPosition", &BWAPI::Unit::canUseTechPosition)
+.def("canUseTechPosition", &BWAPI::Unit::canUseTechPosition)
+```
+
+Solution:
+
+```
+.def("canUseTechPosition", (bool (BWAPI::Unit::*)(BWAPI::TechType, bool, bool)) &BWAPI::Unit::canUseTechPosition)
+.def("canUseTechPosition", (bool (BWAPI::Unit::*)(BWAPI::TechType, Position, bool, bool, bool)) &BWAPI::Unit::canUseTechPosition)
+```
+
+
 Some classes require wrapping, because pybind11 requires possibility to destruct object.
 This is impossible for entities like `Force`, `Player`, `Bullet`, etc.
 E.g. `BWAPI::Force` is getting wrapped into `PyBinding::Wrapper::Force`.
