@@ -1,19 +1,31 @@
+Binding made as from-scratch code generator, outputting msvc project.
+Although starcraft runs perfectly under wine, I couldn't run it with BWAPI injector.
+So I decided to run SC in VirtualBox.
+
+## developer notes
+
+Some classes require wrapping, because pybind11 requires possibility to destruct object.
+This is impossible for entities like `Force`, `Player`, `Bullet`, etc.
+E.g. `BWAPI::Force` is getting wrapped into `PyBinding::Wrapper::Force`.
+This requires type replacement in any function using `Force` type.
+To solve this there's a `typereplacer.py`.
+
+Some classes require no transformation though.
+
+## todo
+
 Unitset не стоит сразу конвертировать в py::set, у него есть родные методы (в том числе конструкторы)
 Forceset ..
 Playerset ..
 Regionset ..
 
-
 обёртки нужны, так как pybind требует деструктор класса
 
-
 добавляются ли динамически создаваемые классы в __subclasses__?
-
 
 нужно передавать как reference не врапаные константные типы (UnitType например, наследники Type), чтобы
 pybind не пытался их удалить.
 хотя.. по идее пайбинд их скопирует. с другой стороны внутри тайпа нет никакого стейта кроме int id.
-
 
 TODO: implement __all__ for:
 BulletType
@@ -31,7 +43,7 @@ UnitType
 UpgradeType
 WeaponType
 
-
+```
 + AIModule.h
 + ArithmaticFilter.h
 BestFilter.h
@@ -98,3 +110,4 @@ UnitType.h
 WeaponType.h
   static methods from line 311 (including __all__)
 + WindowsTypes.h
+```
