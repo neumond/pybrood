@@ -1,0 +1,4 @@
+py::class_&lt;{{ bw_class_full }}&gt;(m, "{{ py_name }}")
+{%- for m in methods %}
+    .def("{{ m.name }}", &amp;{{ bw_class_full }}::{{ m.name }}){% if loop.last %};{% endif %}
+{%- endfor -%}

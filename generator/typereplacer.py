@@ -344,3 +344,15 @@ def process_function(f, obj_op_line, asis=False):
     for k in ('argline_full', 'argline_nodefaults', 'argline_signature'):
         result[k] = argrep[k]
     return result
+
+
+# === new api ===
+
+
+def transform_input_type(vtype, const=False):
+    if vtype in PRIMITIVE_TYPES:
+        return
+
+
+def transform_output_type(vtype, const=False):
+    pass

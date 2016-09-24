@@ -6,17 +6,19 @@
 
 PYBIND11_PLUGIN(pybrood) {
     py::module m("pybrood", "BWAPI python module");
-
-    {% for x in ('', 'WALK', 'TILE')
-     %}m.attr("{{ x }}POSITION_SCALE") = py::cast(BWAPI::{{ x }}POSITION_SCALE);
+    {% for x in ('', 'WALK', 'TILE') %}
+    m.attr("{{ x }}POSITION_SCALE") = py::cast(BWAPI::{{ x }}POSITION_SCALE);
+    {%- endfor %}
+    {% for x in pureenums %}
+    {{ x|indent(4) }}
     {% endfor %}
-
-    {% for f in cpp_files
-     %}#include "pybind/{{ f }}"
+    {% for x in classes %}
+    {{ x|indent(4) }}
     {% endfor %}
-
+    {% for x in objenums %}
+    {{ x|indent(4) }}
+    {% endfor %}
     m.attr("client") = py::cast(BWAPI::BWAPIClient, py::return_value_policy::reference);
     m.attr("game") = py::cast(PyBinding::Wrapper::GameWrapper(&amp;BWAPI::Broodwar), py::return_value_policy::reference);
-
     return m.ptr();
 }

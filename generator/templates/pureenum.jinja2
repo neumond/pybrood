@@ -1,5 +1,4 @@
-{% set pybind_class = 'enum_' + py_name.lower() %}
-py::enum_<{{ bw_class_full }}> {{ pybind_class }}(m, "{{ py_name }}");
-{% for item in items
- %}{{ pybind_class }}.value("{{ item }}", {{ bw_class_full }}::{{ item }});
-{% endfor %}
+py::enum_<{{ bw_class_full }}>(m, "{{ py_name }}")
+{%- for item in items %}
+    .value("{{ item }}", {{ bw_class_full }}::{{ item }}){% if loop.last %};{% endif %}
+{%- endfor %}

@@ -2,6 +2,12 @@ Binding made as from-scratch code generator, outputting msvc project.
 Although starcraft runs perfectly under wine, I couldn't run it with BWAPI injector.
 So I decided to run SC in VirtualBox.
 
+## building
+
+`python3.5 -m generator`
+
+Then run `build.bat` inside `output` folder.
+
 ## developer notes
 
 Some classes require wrapping, because pybind11 requires possibility to destruct object.
@@ -11,6 +17,48 @@ This requires type replacement in any function using `Force` type.
 To solve this there's a `typereplacer.py`.
 
 Some classes require no transformation though.
+
+Without wrapping the usage is trivial for pybind11:
+```
+BWAPI::PlayerType
+    bool isLobbyType() const;
+→
+output/pybind/playertype.cpp
+    class_playertype.def_property_readonly("is_lobby_type",  &BWAPI::PlayerType::isLobbyType);
+```
+
+With wrapping here's the intermediate class:
+```
+BWAPI::Bullet
+    virtual Unit getSource() const = 0;
+→
+output/include/bullet.h
+    BWAPI::Unit getSource();
+output/pybind/bullet.cpp
+    class_bullet.def_property_readonly("source", [](PyBinding::Wrapper::Bullet& obj) -> PyBinding::Wrapper::Unit {
+        return PyBinding::Wrapper::Unit(obj.getSource());
+    });
+output/src/bullet.cpp
+    BWAPI::Unit Bullet::getSource(){
+        return obj->getSource();
+    }
+```
+
+```
+BWAPI::Unitset
+    bool gather(Unit target, bool shiftQueueCommand = false) const;
+→
+output/pybind/unitset.cpp
+    class_unitset.def("gather", [](BWAPI::Unitset& obj, PyBinding::Wrapper::Unit target, bool shiftQueueCommand = false) -> bool {
+        return obj.gather(target.obj, shiftQueueCommand);
+    });
+```
+
+Wrapper class just keeps reference to an object `obj` and allows free destruction
+by pybind11 without affecting internals of BWAPI. `output/include/` and `output/src/` are folders
+for these "as is" wrappers. All type transformations, including instantiation of wrappers happens
+in lambda functions in `output/pybind/`. You can see how `BWAPI::Unit` becomes `PyBinding::Wrapper::Unit`
+and how methods of wrapper are getting called.
 
 ## todo
 

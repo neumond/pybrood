@@ -2,6 +2,7 @@ import jinja2
 import re
 from sys import stderr
 from itertools import count
+from html import unescape as html_unescape
 
 
 jin_env = jinja2.Environment(loader=jinja2.PackageLoader('generator', 'templates'), autoescape=False)
@@ -53,3 +54,7 @@ ecount = count(start=1)
 def outerr(line):
     n = next(ecount)
     print('{}. {}'.format(n, line), file=stderr)
+
+
+def render_template(template, **kw):
+    return html_unescape(jin_env.get_template(template).render(**kw))

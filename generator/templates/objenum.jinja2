@@ -1,0 +1,6 @@
+{%- set pybind_attr = 'objenum_' + py_name.lower() -%}
+auto {{ pybind_attr }} = py::dict();
+{% for name in items -%}
+{{ pybind_attr }}["{{ name }}"] = py::cast({{ namespace }}{{ name }}, py::return_value_policy::reference);
+{% endfor -%}
+m.attr("{{ py_name }}") = {{ pybind_attr }};

@@ -1,4 +1,6 @@
-from .utils import squash_spaces
+from ..utils import flines, squash_spaces
+from os.path import join
+from ..config import BWAPI_INCLUDE_DIR
 
 
 def nametype_split(line):
@@ -99,3 +101,7 @@ def lines_to_statements(lines, separator=';'):
         if not func:
             continue
         yield func
+
+
+def incflines(*fname):
+    return flines(join(BWAPI_INCLUDE_DIR, *fname))
