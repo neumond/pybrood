@@ -40,8 +40,8 @@ Bulletset.h
   set methods ? (empty)
 + BulletType.h
 Client.h
-Color.h
-  Color type handling only, enums done
++ Color.h
+  Color is the one of few types open for construction from python side.
 ComparisonFilter.h
 + Constants.h
   only TILE_SIZE constant, она нигде не используется

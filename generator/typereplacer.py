@@ -8,15 +8,21 @@ PRIMITIVE_TYPES = {
 CONST_PRIMITIVE_TYPES = {
     'char *', 'wchar_t *',
 }
-CONST_STRAIGHT_TYPES = {
-    'std::pair< UnitType, int >',
-}
-CONST_REF_STRAIGHT_TYPES = {
+CONST_REF_PRIMITIVE_TYPES = {
     'std::string',
-    'UnitType::set',
-    'std::map< UnitType, int >',
-    'SetContainer<TechType>',
-    'SetContainer<UpgradeType>',
+}
+CONST_BWAPI_TYPES = {
+    'std::pair< {bwapi}UnitType, int >',
+}
+CONST_REF_BWAPI_TYPES = {
+    '{bwapi}UnitType::set',
+    'std::map< {bwapi}UnitType, int >',
+    '{bwapi}SetContainer<{bwapi}TechType>',
+    '{bwapi}SetContainer<{bwapi}UpgradeType>',
+    '{bwapi}Forceset',
+    '{bwapi}Playerset',
+    '{bwapi}Unitset',
+    '{bwapi}Bulletset',
 }
 
 POSITION_TYPES = {'Position', 'WalkPosition', 'TilePosition'}
@@ -119,16 +125,33 @@ def register_types():
         AS_IS_RETURN_TYPES[t] = _NO_ACTION_RETURN
         AS_IS_CONST_RETURN_TYPES[t] = _NO_ACTION_RETURN
 
-    for t in CONST_PRIMITIVE_TYPES | CONST_STRAIGHT_TYPES:
+    for t in CONST_PRIMITIVE_TYPES:
         CONST_ARGUMENT_TYPES[t] = _NO_ACTION_ARGUMENT
         CONST_RETURN_TYPES[t] = _NO_ACTION_RETURN
 
         AS_IS_CONST_ARGUMENT_TYPES[t] = _NO_ACTION_ARGUMENT
         AS_IS_CONST_RETURN_TYPES[t] = _NO_ACTION_RETURN
 
-    for t in CONST_REF_STRAIGHT_TYPES:
+    for t in CONST_REF_PRIMITIVE_TYPES:
         for s in ('&', ' &'):
             tt = t + s
+            CONST_ARGUMENT_TYPES[tt] = _NO_ACTION_ARGUMENT
+            CONST_RETURN_TYPES[tt] = _NO_ACTION_RETURN
+
+            AS_IS_CONST_ARGUMENT_TYPES[tt] = _NO_ACTION_ARGUMENT
+            AS_IS_CONST_RETURN_TYPES[tt] = _NO_ACTION_RETURN
+
+    for t in CONST_BWAPI_TYPES:
+        tname = t.format(bwapi='')
+        CONST_ARGUMENT_TYPES[tname] = _NO_ACTION_ARGUMENT
+        CONST_RETURN_TYPES[tname] = _NO_ACTION_RETURN
+
+        AS_IS_CONST_ARGUMENT_TYPES[tname] = _NO_ACTION_ARGUMENT
+        AS_IS_CONST_RETURN_TYPES[tname] = _NO_ACTION_RETURN
+
+    for t in CONST_REF_BWAPI_TYPES:
+        for s in ('&', ' &'):
+            tt = (t + s).format(bwapi='')
             CONST_ARGUMENT_TYPES[tt] = _NO_ACTION_ARGUMENT
             CONST_RETURN_TYPES[tt] = _NO_ACTION_RETURN
 
