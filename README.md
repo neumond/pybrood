@@ -30,6 +30,14 @@ Solution:
 .def("canUseTechPosition", (bool (BWAPI::Unit::*)(BWAPI::TechType, Position, bool, bool, bool)) &BWAPI::Unit::canUseTechPosition)
 ```
 
+Second problem, some types are actually pointers to classes:
+
+```
+typedef RegionInterface *Region;
+```
+
+Solution: create proxy classes
+
 
 Some classes require wrapping, because pybind11 requires possibility to destruct object.
 This is impossible for entities like `Force`, `Player`, `Bullet`, etc.

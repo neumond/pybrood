@@ -51,9 +51,9 @@
         </PostBuildEvent>
     </ItemDefinitionGroup>
     <ItemGroup>
-        {% for f in cpp_files
-         %}<ClCompile Include="src/{{ f }}" />
-        {% endfor %}
+        {% for f in cpp_files %}
+        <ClCompile Include="src/{{ f }}" />
+        {%- endfor %}
         <ClCompile Include="pybrood.cpp" />
     </ItemGroup>
     <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -1,6 +1,7 @@
 from .parser.classes import main as get_data
 # from .typereplacer import transform_input_type, transform_output_type
 from collections import defaultdict
+from .proxy_classes import PROXY_CLASSES
 
 
 PRE_TYPE_MAP = {
@@ -48,7 +49,8 @@ def presub_types(class_data):
 
 def make_overload_signature(func, class_name):
     argline = ', '.join(a['type'] for a in func['args'])
-    return '{} ({}::*)({})'.format(func['rtype'], class_name, argline)
+    ns = 'Pybrood' if class_name in PROXY_CLASSES else 'BWAPI'
+    return '{} ({}::{}::*)({})'.format(func['rtype'], ns, class_name, argline)
 
 
 def make_overload_signatures(class_data, class_name):
@@ -62,9 +64,17 @@ def make_overload_signatures(class_data, class_name):
             func['overload_signature'] = make_overload_signature(func, class_name)
 
 
+def fix_namespace_for_proxy(class_data, class_name):
+    assert class_data['bw_class_full'].startswith('BWAPI::')
+    k = class_data['bw_class_full'].split('::', 1)[1]
+    ns = 'Pybrood' if class_name in PROXY_CLASSES else 'BWAPI'
+    class_data['bw_class_full'] = ns + '::' + k
+
+
 def transform_class(class_data, class_name):
     presub_types(class_data)
     make_overload_signatures(class_data, class_name)
+    fix_namespace_for_proxy(class_data, class_name)
     return class_data
 
 

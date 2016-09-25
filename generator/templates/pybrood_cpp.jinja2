@@ -1,7 +1,7 @@
 #include "include/common.h"
-{% for f in h_files
-%}#include "include/{{ f }}"
-{% endfor %}
+{% for f in h_files %}
+#include "include/{{ f }}"
+{%- endfor %}
 
 
 PYBIND11_PLUGIN(pybrood) {
