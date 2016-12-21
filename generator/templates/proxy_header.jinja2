@@ -1,16 +1,14 @@
 #pragma once
 #include "common.h"
 
-namespace Pybrood {
+using namespace BWAPI;
 
-class {{ py_name }}
+class Pybrood{{ proxy_type }}
 {
 public:
-    BWAPI::{{ py_name }}{{ pline }} obj;
-    {{ py_name }}(BWAPI::{{ py_name }}{{ pline }});
+    {{ pointer_type }} obj;
+    Pybrood{{ proxy_type }}({{ pointer_type }});
     {% for m in methods -%}
     {{ m }};
     {% endfor %}
 };
-
-}

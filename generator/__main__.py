@@ -1,4 +1,4 @@
-from . import skel
+from . import skel, proxy_classes
 # from . import pureenums
 # from . import classes
 # from . import classenums
@@ -6,6 +6,8 @@ from . import skel
 
 
 skel.pre()
+
+proxy_classes.main()
 
 # for Sub in classes.BaseClassFile.__subclasses__():
 #     if Sub is not classes.BaseWrappedClassFile:

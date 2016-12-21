@@ -8,14 +8,18 @@ So I decided to run SC in VirtualBox.
 
 Then run `build.bat` inside `output` folder.
 
-## BWAPI include files parser
+## Internals
 
 `generator.parser` contains everything related to parsing of BWAPI include files.
 It returns data structure sufficient to generate binding module.
 
-There're 3 kinds of things: classes, enums consisting of singleton objects, usual C++ enums.
+There're several kinds of things to be passed between python and C++ sides:
 
-## C++ enums
+1. Usual C++ enums.
+2. Classes.
+3. Primitive types and STL containers automatically handled by pybind11.
+
+### C++ enums
 
 Most straightforward part. Just using them exactly as pybind11 documentation says:
 
@@ -37,21 +41,128 @@ py::enum_<BWAPI::Text::Size::Enum>(m, "TextSize")
 
 We need only set (by hand) pythonic name here: `"TextSize"`.
 
-## Object enums
+### Classes
 
-Enumerations consisting of objects use straightforward pybind11 classes
-in conjunction with returning as weakref.
+Depending on:
+
+1. Availability of class destructor in public space (
+    This is required just for describing a class using `py::class_`.
+    It doesn't matter even if you're going to use objects only via weakrefs
+    ).
+2. Whether the type is actually a pointer to a class.
+3. Intended for construction from python side as usual object.
+4. Class resembles set (may be with some extra methods, marked with +).
+5. Class is BWAPI::Type with numeric ID and string Name (may be with some extra methods, marked with +).
+    This class works like numeric enum constant, but has some attached functionality.
+
+Possible decisions:
+
+1. Building proxy class (for available destructor) holding pointer to actual object, behaving like weakref.
+2. Possibility to construct typed set on py side and call its methods.
+    ```
+    # possible to create C++ side set from pure pythonic
+    pset = Playerset({player1, player2})
+    pset.getRaces()
+
+    # passing sets to methods require constructed object
+    # for simplicity, due to rareness of such situations
+    some_bwapi_method(pset)
+    # impossible: some_bwapi_method({player1, player2})
+
+    # returned values are also C++ side objects with ability to iterate
+    pset2 = another_bwapi_method()
+    pset2.getRaces()
+    for player in pset2:
+        pass
+    pythonic_set = set(pset2)
+
+    # for simplicity other set operations are NOT implemented:
+    # impossible: pset2.add(player2)
+    pset2 = Playerset(set(pset2) | {player2})
+    # Yes, this is slightly suboptimal, but doesn't complicate things.
+    ```
+3. Straightforward description of class using pybind11.
+    1. Without ability to construct, enumeration of singletons available in advance.
+    2. With free ability to construct.
+    3. Without ability to construct, one singleton available in advance.
+
+class | 1 | 2 | 3 | 4 | 5 | decision
+--- | --- | --- | --- | --- | --- | ---
+Bullet          | |Y| |  |  | 1
+Bulletset       | | | |Y |  | 2
+Client          | | | |  |  | 3.3
+Color           | | |Y|  |Y+| 3.2
+DamageType      | | | |  |Y | 3.1
+Error           | | | |  |Y | 3.1
+ExplosionType   | | | |  |Y | 3.1
+Force           | |Y| |  |  | 1
+Forceset        | | | |Y+|  | 2
+Game            |N| | |  |  | 1
+GameType        | | | |  |Y | 3.1
+Order           | | | |  |Y | 3.1
+Player          | |Y| |  |  | 1
+Playerset       | | | |Y+|  | 2
+PlayerType      | | | |  |Y+| 3.1
+Race            | | | |  |Y+| 3.1
+Region          | |Y| |  |  | 1
+Regionset       | | | |Y+|  | 2
+TechType        | | | |  |Y+| 3.1
+Unit            | |Y| |  |  | 1
+UnitCommandType | | | |  |Y | 3.1
+Unitset         | | | |Y+|  | 2
+UnitSizeType    | | | |  |Y | 3.1
+UnitType        | | | |  |Y+| 3.1
+UpgradeType     | | | |  |Y+| 3.1
+WeaponType      | | | |  |Y+| 3.1
+
+Note that handling of all type cases must also be done in return values and function/method parameters.
+
+#### Building proxy class
+
+There's no need to worry about lifetime of object. BWAPI returns pointers and we can freely transform them into weak references.
 
 ```
-class Race : public Type<Race, Races::Enum::Unknown>
+namespace Pybrood {
+class Bullet
 {
-  public:
-    UnitType getWorker() const;
-    UnitType getCenter() const;
-    UnitType getRefinery() const;
-    UnitType getTransport() const;
-    UnitType getSupplyProvider() const;
+public:
+    BWAPI::Bullet obj;  // be sure this type is pointer to object
+    Bullet(BWAPI::Bullet);
+    ...  // dummy methods following here
 };
+}
+```
+
+```
+py::class_<Pybrood::Bullet>(m, "Bullet")  // note how original class replaced with proxy
+    .def("getPlayer", ...)
+    .def("getType", ...)
+    .def("getSource", ...);
+```
+
+Dummy methods must not handle any specific type conversions. Instead, use pybind11 definitions
+for this. That is the way to place special conversions uniformly: they can happen even in straightforwardly binded classes.
+
+#### Straightforward description
+
+Simply as pybind11 manual says:
+
+```
+py::class_<BWAPI::Race>(m, "Race")
+    .def("getWorker", ...)
+    .def("getCenter", ...)
+    .def("getRefinery", ...)
+    .def("getTransport", ...)
+    .def("getSupplyProvider", ...);
+```
+
+Yet again, we need to choose pythonic name: `"Race"`.
+
+#### Enums consisting of objects
+
+Straightforward pybind11 classes used in conjunction with returning as weakref.
+
+```
 namespace Races
 {
   extern const Race Zerg;
@@ -62,14 +173,6 @@ namespace Races
   extern const Race Unknown;
 }
 →
-py::class_<BWAPI::Race>(m, "Race")
-    .def("getID", &BWAPI::Race::getID)
-    .def("getName", &BWAPI::Race::getName)
-    .def("getWorker", &BWAPI::Race::getWorker)
-    .def("getCenter", &BWAPI::Race::getCenter)
-    .def("getRefinery", &BWAPI::Race::getRefinery)
-    .def("getTransport", &BWAPI::Race::getTransport)
-    .def("getSupplyProvider", &BWAPI::Race::getSupplyProvider);
 {
     auto o = py::dict();
     o["Zerg"] = py::cast(BWAPI::Races::Zerg, py::return_value_policy::reference);
@@ -82,7 +185,12 @@ py::class_<BWAPI::Race>(m, "Race")
 }
 ```
 
-Python side can build dummy object converting this dict keys into properties.
+Python side then can build dummy object converting this dict keys into properties:
+
+```
+Races.Terran.getRefinery()
+some_bwapi_method(Races.Terran)
+```
 
 ## developer notes
 

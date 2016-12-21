@@ -77,7 +77,11 @@ def parse_classes():
 
     def Game():
         f = incflines('Game.h')
-        yield from f(55, 1705)
+        yield from f(55, 783)
+        # skipping variadic printf-like functions
+        yield from f(801, 811)
+        yield from f(825, 834)
+        yield from f(852, 1705)
         # TODO: iostream operator <<
         # TODO: flush()
 

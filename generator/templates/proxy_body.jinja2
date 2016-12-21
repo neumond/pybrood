@@ -1,11 +1,7 @@
 #include "../include/common.h"
 #include "../include/{{ header_file }}"
 
-namespace Pybrood {
-
-{{ py_name }}::{{ py_name }}(BWAPI::{{ py_name }}{{ pline }} iobj) : obj(iobj){};
+Pybrood{{ proxy_type }}::Pybrood{{ proxy_type }}({{ pointer_type }} iobj) : obj(iobj){};
 {% for m in methods -%}
 {{ m }};
 {% endfor %}
-
-}
