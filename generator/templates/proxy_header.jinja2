@@ -6,8 +6,8 @@ namespace Pybrood {
 class {{ py_name }}
 {
 public:
-    BWAPI::{{ py_name }} obj;
-    {{ py_name }}(BWAPI::{{ py_name }});
+    BWAPI::{{ py_name }}{{ pline }} obj;
+    {{ py_name }}(BWAPI::{{ py_name }}{{ pline }});
     {% for m in methods -%}
     {{ m }};
     {% endfor %}

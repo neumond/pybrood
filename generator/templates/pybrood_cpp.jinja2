@@ -18,7 +18,7 @@ PYBIND11_PLUGIN(pybrood) {
     {% for x in objenums %}
     {{ x|indent(4) }}
     {% endfor %}
-    m.attr("client") = py::cast(BWAPI::BWAPIClient, py::return_value_policy::reference);
-    m.attr("game") = py::cast(PyBinding::Wrapper::GameWrapper(&amp;BWAPI::Broodwar), py::return_value_policy::reference);
+    // m.attr("client") = py::cast(BWAPI::BWAPIClient, py::return_value_policy::reference);
+    // m.attr("game") = py::cast(Pybrood::Game(BWAPI::BroodwarPtr), py::return_value_policy::reference);
     return m.ptr();
 }

@@ -8,6 +8,82 @@ So I decided to run SC in VirtualBox.
 
 Then run `build.bat` inside `output` folder.
 
+## BWAPI include files parser
+
+`generator.parser` contains everything related to parsing of BWAPI include files.
+It returns data structure sufficient to generate binding module.
+
+There're 3 kinds of things: classes, enums consisting of singleton objects, usual C++ enums.
+
+## C++ enums
+
+Most straightforward part. Just using them exactly as pybind11 documentation says:
+
+```
+enum BWAPI::Text::Size::Enum
+{
+  Small,
+  Default,
+  Large,
+  Huge
+};
+→
+py::enum_<BWAPI::Text::Size::Enum>(m, "TextSize")
+    .value("Small", BWAPI::Text::Size::Enum::Small)
+    .value("Default", BWAPI::Text::Size::Enum::Default)
+    .value("Large", BWAPI::Text::Size::Enum::Large)
+    .value("Huge", BWAPI::Text::Size::Enum::Huge);
+```
+
+We need only set (by hand) pythonic name here: `"TextSize"`.
+
+## Object enums
+
+Enumerations consisting of objects use straightforward pybind11 classes
+in conjunction with returning as weakref.
+
+```
+class Race : public Type<Race, Races::Enum::Unknown>
+{
+  public:
+    UnitType getWorker() const;
+    UnitType getCenter() const;
+    UnitType getRefinery() const;
+    UnitType getTransport() const;
+    UnitType getSupplyProvider() const;
+};
+namespace Races
+{
+  extern const Race Zerg;
+  extern const Race Terran;
+  extern const Race Protoss;
+  extern const Race Random;
+  extern const Race None;
+  extern const Race Unknown;
+}
+→
+py::class_<BWAPI::Race>(m, "Race")
+    .def("getID", &BWAPI::Race::getID)
+    .def("getName", &BWAPI::Race::getName)
+    .def("getWorker", &BWAPI::Race::getWorker)
+    .def("getCenter", &BWAPI::Race::getCenter)
+    .def("getRefinery", &BWAPI::Race::getRefinery)
+    .def("getTransport", &BWAPI::Race::getTransport)
+    .def("getSupplyProvider", &BWAPI::Race::getSupplyProvider);
+{
+    auto o = py::dict();
+    o["Zerg"] = py::cast(BWAPI::Races::Zerg, py::return_value_policy::reference);
+    o["Terran"] = py::cast(BWAPI::Races::Terran, py::return_value_policy::reference);
+    o["Protoss"] = py::cast(BWAPI::Races::Protoss, py::return_value_policy::reference);
+    o["Random"] = py::cast(BWAPI::Races::Random, py::return_value_policy::reference);
+    o["None"] = py::cast(BWAPI::Races::None, py::return_value_policy::reference);
+    o["Unknown"] = py::cast(BWAPI::Races::Unknown, py::return_value_policy::reference);
+    m.attr("Races") = o;
+}
+```
+
+Python side can build dummy object converting this dict keys into properties.
+
 ## developer notes
 
 Standard pybind11 method handling:
@@ -36,8 +112,12 @@ Second problem, some types are actually pointers to classes:
 typedef RegionInterface *Region;
 ```
 
-Solution: create proxy classes
+Solution: create proxy classes. It is possible to return objects
+as weak references from function, but impossible to describe a class without accessble destructor.
 
+Third problem, `BWAPI::Game` class has protected destructor.
+
+Solution: create proxy class for Game. Same as previous.
 
 Some classes require wrapping, because pybind11 requires possibility to destruct object.
 This is impossible for entities like `Force`, `Player`, `Bullet`, etc.
@@ -74,6 +154,22 @@ output/src/bullet.cpp
 ```
 
 ```
+BWAPI::Bullet
+    virtual Unit getSource() const = 0;
+→
+output/include/bullet.h
+    BWAPI::Unit getSource();
+output/pybind/bullet.cpp
+    class_bullet.def_property_readonly("source", [](BWAPI::Bullet& obj) -> PyBinding::Wrapper::Unit {
+        return PyBinding::Wrapper::Unit(obj.getSource());
+    });
+output/src/bullet.cpp
+    BWAPI::Unit Bullet::getSource(){
+        return obj->getSource();
+    }
+```
+
+```
 BWAPI::Unitset
     bool gather(Unit target, bool shiftQueueCommand = false) const;
 →
@@ -96,7 +192,7 @@ Forceset ..
 Playerset ..
 Regionset ..
 
-обёртки нужны, так как pybind требует деструктор класса
+обёртки нужны, так как pybind требует деструктор класса, описать класс иначе нельзя.
 
 добавляются ли динамически создаваемые классы в __subclasses__?
 

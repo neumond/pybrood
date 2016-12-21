@@ -3,7 +3,7 @@
 
 namespace Pybrood {
 
-{{ py_name }}::{{ py_name }}(BWAPI::{{ py_name }} iobj) : obj(iobj){};
+{{ py_name }}::{{ py_name }}(BWAPI::{{ py_name }}{{ pline }} iobj) : obj(iobj){};
 {% for m in methods -%}
 {{ m }};
 {% endfor %}
