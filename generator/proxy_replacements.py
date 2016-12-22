@@ -1,120 +1,116 @@
 from .common import atype_or_dots
 
 
+'''
+.def("drawText", [](
+    Game& instance,
+    CoordinateType::Enum ctype,
+    int x,
+    int y,
+    std::string line
+){
+    // simply omitting variadic part
+    instance.drawText(ctype, x, y, Pybrood::string_replace(line, "%", "%%").c_str());
+})
+'''
+
+STRF = 'Pybrood::string_replace(line, "%", "%%").c_str()'
+
+
 REPLACEMENTS = {
     'Game::vPrintf': {
-        'parsed': {
-            'name': 'print',
-            'rconst': False, 'rtype': 'void',
-            'args': [
-                {'const': True, 'type': 'char *', 'name': 'line', 'opt_value': None},
-            ],
-        },
-        'body': 'va_list elist; obj->vPrintf(line, elist);',
+        'name': 'print',
+        'rconst': False, 'rtype': 'void', 'selfconst': False,
+        'args': [
+            {'const': False, 'type': 'std::string', 'name': 'line', 'opt_value': None},
+        ],
+        'custom_body': 'va_list elist; instance.vPrintf({}, elist);'.format(STRF),
     },
     'Game::vSendText': {
-        'parsed': {
-            'name': 'sendText',
-            'rconst': False, 'rtype': 'void',
-            'args': [
-                {'const': True, 'type': 'char *', 'name': 'line', 'opt_value': None},
-            ],
-        },
-        'body': 'va_list elist; obj->vSendText(line, elist);',
+        'name': 'sendText',
+        'rconst': False, 'rtype': 'void', 'selfconst': False,
+        'args': [
+            {'const': False, 'type': 'std::string', 'name': 'line', 'opt_value': None},
+        ],
+        'custom_body': 'va_list elist; instance.vSendText({}, elist);'.format(STRF),
     },
     'Game::vSendTextEx': {
-        'parsed': {
-            'name': 'sendTextEx',
-            'rconst': False, 'rtype': 'void',
-            'args': [
-                {'const': False, 'type': 'bool', 'name': 'toAllies', 'opt_value': None},
-                {'const': True, 'type': 'char *', 'name': 'line', 'opt_value': None},
-            ],
-        },
-        'body': 'va_list elist; obj->vSendTextEx(toAllies, line, elist);',
+        'name': 'sendTextEx',
+        'rconst': False, 'rtype': 'void', 'selfconst': False,
+        'args': [
+            {'const': False, 'type': 'bool', 'name': 'toAllies', 'opt_value': None},
+            {'const': False, 'type': 'std::string', 'name': 'line', 'opt_value': None},
+        ],
+        'custom_body': 'va_list elist; instance.vSendTextEx({{toAllies}}, {}, elist);'.format(STRF),
     },
     'Game::vDrawText': NotImplemented,
     'Game::drawText': {
-        'parsed': {
-            'name': 'drawText',
-            'rconst': False, 'rtype': 'void',
-            'args': [
-                {'const': False, 'type': 'CoordinateType::Enum', 'name': 'ctype', 'opt_value': None},
-                {'const': False, 'type': 'int', 'name': 'x', 'opt_value': None},
-                {'const': False, 'type': 'int', 'name': 'y', 'opt_value': None},
-                {'const': True, 'type': 'char *', 'name': 'line', 'opt_value': None},
-            ],
-        },
-        'body': 'obj->drawText(ctype, x, y, line);',
+        'name': 'drawText',
+        'rconst': False, 'rtype': 'void', 'selfconst': False,
+        'args': [
+            {'const': False, 'type': 'CoordinateType::Enum', 'name': 'ctype', 'opt_value': None},
+            {'const': False, 'type': 'int', 'name': 'x', 'opt_value': None},
+            {'const': False, 'type': 'int', 'name': 'y', 'opt_value': None},
+            {'const': False, 'type': 'std::string', 'name': 'line', 'opt_value': None},
+        ],
+        'custom_body': 'instance.drawText({{ctype}}, {{x}}, {{y}}, {});'.format(STRF),
     },
     ('Game::drawTextMap', 'int', 'int', 'const char *', '...'): {
-        'parsed': {
-            'name': 'drawTextMap',
-            'rconst': False, 'rtype': 'void',
-            'args': [
-                {'const': False, 'type': 'int', 'name': 'x', 'opt_value': None},
-                {'const': False, 'type': 'int', 'name': 'y', 'opt_value': None},
-                {'const': True, 'type': 'char *', 'name': 'line', 'opt_value': None},
-            ],
-        },
-        'body': 'obj->drawTextMap(x, y, line);',
+        'name': 'drawTextMap',
+        'rconst': False, 'rtype': 'void', 'selfconst': False,
+        'args': [
+            {'const': False, 'type': 'int', 'name': 'x', 'opt_value': None},
+            {'const': False, 'type': 'int', 'name': 'y', 'opt_value': None},
+            {'const': False, 'type': 'std::string', 'name': 'line', 'opt_value': None},
+        ],
+        'custom_body': 'instance.drawTextMap({{x}}, {{y}}, {});'.format(STRF),
     },
     ('Game::drawTextMap', 'Position', 'const char *', '...'): {
-        'parsed': {
-            'name': 'drawTextMap',
-            'rconst': False, 'rtype': 'void',
-            'args': [
-                {'const': False, 'type': 'Position', 'name': 'p', 'opt_value': None},
-                {'const': True, 'type': 'char *', 'name': 'line', 'opt_value': None},
-            ],
-        },
-        'body': 'obj->drawTextMap(p, line);',
+        'name': 'drawTextMap',
+        'rconst': False, 'rtype': 'void', 'selfconst': False,
+        'args': [
+            {'const': False, 'type': 'Position', 'name': 'p', 'opt_value': None},
+            {'const': False, 'type': 'std::string', 'name': 'line', 'opt_value': None},
+        ],
+        'custom_body': 'instance.drawTextMap({{p}}, {});'.format(STRF),
     },
     ('Game::drawTextMouse', 'int', 'int', 'const char *', '...'): {
-        'parsed': {
-            'name': 'drawTextMouse',
-            'rconst': False, 'rtype': 'void',
-            'args': [
-                {'const': False, 'type': 'int', 'name': 'x', 'opt_value': None},
-                {'const': False, 'type': 'int', 'name': 'y', 'opt_value': None},
-                {'const': True, 'type': 'char *', 'name': 'line', 'opt_value': None},
-            ],
-        },
-        'body': 'obj->drawTextMouse(x, y, line);',
+        'name': 'drawTextMouse',
+        'rconst': False, 'rtype': 'void', 'selfconst': False,
+        'args': [
+            {'const': False, 'type': 'int', 'name': 'x', 'opt_value': None},
+            {'const': False, 'type': 'int', 'name': 'y', 'opt_value': None},
+            {'const': False, 'type': 'std::string', 'name': 'line', 'opt_value': None},
+        ],
+        'custom_body': 'instance.drawTextMouse({{x}}, {{y}}, {});'.format(STRF),
     },
     ('Game::drawTextMouse', 'Position', 'const char *', '...'): {
-        'parsed': {
-            'name': 'drawTextMouse',
-            'rconst': False, 'rtype': 'void',
-            'args': [
-                {'const': False, 'type': 'Position', 'name': 'p', 'opt_value': None},
-                {'const': True, 'type': 'char *', 'name': 'line', 'opt_value': None},
-            ],
-        },
-        'body': 'obj->drawTextMouse(p, line);',
+        'name': 'drawTextMouse',
+        'rconst': False, 'rtype': 'void', 'selfconst': False,
+        'args': [
+            {'const': False, 'type': 'Position', 'name': 'p', 'opt_value': None},
+            {'const': False, 'type': 'std::string', 'name': 'line', 'opt_value': None},
+        ],
+        'custom_body': 'instance.drawTextMouse({{p}}, {});'.format(STRF),
     },
     ('Game::drawTextScreen', 'int', 'int', 'const char *', '...'): {
-        'parsed': {
-            'name': 'drawTextScreen',
-            'rconst': False, 'rtype': 'void',
-            'args': [
-                {'const': False, 'type': 'int', 'name': 'x', 'opt_value': None},
-                {'const': False, 'type': 'int', 'name': 'y', 'opt_value': None},
-                {'const': True, 'type': 'char *', 'name': 'line', 'opt_value': None},
-            ],
-        },
-        'body': 'obj->drawTextScreen(x, y, line);',
+        'name': 'drawTextScreen',
+        'rconst': False, 'rtype': 'void', 'selfconst': False,
+        'args': [
+            {'const': False, 'type': 'int', 'name': 'x', 'opt_value': None},
+            {'const': False, 'type': 'int', 'name': 'y', 'opt_value': None},
+            {'const': False, 'type': 'std::string', 'name': 'line', 'opt_value': None},
+        ],
+        'custom_body': 'instance.drawTextScreen({{x}}, {{y}}, {});'.format(STRF),
     },
     ('Game::drawTextScreen', 'Position', 'const char *', '...'): {
-        'parsed': {
-            'name': 'drawTextScreen',
-            'rconst': False, 'rtype': 'void',
-            'args': [
-                {'const': False, 'type': 'Position', 'name': 'p', 'opt_value': None},
-                {'const': True, 'type': 'char *', 'name': 'line', 'opt_value': None},
-            ],
-        },
-        'body': 'obj->drawTextScreen(p, line);',
+        'name': 'drawTextScreen',
+        'rconst': False, 'rtype': 'void', 'selfconst': False,
+        'args': [
+            {'const': False, 'type': 'Position', 'name': 'p', 'opt_value': None},
+            {'const': False, 'type': 'std::string', 'name': 'line', 'opt_value': None},
+        ],
+        'custom_body': 'instance.drawTextScreen({{p}}, {});'.format(STRF),
     },
 }
 
@@ -136,4 +132,6 @@ def get_replacement(func, class_name):
     repl = get_replacement_inner(func, class_name)
     if repl is NotImplemented:
         raise MethodDiscarded
+    elif repl is None:
+        return func
     return repl

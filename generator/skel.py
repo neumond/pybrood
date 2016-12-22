@@ -6,7 +6,7 @@ from pathlib import PureWindowsPath
 from shutil import rmtree
 from .parser import parse_pureenums, parse_classes, parse_objenums
 # from .proxy_classes import PROXY_CLASSES, get_replacement_parsed
-# from .proxy_replacements import MethodDiscarded
+from .proxy_replacements import MethodDiscarded, get_replacement
 from collections import defaultdict
 from .common import atype_or_dots, get_full_argtype, get_full_rettype
 from .typereplacer2 import arg_replacer, NoReplacement
@@ -60,6 +60,7 @@ def smart_arg_join(lines, gap):
 def make_lambda_overload(class_name, func):
     input_lines, call_lines = ['{}& instance'.format(class_name)], []
     has_any_replacement = False
+    call_line_map = {}
     for a in func['args']:
         try:
             i, c = arg_replacer(a)
@@ -71,24 +72,31 @@ def make_lambda_overload(class_name, func):
             c = a['name']
         input_lines.append(i)
         call_lines.append(c)
+        call_line_map[a['name']] = c
 
-    if not has_any_replacement:
+    if not has_any_replacement and 'custom_body' not in func:
         raise NoReplacement
 
     s_input_lines = smart_arg_join(input_lines, '')
     s_call_lines = smart_arg_join(call_lines, '    ')
 
+    if 'custom_body' in func:
+        body = func['custom_body'].format(**call_line_map)
+    else:
+        body = '{return_op}instance.{method_name}({call_args});'.format(
+            return_op='' if func['rtype'] == 'void' else 'return ',
+            method_name=func['name'],
+            call_args=s_call_lines,
+        )
+
     return (
         '[]({input_args}){lambda_return_type} {{\n'
-        '    {return_op}instance.{method_name}({call_args});\n'
+        '    {body}\n'
         '}}'
     ).format(
-        class_name=class_name,
-        method_name=func['name'],
         lambda_return_type='' if func['rtype'] == 'void' else ' -> {}'.format(func['rtype']),
-        return_op='' if func['rtype'] == 'void' else 'return ',
         input_args=s_input_lines,
-        call_args=s_call_lines,
+        body=body,
     )
 
 
@@ -102,6 +110,16 @@ def make_lambda_overloads(class_data, class_name):
                 func['defcode'] = '({}) {}'.format(func['overload_signature'], func['defcode'])
 
 
+def custom_replacements(class_data, class_name):
+    methods = []
+    for func in class_data['methods']:
+        try:
+            methods.append(get_replacement(func, class_name))
+        except MethodDiscarded:
+            pass
+    class_data['methods'] = methods
+
+
 def render_pureenums():
     for py_name, v in parse_pureenums().items():
         yield render_template('pureenum.jinja2', py_name=py_name, **v)
@@ -111,6 +129,7 @@ def render_classes():
     for py_name, v in parse_classes().items():
         c = UNPOINTED_CLASSES[py_name] if py_name in UNPOINTED_CLASSES else py_name
         make_overload_signatures(v, c)
+        custom_replacements(v, c)
         make_lambda_overloads(v, c)
         # if py_name in PROXY_CLASSES:
         #     methods = []
