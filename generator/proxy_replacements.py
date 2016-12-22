@@ -115,6 +115,25 @@ REPLACEMENTS = {
 }
 
 
+for t in (
+    'BulletType', 'Color', 'DamageType', 'Error', 'ExplosionType', 'GameType', 'Order', 'PlayerType', 'Race',
+    'TechType', 'UnitCommandType', 'UnitSizeType', 'UnitType', 'UpgradeType', 'WeaponType'
+):
+    # fighting with inline methods
+    REPLACEMENTS['{}::getID'.format(t)] = {
+        'name': 'getID',
+        'rconst': False, 'rtype': 'int', 'selfconst': True,
+        'args': [],
+        'custom_body': 'return instance.getID();',
+    }
+    REPLACEMENTS['{}::getName'.format(t)] = {
+        'name': 'getName',
+        'rconst': True, 'rtype': 'std::string', 'selfconst': True,
+        'args': [],
+        'custom_body': 'return instance.getName();',
+    }
+
+
 class MethodDiscarded(Exception):
     pass
 

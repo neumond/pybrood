@@ -13,10 +13,6 @@ from .typereplacer2 import arg_replacer, NoReplacement
 
 
 NODELETE_CLASSES = {'Game', 'Client', 'Bullet', 'Force', 'Player', 'Region', 'Unit'}
-NODELETE_CLASSES |= {
-    'Color', 'DamageType', 'Error', 'GameType', 'Order', 'PlayerType', 'ExplosionType',
-    'Race', 'TechType', 'UnitCommandType', 'UnitSizeType', 'UnitType', 'UpgradeType', 'WeaponType',
-}
 UNPOINTED_CLASSES = {
     'Bullet': 'BulletInterface',
     'Force': 'ForceInterface',
@@ -173,11 +169,11 @@ def pre():
 
 def post():
     pureenums = list(render_pureenums())
-    pureenums = []
+    # pureenums = []
     classes = list(render_classes())
     # classes = []
     objenums = list(render_objenums())
-    objenums = []
+    # objenums = []
 
     h_files = listdir(join(GEN_OUTPUT_DIR, 'include'))
     h_files.remove('common.h')

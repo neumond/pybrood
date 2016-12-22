@@ -1,7 +1,7 @@
 {
     auto d = py::dict();
     {% for name in items -%}
-    d["{{ name }}"] = py::cast({{ namespace }}{{ name }}, py::return_value_policy::reference);
+    d["{{ name }}"] = py::cast(&{{ namespace }}{{ name }}, py::return_value_policy::reference);
     {% endfor -%}
-    m.attr("{{ py_name }}") = d;
+    enum_instances["{{ py_name }}"] = d;
 }

@@ -4,8 +4,11 @@
 {%- endfor %}
 
 
+
+
+
 PYBIND11_PLUGIN(pybrood) {
-    py::module m("pybrood", "BWAPI python module");
+    py::module m("pybrood", "BWAPI module bridge");
     {% for x in ('', 'WALK', 'TILE') %}
     m.attr("{{ x }}POSITION_SCALE") = py::cast(BWAPI::{{ x }}POSITION_SCALE);
     {%- endfor %}
@@ -15,10 +18,12 @@ PYBIND11_PLUGIN(pybrood) {
     {% for x in classes %}
     {{ x|indent(4) }}
     {% endfor %}
+    auto enum_instances = py::dict();
+    m.attr("enum_instances") = enum_instances;
     {% for x in objenums %}
     {{ x|indent(4) }}
     {% endfor %}
-    // m.attr("client") = py::cast(BWAPI::BWAPIClient, py::return_value_policy::reference);
-    // m.attr("game") = py::cast(Pybrood::Game(BWAPI::BroodwarPtr), py::return_value_policy::reference);
+    // m.attr("client_instance") = py::cast(BWAPI::BWAPIClient, py::return_value_policy::reference);
+    // m.attr("game_instance") = py::cast(BWAPI::BroodwarPtr, py::return_value_policy::reference);
     return m.ptr();
 }
