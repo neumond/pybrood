@@ -2,6 +2,7 @@ from .parser.classes import main as get_data
 # from .typereplacer import transform_input_type, transform_output_type
 from collections import defaultdict
 from .proxy_classes import PROXY_CLASSES
+from .common import atype_or_dots, get_full_rettype
 
 
 PRE_TYPE_MAP = {
@@ -48,9 +49,8 @@ def presub_types(class_data):
 
 
 def make_overload_signature(func, class_name):
-    argline = ', '.join(a['type'] for a in func['args'])
-    ns = 'Pybrood' if class_name in PROXY_CLASSES else 'BWAPI'
-    return '{} ({}::{}::*)({})'.format(func['rtype'], ns, class_name, argline)
+    argline = ', '.join(atype_or_dots(a) for a in func['args'])
+    return '{} ({}::*)({})'.format(get_full_rettype(func), class_name, argline)
 
 
 def make_overload_signatures(class_data, class_name):

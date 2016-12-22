@@ -1,3 +1,6 @@
+from .common import atype_or_dots
+
+
 REPLACEMENTS = {
     'Game::vPrintf': {
         'parsed': {
@@ -114,3 +117,23 @@ REPLACEMENTS = {
         'body': 'obj->drawTextScreen(p, line);',
     },
 }
+
+
+class MethodDiscarded(Exception):
+    pass
+
+
+def get_replacement_inner(func, class_name):
+    k = '{}::{}'.format(class_name, func['name'])
+    if k in REPLACEMENTS:
+        return REPLACEMENTS[k]
+    k = (k, ) + tuple(atype_or_dots(a) for a in func['args'])
+    if k in REPLACEMENTS:
+        return REPLACEMENTS[k]
+
+
+def get_replacement(func, class_name):
+    repl = get_replacement_inner(func, class_name)
+    if repl is NotImplemented:
+        raise MethodDiscarded
+    return repl

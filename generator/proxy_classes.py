@@ -2,52 +2,18 @@ from .config import GEN_OUTPUT_DIR
 from os.path import join
 from .utils import render_template
 from .parser import parse_classes
-from .proxy_replacements import REPLACEMENTS
+from .proxy_replacements import get_replacement, MethodDiscarded
+from .common import atype_or_dots, get_full_rettype, get_full_argtype
 
 
 PROXY_CLASSES = {'Region', 'Player', 'Unit', 'Bullet', 'Force', 'Game'}
 PTR_CLASSES = {'Game'}
 
 
-class MethodDiscarded(Exception):
-    pass
-
-
-def get_full_argtype(a):
-    t = a['type']
-    if a['const']:
-        t = 'const ' + t
-    return t
-
-
-def get_full_rettype(a):
-    t = a['rtype']
-    if a['rconst']:
-        t = 'const ' + t
-    return t
-
-
-def atype_or_dots(a):
-    if a['type'] == '':
-        return '...'
-    return get_full_argtype(a)
-
-
-def get_replacement(func, class_name):
-    k = '{}::{}'.format(class_name, func['name'])
-    if k in REPLACEMENTS:
-        return REPLACEMENTS[k]
-    k = (k, ) + tuple(atype_or_dots(a) for a in func['args'])
-    if k in REPLACEMENTS:
-        return REPLACEMENTS[k]
-
-
 def get_replacement_parsed(func, class_name):
     repl = get_replacement(func, class_name)
     if repl is None:
         return func
-    elif repl is NotImplemented:
-        raise MethodDiscarded
     else:
         return repl['parsed']
 
@@ -58,8 +24,6 @@ def get_replacement_body(func, class_name):
         argnames = ', '.join(a['name'] for a in func['args'])
         rst = '' if func['rtype'] == 'void' else 'return '
         return '{}obj->{}({});'.format(rst, func['name'], argnames)
-    elif repl is NotImplemented:
-        raise MethodDiscarded
     else:
         return repl['body']
 

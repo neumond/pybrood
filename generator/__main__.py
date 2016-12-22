@@ -7,7 +7,7 @@ from . import skel, proxy_classes
 
 skel.pre()
 
-proxy_classes.main()
+# proxy_classes.main()
 
 # for Sub in classes.BaseClassFile.__subclasses__():
 #     if Sub is not classes.BaseWrappedClassFile:
