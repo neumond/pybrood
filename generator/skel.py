@@ -24,16 +24,14 @@ UNPOINTED_CLASSES = {
     'Region': 'RegionInterface',
     'Unit': 'UnitInterface',
 }
-FORCE_LAMDBA_TYPES = {
-    'Position',
-    'WalkPosition',
-    'TilePosition',
-}
 
 
 def make_overload_signature(func, class_name):
     argline = ', '.join(atype_or_dots(a) for a in func['args'])
-    return '{} ({}::*)({})'.format(get_full_rettype(func), class_name, argline)
+    r = '{} ({}::*)({})'.format(get_full_rettype(func), class_name, argline)
+    if func['selfconst']:
+        r += ' const'
+    return r
 
 
 def make_overload_signatures(class_data, class_name):
@@ -47,32 +45,16 @@ def make_overload_signatures(class_data, class_name):
             func['overload_signature'] = make_overload_signature(func, class_name)
 
 
-'''
-.def("canBuild", (bool (UnitInterface::*)(bool)) &BWAPI::UnitInterface::canBuild)
-.def("canBuild", (bool (UnitInterface::*)(UnitType, bool, bool)) &BWAPI::UnitInterface::canBuild)
-// .def("canBuild", (bool (UnitInterface::*)(UnitType, TilePosition, bool, bool, bool)) &BWAPI::UnitInterface::canBuild)
-.def("canBuild",
-    [](
-        UnitInterface& instance,
-        UnitType uType,
-        Pybrood::UniversalPosition tilePos,
-        bool checkTargetUnitType = true,
-        bool checkCanIssueCommandType = true,
-        bool checkCommandibility = true
-    ) -> bool {
-        return instance.canBuild(
-            uType,
-            TilePosition(tilePos[0], tilePos[1]),
-            checkTargetUnitType,
-            checkCanIssueCommandType,
-            checkCommandibility
-        );
-    }
-)
-'''
-
-
 LINE_MAX_LEN_BEFORE_SPLIT = 50
+
+
+def smart_arg_join(lines, gap):
+    s_lines = ', '.join(lines)
+    if len(s_lines) > LINE_MAX_LEN_BEFORE_SPLIT:
+        s_lines = (',\n    ' + gap).join(lines)
+        if len(lines) > 1:
+            s_lines = '\n    ' + gap + s_lines + '\n' + gap
+    return s_lines
 
 
 def make_lambda_overload(class_name, func):
@@ -93,17 +75,8 @@ def make_lambda_overload(class_name, func):
     if not has_any_replacement:
         raise NoReplacement
 
-    s_input_lines = ', '.join(input_lines)
-    if len(s_input_lines) > LINE_MAX_LEN_BEFORE_SPLIT:
-        s_input_lines = ',\n    '.join(input_lines)
-        if len(input_lines) > 1:
-            s_input_lines = '\n    ' + s_input_lines + '\n'
-
-    s_call_lines = ', '.join(call_lines)
-    if len(s_call_lines) > LINE_MAX_LEN_BEFORE_SPLIT:
-        s_call_lines = ',\n        '.join(call_lines)
-        if len(call_lines) > 1:
-            s_call_lines = '\n        ' + s_call_lines + '\n    '
+    s_input_lines = smart_arg_join(input_lines, '')
+    s_call_lines = smart_arg_join(call_lines, '    ')
 
     return (
         '[]({input_args}){lambda_return_type} {{\n'
