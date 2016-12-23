@@ -1,14 +1,14 @@
-from .config import GEN_OUTPUT_DIR, BWAPI_DIR, PYBIND_DIR
 from os import mkdir, listdir
 from os.path import join, isdir, relpath
+from collections import defaultdict
 from copy import deepcopy
-from .utils import render_template, split_to_well_sized_lines
 from pathlib import PureWindowsPath
 from shutil import rmtree
+
+from .config import GEN_OUTPUT_DIR, BWAPI_DIR, PYBIND_DIR
+from .utils import render_template, split_to_well_sized_lines
 from .parser import parse_pureenums, parse_classes, parse_objenums
-# from .proxy_classes import PROXY_CLASSES, get_replacement_parsed
 from .proxy_replacements import MethodDiscarded, get_replacement
-from collections import defaultdict
 from .common import atype_or_dots, get_full_argtype, get_full_rettype
 from .typereplacer2 import arg_replacer, NoReplacement
 
@@ -89,8 +89,6 @@ def make_lambda_overload(class_name, func, force=False, game=False):
             has_any_replacement = True
         except NoReplacement:
             i = '{} {}'.format(get_full_argtype(a), a['name'])
-            # if a['opt_value']:
-            #     i += ' = {}'.format(a['opt_value'])
             c = a['name']
         if a.get('PositionOrUnit'):
             has_any_replacement = True
@@ -187,7 +185,6 @@ def render_pureenums():
 
 def render_classes():
     all_classes = parse_classes()
-    # game_class = all_classes.pop('Game')
     for py_name, v in all_classes.items():
         is_game = py_name == 'Game'
         c = UNPOINTED_CLASSES[py_name] if py_name in UNPOINTED_CLASSES else py_name
@@ -220,9 +217,7 @@ def makedir(*path):
 
 def pre():
     makedir(GEN_OUTPUT_DIR)
-    makedir(GEN_OUTPUT_DIR, 'src')
     makedir(GEN_OUTPUT_DIR, 'include')
-    makedir(GEN_OUTPUT_DIR, 'pybind')
 
     with open(join(GEN_OUTPUT_DIR, 'build.bat'), 'w') as f:
         f.write('msbuild /p:PlatformToolset=v140 /p:Configuration=Release /p:Platform=Win32')
@@ -233,11 +228,8 @@ def pre():
 
 def post():
     pureenums = list(render_pureenums())
-    # pureenums = []
     classes = list(render_classes())
-    # classes = []
     objenums = list(render_objenums())
-    # objenums = []
 
     h_files = listdir(join(GEN_OUTPUT_DIR, 'include'))
     h_files.remove('common.h')
@@ -256,7 +248,7 @@ def post():
             'vcproj.jinja2',
             bwapi_dir=PureWindowsPath(relpath(BWAPI_DIR, GEN_OUTPUT_DIR)),
             pybind_dir=PureWindowsPath(relpath(PYBIND_DIR, GEN_OUTPUT_DIR)),
-            cpp_files=listdir(join(GEN_OUTPUT_DIR, 'src')),
+            cpp_files=[],
         ))
 
     print(UNIQUE_DEFAULT)

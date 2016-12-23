@@ -1,7 +1,0 @@
-#include "../include/common.h"
-#include "../include/{{ header_file }}"
-
-Pybrood{{ proxy_type }}::Pybrood{{ proxy_type }}({{ pointer_type }} iobj) : obj(iobj){};
-{% for m in methods -%}
-{{ m }};
-{% endfor %}

@@ -1,19 +1,6 @@
 from .common import atype_or_dots
 
 
-'''
-.def("drawText", [](
-    Game& instance,
-    CoordinateType::Enum ctype,
-    int x,
-    int y,
-    std::string line
-){
-    // simply omitting variadic part
-    instance.drawText(ctype, x, y, Pybrood::string_replace(line, "%", "%%").c_str());
-})
-'''
-
 STRF = 'Pybrood::string_replace(line, "%", "%%").c_str()'
 
 
