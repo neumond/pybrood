@@ -21,9 +21,10 @@ UNPOINTED_CLASSES = {
     'Region': 'RegionInterface',
     'Unit': 'UnitInterface',
 }
+FILTER_TYPES = {'UnitFilter', 'UnitFilter &'}
 
 
-def duplicate_for_position_or_unit(class_data, class_name):
+def duplicate_for_position_or_unit(class_data):
     methods = []
     for func in class_data['methods']:
         pu = False
@@ -45,6 +46,23 @@ def duplicate_for_position_or_unit(class_data, class_name):
             methods.append(f1)
             methods.append(f2)
     class_data['methods'] = methods
+
+
+def remove_everything_with_required_filter(class_data):
+    methods = []
+    for func in class_data['methods']:
+        if not any(a['type'] in FILTER_TYPES and a['opt_value'] is None for a in func['args']):
+            methods.append(func)
+    class_data['methods'] = methods
+
+
+def collect_type_list(class_data):
+    result = set()
+    for func in class_data['methods']:
+        result.add(func['rtype'])
+        for a in func['args']:
+            result.add(a['type'])
+    return result
 
 
 def make_overload_signature(func, class_name):
@@ -92,7 +110,10 @@ def make_lambda_overload(class_name, func, force=False, game=False):
             c = a['name']
         if a.get('PositionOrUnit'):
             has_any_replacement = True
-        input_lines.append(i)
+        if i is not None:
+            input_lines.append(i)
+        else:
+            a['RemoveFromDefaults'] = True
         call_lines.append(c)
         call_line_map[a['name']] = c
 
@@ -146,9 +167,7 @@ def custom_replacements(class_data, class_name):
 DEFAULT_REPLACEMENTS = {
     ('TilePosition', 'TilePositions::None'): ('Pybrood::UniversalPosition', 'Pybrood::TilePositions::None'),
     ('Position', 'Positions::Origin'): ('Pybrood::UniversalPosition', 'Pybrood::Positions::Origin'),
-    ('const UnitFilter &', 'nullptr'): NotImplemented,
 }
-UNIQUE_DEFAULT = set()
 
 
 def make_default_arguments(class_data, class_name):
@@ -156,6 +175,8 @@ def make_default_arguments(class_data, class_name):
         has_opts = False
         ags = []
         for a in func['args']:
+            if a.get('RemoveFromDefaults'):
+                continue
             ft = NotImplemented
             if a['opt_value'] is not None:
                 ft = (get_full_argtype(a), a['opt_value'])
@@ -165,7 +186,6 @@ def make_default_arguments(class_data, class_name):
                 elif repl is not None:
                     ft = repl
             if not (a['opt_value'] is None or ft is NotImplemented):
-                UNIQUE_DEFAULT.add(ft)
                 ftype, fvalue = ft
                 has_opts = True
                 cast = '({}) '.format(ftype) if fvalue == 'nullptr' else ''
@@ -184,15 +204,18 @@ def render_pureenums():
 
 
 def render_classes():
+    all_type_list = set()
     all_classes = parse_classes()
     for py_name, v in all_classes.items():
         is_game = py_name == 'Game'
         c = UNPOINTED_CLASSES[py_name] if py_name in UNPOINTED_CLASSES else py_name
-        duplicate_for_position_or_unit(v, c)
+        duplicate_for_position_or_unit(v)
+        remove_everything_with_required_filter(v)
         make_overload_signatures(v, c)
         custom_replacements(v, c)
         make_lambda_overloads(v, c, force=is_game, game=is_game)
         make_default_arguments(v, c)
+        all_type_list |= collect_type_list(v)
         if py_name in UNPOINTED_CLASSES:
             v['bw_class_full'] = 'BWAPI::{}'.format(UNPOINTED_CLASSES[py_name])
         yield render_template(
@@ -200,6 +223,8 @@ def render_classes():
             py_name=py_name,
             nodelete=py_name in NODELETE_CLASSES, **v
         )
+    from pprint import pprint
+    pprint(sorted(all_type_list))
 
 
 def render_objenums():
@@ -250,5 +275,3 @@ def post():
             pybind_dir=PureWindowsPath(relpath(PYBIND_DIR, GEN_OUTPUT_DIR)),
             cpp_files=[],
         ))
-
-    print(UNIQUE_DEFAULT)

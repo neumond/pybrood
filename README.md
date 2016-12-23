@@ -6,6 +6,8 @@ So I decided to run SC in VirtualBox.
 
 `python3.5 -m generator`
 
+TODO: localizing dependencies, patching BWAPI, installing msvc.
+
 Then run `build.bat` inside `output` folder.
 
 ## TODO:
@@ -13,6 +15,17 @@ Then run `build.bat` inside `output` folder.
 - Make sets (Unitset, etc) iterable.
 - Default argument value handling.
 - Default argument value handling: nullptr value cases.
+- Unit and other objects equality operator (by ID).
+- setClientInfo
+
+- Position::list&
+- Race::set
+- SetContainer<TechType>&
+- SetContainer<UpgradeType>&
+- TilePosition::list&
+- UnitType::list
+- UnitType::set&
+- std::list< Event >&
 
 ## Internals
 

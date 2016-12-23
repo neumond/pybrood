@@ -8,10 +8,9 @@ def arg_replacer(a):
             'Pybrood::UniversalPosition {}'.format(a['name']),
             '{bwtype}({aname}[0], {aname}[1])'.format(aname=a['name'], bwtype=a['type']),
         )
-    # TODO:
-    # if a['type'] == 'UnitFilter':
-    #     return (
-    #         None,
-    #         'nullptr',
-    #     )
+    if a['type'] in ('UnitFilter', 'UnitFilter &'):
+        return (
+            None,
+            'nullptr',
+        )
     raise NoReplacement
