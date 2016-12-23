@@ -22,6 +22,7 @@ UNPOINTED_CLASSES = {
     'Unit': 'UnitInterface',
 }
 FILTER_TYPES = {'UnitFilter', 'UnitFilter &'}
+UNITCOMMAND_TYPES = {'UnitCommand'}
 
 
 def duplicate_for_position_or_unit(class_data):
@@ -52,6 +53,14 @@ def remove_everything_with_required_filter(class_data):
     methods = []
     for func in class_data['methods']:
         if not any(a['type'] in FILTER_TYPES and a['opt_value'] is None for a in func['args']):
+            methods.append(func)
+    class_data['methods'] = methods
+
+
+def remove_everything_with_required_unitcommand(class_data):
+    methods = []
+    for func in class_data['methods']:
+        if not any(a['type'] in UNITCOMMAND_TYPES and a['opt_value'] is None for a in func['args']):
             methods.append(func)
     class_data['methods'] = methods
 
@@ -167,10 +176,11 @@ def custom_replacements(class_data, class_name):
 DEFAULT_REPLACEMENTS = {
     ('TilePosition', 'TilePositions::None'): ('Pybrood::UniversalPosition', 'Pybrood::TilePositions::None'),
     ('Position', 'Positions::Origin'): ('Pybrood::UniversalPosition', 'Pybrood::Positions::Origin'),
+    ('Position', 'Positions::Unknown'): ('Pybrood::UniversalPosition', 'Pybrood::Positions::Unknown'),
 }
 
 
-def make_default_arguments(class_data, class_name):
+def make_default_arguments(class_data, class_name, game=False):
     for func in class_data['methods']:
         has_opts = False
         ags = []
@@ -211,10 +221,11 @@ def render_classes():
         c = UNPOINTED_CLASSES[py_name] if py_name in UNPOINTED_CLASSES else py_name
         duplicate_for_position_or_unit(v)
         remove_everything_with_required_filter(v)
+        remove_everything_with_required_unitcommand(v)
         make_overload_signatures(v, c)
         custom_replacements(v, c)
         make_lambda_overloads(v, c, force=is_game, game=is_game)
-        make_default_arguments(v, c)
+        make_default_arguments(v, c, game=is_game)
         all_type_list |= collect_type_list(v)
         if py_name in UNPOINTED_CLASSES:
             v['bw_class_full'] = 'BWAPI::{}'.format(UNPOINTED_CLASSES[py_name])
@@ -223,8 +234,8 @@ def render_classes():
             py_name=py_name,
             nodelete=py_name in NODELETE_CLASSES, **v
         )
-    from pprint import pprint
-    pprint(sorted(all_type_list))
+    # from pprint import pprint
+    # pprint(sorted(all_type_list))
 
 
 def render_objenums():

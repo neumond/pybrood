@@ -109,22 +109,7 @@ REPLACEMENTS = {
         'custom_body': 'Broodwar->drawTextScreen({{p}}, {});'.format(STRF),
     },
     'Unitset::setClientInfo': NotImplemented,
-
-
-    # - SetContainer<TechType>&
-    #   - UnitType::abilities  (return, → list)
-    #   - UnitType::researchesWhat  (return, → list)
-    # - SetContainer<UpgradeType>&
-    #   - UnitType::upgrades  (return, → list)
-    #   - UnitType::upgradesWhat  (return, → list)
-    # - TilePosition::list&  // actually std::deque
-    #   - Game::getStartLocations  (return, → list)
-    # - UnitType::list  // actually std::deque
-    #   - Unit::getTrainingQueue  (return, → list)
-    # - UnitType::set&
-    #   - TechType::whatUses  (return, → list)
-    #   - UnitType::buildsWhat  (return, → list)
-    #   - UpgradeType::whatUses  (return, → list)
+    'Game::getEvents': NotImplemented,  # TODO: return back
 }
 
 
