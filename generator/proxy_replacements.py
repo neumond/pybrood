@@ -2,6 +2,15 @@ from .common import atype_or_dots
 
 
 STRF = 'Pybrood::string_replace(line, "%", "%%").c_str()'
+TOLIST = '''
+auto c = {source};
+py::list result;
+for (auto it = c.begin(); it != c.end(); ++it){{{{
+    result.append({element});
+}}}}
+return result;
+'''
+# element='*it'
 
 
 REPLACEMENTS = {
@@ -99,6 +108,23 @@ REPLACEMENTS = {
         ],
         'custom_body': 'Broodwar->drawTextScreen({{p}}, {});'.format(STRF),
     },
+    'Unitset::setClientInfo': NotImplemented,
+
+
+    # - SetContainer<TechType>&
+    #   - UnitType::abilities  (return, → list)
+    #   - UnitType::researchesWhat  (return, → list)
+    # - SetContainer<UpgradeType>&
+    #   - UnitType::upgrades  (return, → list)
+    #   - UnitType::upgradesWhat  (return, → list)
+    # - TilePosition::list&  // actually std::deque
+    #   - Game::getStartLocations  (return, → list)
+    # - UnitType::list  // actually std::deque
+    #   - Unit::getTrainingQueue  (return, → list)
+    # - UnitType::set&
+    #   - TechType::whatUses  (return, → list)
+    #   - UnitType::buildsWhat  (return, → list)
+    #   - UpgradeType::whatUses  (return, → list)
 }
 
 
@@ -118,6 +144,32 @@ for t in (
         'rconst': True, 'rtype': 'std::string', 'selfconst': True,
         'args': [],
         'custom_body': 'return instance.getName();',
+    }
+
+
+for t, pcls in (('Game::getNukeDots', 'Position'), ('Game::getStartLocations', 'TilePosition')):
+    m = t.split('::', 1)[1]
+    REPLACEMENTS[t] = {
+        'name': m,
+        'rconst': False, 'rtype': 'py::list', 'selfconst': True,
+        'args': [],
+        'custom_body': TOLIST.format(
+            source='Broodwar->{}()'.format(m),
+            element='Pybrood::convert_position<{}>(*it)'.format(pcls),
+        ),
+    }
+
+
+for t in (
+    'Playerset::getRaces', 'UnitType::abilities', 'UnitType::researchesWhat', 'UnitType::upgrades',
+    'UnitType::upgradesWhat', 'Unit::getTrainingQueue',
+    'TechType::whatUses', 'UnitType::buildsWhat', 'UpgradeType::whatUses',
+):
+    m = t.split('::', 1)[1]
+    REPLACEMENTS[t] = {
+        'name': m,
+        'rconst': False, 'rtype': 'py::list', 'selfconst': True, 'args': [],
+        'custom_body': TOLIST.format(source='instance.{}()'.format(m), element='*it'),
     }
 
 
