@@ -24,7 +24,7 @@ REPLACEMENTS = {
         'args': [
             {'const': False, 'type': 'std::string', 'name': 'line', 'opt_value': None},
         ],
-        'custom_body': 'va_list elist; instance.vPrintf({}, elist);'.format(STRF),
+        'custom_body': 'va_list elist; Broodwar->vPrintf({}, elist);'.format(STRF),
     },
     'Game::vSendText': {
         'name': 'sendText',
@@ -32,7 +32,7 @@ REPLACEMENTS = {
         'args': [
             {'const': False, 'type': 'std::string', 'name': 'line', 'opt_value': None},
         ],
-        'custom_body': 'va_list elist; instance.vSendText({}, elist);'.format(STRF),
+        'custom_body': 'va_list elist; Broodwar->vSendText({}, elist);'.format(STRF),
     },
     'Game::vSendTextEx': {
         'name': 'sendTextEx',
@@ -41,7 +41,7 @@ REPLACEMENTS = {
             {'const': False, 'type': 'bool', 'name': 'toAllies', 'opt_value': None},
             {'const': False, 'type': 'std::string', 'name': 'line', 'opt_value': None},
         ],
-        'custom_body': 'va_list elist; instance.vSendTextEx({{toAllies}}, {}, elist);'.format(STRF),
+        'custom_body': 'va_list elist; Broodwar->vSendTextEx({{toAllies}}, {}, elist);'.format(STRF),
     },
     'Game::vDrawText': NotImplemented,
     'Game::drawText': {
@@ -53,7 +53,7 @@ REPLACEMENTS = {
             {'const': False, 'type': 'int', 'name': 'y', 'opt_value': None},
             {'const': False, 'type': 'std::string', 'name': 'line', 'opt_value': None},
         ],
-        'custom_body': 'instance.drawText({{ctype}}, {{x}}, {{y}}, {});'.format(STRF),
+        'custom_body': 'Broodwar->drawText({{ctype}}, {{x}}, {{y}}, {});'.format(STRF),
     },
     ('Game::drawTextMap', 'int', 'int', 'const char *', '...'): {
         'name': 'drawTextMap',
@@ -63,7 +63,7 @@ REPLACEMENTS = {
             {'const': False, 'type': 'int', 'name': 'y', 'opt_value': None},
             {'const': False, 'type': 'std::string', 'name': 'line', 'opt_value': None},
         ],
-        'custom_body': 'instance.drawTextMap({{x}}, {{y}}, {});'.format(STRF),
+        'custom_body': 'Broodwar->drawTextMap({{x}}, {{y}}, {});'.format(STRF),
     },
     ('Game::drawTextMap', 'Position', 'const char *', '...'): {
         'name': 'drawTextMap',
@@ -72,7 +72,7 @@ REPLACEMENTS = {
             {'const': False, 'type': 'Position', 'name': 'p', 'opt_value': None},
             {'const': False, 'type': 'std::string', 'name': 'line', 'opt_value': None},
         ],
-        'custom_body': 'instance.drawTextMap({{p}}, {});'.format(STRF),
+        'custom_body': 'Broodwar->drawTextMap({{p}}, {});'.format(STRF),
     },
     ('Game::drawTextMouse', 'int', 'int', 'const char *', '...'): {
         'name': 'drawTextMouse',
@@ -82,7 +82,7 @@ REPLACEMENTS = {
             {'const': False, 'type': 'int', 'name': 'y', 'opt_value': None},
             {'const': False, 'type': 'std::string', 'name': 'line', 'opt_value': None},
         ],
-        'custom_body': 'instance.drawTextMouse({{x}}, {{y}}, {});'.format(STRF),
+        'custom_body': 'Broodwar->drawTextMouse({{x}}, {{y}}, {});'.format(STRF),
     },
     ('Game::drawTextMouse', 'Position', 'const char *', '...'): {
         'name': 'drawTextMouse',
@@ -91,7 +91,7 @@ REPLACEMENTS = {
             {'const': False, 'type': 'Position', 'name': 'p', 'opt_value': None},
             {'const': False, 'type': 'std::string', 'name': 'line', 'opt_value': None},
         ],
-        'custom_body': 'instance.drawTextMouse({{p}}, {});'.format(STRF),
+        'custom_body': 'Broodwar->drawTextMouse({{p}}, {});'.format(STRF),
     },
     ('Game::drawTextScreen', 'int', 'int', 'const char *', '...'): {
         'name': 'drawTextScreen',
@@ -101,7 +101,7 @@ REPLACEMENTS = {
             {'const': False, 'type': 'int', 'name': 'y', 'opt_value': None},
             {'const': False, 'type': 'std::string', 'name': 'line', 'opt_value': None},
         ],
-        'custom_body': 'instance.drawTextScreen({{x}}, {{y}}, {});'.format(STRF),
+        'custom_body': 'Broodwar->drawTextScreen({{x}}, {{y}}, {});'.format(STRF),
     },
     ('Game::drawTextScreen', 'Position', 'const char *', '...'): {
         'name': 'drawTextScreen',
@@ -110,7 +110,7 @@ REPLACEMENTS = {
             {'const': False, 'type': 'Position', 'name': 'p', 'opt_value': None},
             {'const': False, 'type': 'std::string', 'name': 'line', 'opt_value': None},
         ],
-        'custom_body': 'instance.drawTextScreen({{p}}, {});'.format(STRF),
+        'custom_body': 'Broodwar->drawTextScreen({{p}}, {});'.format(STRF),
     },
 }
 

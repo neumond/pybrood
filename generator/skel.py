@@ -12,7 +12,7 @@ from .common import atype_or_dots, get_full_argtype, get_full_rettype
 from .typereplacer2 import arg_replacer, NoReplacement
 
 
-NODELETE_CLASSES = {'Game', 'Client', 'Bullet', 'Force', 'Player', 'Region', 'Unit'}
+NODELETE_CLASSES = {'Client', 'Bullet', 'Force', 'Player', 'Region', 'Unit'}
 UNPOINTED_CLASSES = {
     'Bullet': 'BulletInterface',
     'Force': 'ForceInterface',
@@ -53,9 +53,11 @@ def smart_arg_join(lines, gap):
     return s_lines
 
 
-def make_lambda_overload(class_name, func):
-    input_lines, call_lines = ['{}& instance'.format(class_name)], []
-    has_any_replacement = False
+def make_lambda_overload(class_name, func, force=False, game=False):
+    input_lines, call_lines = [], []
+    if not game:
+        input_lines.append('{}& instance'.format(class_name))
+    has_any_replacement = force
     call_line_map = {}
     for a in func['args']:
         try:
@@ -79,10 +81,11 @@ def make_lambda_overload(class_name, func):
     if 'custom_body' in func:
         body = func['custom_body'].format(**call_line_map)
     else:
-        body = '{return_op}instance.{method_name}({call_args});'.format(
+        body = '{return_op}{instance}{method_name}({call_args});'.format(
             return_op='' if func['rtype'] == 'void' else 'return ',
             method_name=func['name'],
             call_args=s_call_lines,
+            instance='instance.' if not game else 'Broodwar->',
         )
 
     return (
@@ -90,16 +93,16 @@ def make_lambda_overload(class_name, func):
         '    {body}\n'
         '}}'
     ).format(
-        lambda_return_type='' if func['rtype'] == 'void' else ' -> {}'.format(func['rtype']),
+        lambda_return_type='' if func['rtype'] == 'void' else ' -> {}'.format(get_full_rettype(func)),
         input_args=s_input_lines,
         body=body,
     )
 
 
-def make_lambda_overloads(class_data, class_name):
+def make_lambda_overloads(class_data, class_name, force=False, game=False):
     for func in class_data['methods']:
         try:
-            func['defcode'] = make_lambda_overload(class_name, func)
+            func['defcode'] = make_lambda_overload(class_name, func, force=force, game=game)
         except NoReplacement:
             func['defcode'] = '&{}::{}'.format(class_name, func['name'])
             if 'overload_signature' in func:
@@ -122,23 +125,21 @@ def render_pureenums():
 
 
 def render_classes():
-    for py_name, v in parse_classes().items():
+    all_classes = parse_classes()
+    # game_class = all_classes.pop('Game')
+    for py_name, v in all_classes.items():
+        is_game = py_name == 'Game'
         c = UNPOINTED_CLASSES[py_name] if py_name in UNPOINTED_CLASSES else py_name
         make_overload_signatures(v, c)
         custom_replacements(v, c)
-        make_lambda_overloads(v, c)
-        # if py_name in PROXY_CLASSES:
-        #     methods = []
-        #     for func in v['methods']:
-        #         try:
-        #             methods.append(get_replacement_parsed(func, py_name))
-        #         except MethodDiscarded:
-        #             pass
-        #     v['methods'] = methods
-        #     v['bw_class_full'] = 'Pybrood{}'.format(py_name)
+        make_lambda_overloads(v, c, force=is_game, game=is_game)
         if py_name in UNPOINTED_CLASSES:
             v['bw_class_full'] = 'BWAPI::{}'.format(UNPOINTED_CLASSES[py_name])
-        yield render_template('direct_class.jinja2', py_name=py_name, nodelete=py_name in NODELETE_CLASSES, **v)
+        yield render_template(
+            'game.jinja2' if is_game else 'direct_class.jinja2',
+            py_name=py_name,
+            nodelete=py_name in NODELETE_CLASSES, **v
+        )
 
 
 def render_objenums():

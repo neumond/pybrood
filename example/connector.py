@@ -2,24 +2,31 @@ from time import sleep
 import pybrood
 
 
+client = pybrood.client_instance
+game = pybrood.game
+
+
+print(game)
+
+
 def reconnect():
-    while not pybrood.client.connect():
+    while not client.connect():
         sleep(1)
 
 
 def connection_checker():
-    pybrood.client.update()
-    if not pybrood.client.is_connected:
+    client.update()
+    if not client.isConnected():
         print('Reconnecting...')
         reconnect()
 
 
 def debug_code():
-    force = pybrood.game.get_force(0)
+    force = game.getForce(0)
     print(force)
-    print(force.id)
-    print(force.name)
-    bullets = pybrood.game.bullets
+    print(force.getID())
+    print(force.getName())
+    bullets = game.getBullets()
     print(bullets)
     print(type(bullets))
     print(dir(bullets))
@@ -35,17 +42,21 @@ def debug_code():
 
 
 def main():
+    print(game)
     print('Connecting...')
+    print(game)
     reconnect()
+    print(game)
     while True:
+        print(game)
         print('Waiting to enter match...')
-        while not pybrood.game.is_in_game:
+        while not game.isInGame():
             connection_checker()
         print('Starting match!')
 
         debug_code()
 
-        while pybrood.game.is_in_game:
+        while game.isInGame():
             # ...
             connection_checker()
         print('Game ended')

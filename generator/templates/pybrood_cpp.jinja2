@@ -4,9 +4,6 @@
 {%- endfor %}
 
 
-
-
-
 PYBIND11_PLUGIN(pybrood) {
     py::module m("pybrood", "BWAPI module bridge");
     {% for x in ('', 'WALK', 'TILE') %}
@@ -23,7 +20,6 @@ PYBIND11_PLUGIN(pybrood) {
     {% for x in objenums %}
     {{ x|indent(4) }}
     {% endfor %}
-    // m.attr("client_instance") = py::cast(BWAPI::BWAPIClient, py::return_value_policy::reference);
-    // m.attr("game_instance") = py::cast(BWAPI::BroodwarPtr, py::return_value_policy::reference);
+    m.attr("client_instance") = py::cast(&BWAPI::BWAPIClient, py::return_value_policy::reference);
     return m.ptr();
 }

@@ -125,73 +125,73 @@ def parse_classes():
 
     # ================================
 
-    # @add
-    # def Bullet():
-    #     f = incflines('Bullet.h')
-    #     yield from f(39, 167)
-    #
-    # @add
-    # def Bulletset():
-    #     # f = incflines('Bulletset.h')
-    #     yield ''
-    #
-    # @add
-    # def Player():
-    #     f = incflines('Player.h')
-    #     yield from f(38, 641)
-    #
-    # @add
-    # def Playerset():
-    #     f = incflines('Playerset.h')
-    #     yield from f(19, 41)
-    #
-    # @add
-    # def Region():
-    #     f = incflines('Region.h')
-    #     yield from f(30, 132)
-    #
-    # @add
-    # def Regionset():
-    #     f = incflines('Regionset.h')
-    #     yield from f(19, 23)
-    #
-    # @add
-    # def Unit():
-    #     f = incflines('Unit.h')
-    #     yield from f(60, 2458)
-    #
-    # @add
-    # def Unitset():
-    #     f = incflines('Unitset.h')
-    #     yield from f(27, 183)
-    #
-    # @add
-    # def Force():
-    #     f = incflines('Force.h')
-    #     yield from f(25, 63)
-    #
-    # @add
-    # def Forceset():
-    #     f = incflines('Forceset.h')
-    #     yield from f(18, 19)
+    @add
+    def Bullet():
+        f = incflines('Bullet.h')
+        yield from f(39, 167)
+
+    @add
+    def Bulletset():
+        # f = incflines('Bulletset.h')
+        yield ''
+
+    @add
+    def Player():
+        f = incflines('Player.h')
+        yield from f(38, 641)
+
+    @add
+    def Playerset():
+        f = incflines('Playerset.h')
+        yield from f(19, 41)
+
+    @add
+    def Region():
+        f = incflines('Region.h')
+        yield from f(30, 132)
+
+    @add
+    def Regionset():
+        f = incflines('Regionset.h')
+        yield from f(19, 23)
+
+    @add
+    def Unit():
+        f = incflines('Unit.h')
+        yield from f(60, 2458)
+
+    @add
+    def Unitset():
+        f = incflines('Unitset.h')
+        yield from f(27, 183)
+
+    @add
+    def Force():
+        f = incflines('Force.h')
+        yield from f(25, 63)
+
+    @add
+    def Forceset():
+        f = incflines('Forceset.h')
+        yield from f(18, 19)
 
     # ================================
 
-    # @add
-    # def Game():
-    #     f = incflines('Game.h')
-    #     yield from f(55, 783)
-    #     # skipping variadic printf-like functions
-    #     yield from f(801, 811)
-    #     yield from f(825, 834)
-    #     yield from f(852, 1705)
-    #     # TODO: iostream operator <<
-    #     # TODO: flush()
-    #
-    # @add
-    # def Client():
-    #     f = incflines('Client', 'Client.h')
-    #     yield from f(20, 23)
+    @add
+    def Game():
+        f = incflines('Game.h')
+        yield from f(55, 783)
+        # skipping variadic printf-like functions
+        yield from f(801, 811)
+        yield from f(825, 834)
+        yield from f(852, 1705)
+        # TODO: iostream operator <<
+        # TODO: flush()
+
+    @add
+    def Client():
+        f = incflines('Client', 'Client.h')
+        yield from f(20, 23)
 
     return OrderedDict((k, take_functions(v())) for k, v in ITEMS.items())
 
