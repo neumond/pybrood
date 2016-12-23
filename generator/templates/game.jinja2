@@ -1,4 +1,4 @@
 py::module game = m.def_submodule("game", "Game control functions");
 {%- for m in methods %}
-game.def("{{ m.name }}", {{ m.defcode|indent(4) }});
+game.def("{{ m.name }}", {{ m.defcode|indent(4) }}{{ m.defargs }});
 {%- endfor -%}

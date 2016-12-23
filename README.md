@@ -8,6 +8,12 @@ So I decided to run SC in VirtualBox.
 
 Then run `build.bat` inside `output` folder.
 
+## TODO:
+
+- Make sets (Unitset, etc) iterable.
+- Default argument value handling.
+- Default argument value handling: nullptr value cases.
+
 ## Internals
 
 `generator.parser` contains everything related to parsing of BWAPI include files.

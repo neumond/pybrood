@@ -1,7 +1,8 @@
 from .config import GEN_OUTPUT_DIR, BWAPI_DIR, PYBIND_DIR
 from os import mkdir, listdir
 from os.path import join, isdir, relpath
-from .utils import render_template
+from copy import deepcopy
+from .utils import render_template, split_to_well_sized_lines
 from pathlib import PureWindowsPath
 from shutil import rmtree
 from .parser import parse_pureenums, parse_classes, parse_objenums
@@ -20,6 +21,30 @@ UNPOINTED_CLASSES = {
     'Region': 'RegionInterface',
     'Unit': 'UnitInterface',
 }
+
+
+def duplicate_for_position_or_unit(class_data, class_name):
+    methods = []
+    for func in class_data['methods']:
+        pu = False
+        for i, a in enumerate(func['args']):
+            if a['type'] == 'PositionOrUnit':
+                assert pu is False
+                a['PositionOrUnit'] = True
+                pu = i
+        if pu is False:
+            methods.append(func)
+        else:
+            f1, f2 = deepcopy(func), deepcopy(func)
+            f1['args'][pu]['type'] = 'Position'
+            f2['args'][pu]['type'] = 'Unit'
+            if func['args'][pu]['opt_value'] is not None:
+                assert func['args'][pu]['opt_value'] == 'nullptr', repr(func)
+                f1['args'][pu]['opt_value'] = 'Positions::Unknown'
+                f2['args'][pu]['opt_value'] = 'nullptr'
+            methods.append(f1)
+            methods.append(f2)
+    class_data['methods'] = methods
 
 
 def make_overload_signature(func, class_name):
@@ -41,15 +66,14 @@ def make_overload_signatures(class_data, class_name):
             func['overload_signature'] = make_overload_signature(func, class_name)
 
 
-LINE_MAX_LEN_BEFORE_SPLIT = 50
+WELL_SIZED_LINE = 80
 
 
 def smart_arg_join(lines, gap):
-    s_lines = ', '.join(lines)
-    if len(s_lines) > LINE_MAX_LEN_BEFORE_SPLIT:
-        s_lines = (',\n    ' + gap).join(lines)
-        if len(lines) > 1:
-            s_lines = '\n    ' + gap + s_lines + '\n' + gap
+    joined_lines = split_to_well_sized_lines(lines, WELL_SIZED_LINE, ', ')
+    s_lines = (',\n    ' + gap).join(joined_lines)
+    if len(joined_lines) > 1:
+        s_lines = '\n    ' + gap + s_lines + '\n' + gap
     return s_lines
 
 
@@ -65,9 +89,11 @@ def make_lambda_overload(class_name, func, force=False, game=False):
             has_any_replacement = True
         except NoReplacement:
             i = '{} {}'.format(get_full_argtype(a), a['name'])
-            if a['opt_value']:
-                i += ' = {}'.format(a['opt_value'])
+            # if a['opt_value']:
+            #     i += ' = {}'.format(a['opt_value'])
             c = a['name']
+        if a.get('PositionOrUnit'):
+            has_any_replacement = True
         input_lines.append(i)
         call_lines.append(c)
         call_line_map[a['name']] = c
@@ -119,6 +145,41 @@ def custom_replacements(class_data, class_name):
     class_data['methods'] = methods
 
 
+DEFAULT_REPLACEMENTS = {
+    ('TilePosition', 'TilePositions::None'): ('Pybrood::UniversalPosition', 'Pybrood::TilePositions::None'),
+    ('Position', 'Positions::Origin'): ('Pybrood::UniversalPosition', 'Pybrood::Positions::Origin'),
+    ('const UnitFilter &', 'nullptr'): NotImplemented,
+}
+UNIQUE_DEFAULT = set()
+
+
+def make_default_arguments(class_data, class_name):
+    for func in class_data['methods']:
+        has_opts = False
+        ags = []
+        for a in func['args']:
+            ft = NotImplemented
+            if a['opt_value'] is not None:
+                ft = (get_full_argtype(a), a['opt_value'])
+                repl = DEFAULT_REPLACEMENTS.get(ft)
+                if repl is NotImplemented:
+                    ft = NotImplemented
+                elif repl is not None:
+                    ft = repl
+            if not (a['opt_value'] is None or ft is NotImplemented):
+                UNIQUE_DEFAULT.add(ft)
+                ftype, fvalue = ft
+                has_opts = True
+                cast = '({}) '.format(ftype) if fvalue == 'nullptr' else ''
+                ags.append('py::arg("{}") = {}{}'.format(a['name'], cast, fvalue))
+            else:
+                assert not has_opts
+                ags.append('py::arg("{}")'.format(a['name']))
+        if has_opts:
+            s_lines = split_to_well_sized_lines(ags, WELL_SIZED_LINE, ', ')
+            func['defargs'] = (',\n    ' if len(s_lines) > 1 else ', ') + ',\n    '.join(s_lines)
+
+
 def render_pureenums():
     for py_name, v in parse_pureenums().items():
         yield render_template('pureenum.jinja2', py_name=py_name, **v)
@@ -130,9 +191,11 @@ def render_classes():
     for py_name, v in all_classes.items():
         is_game = py_name == 'Game'
         c = UNPOINTED_CLASSES[py_name] if py_name in UNPOINTED_CLASSES else py_name
+        duplicate_for_position_or_unit(v, c)
         make_overload_signatures(v, c)
         custom_replacements(v, c)
         make_lambda_overloads(v, c, force=is_game, game=is_game)
+        make_default_arguments(v, c)
         if py_name in UNPOINTED_CLASSES:
             v['bw_class_full'] = 'BWAPI::{}'.format(UNPOINTED_CLASSES[py_name])
         yield render_template(
@@ -195,3 +258,5 @@ def post():
             pybind_dir=PureWindowsPath(relpath(PYBIND_DIR, GEN_OUTPUT_DIR)),
             cpp_files=listdir(join(GEN_OUTPUT_DIR, 'src')),
         ))
+
+    print(UNIQUE_DEFAULT)

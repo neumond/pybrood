@@ -58,3 +58,23 @@ def outerr(line):
 
 def render_template(template, **kw):
     return html_unescape(jin_env.get_template(template).render(**kw))
+
+
+def split_to_well_sized_lines(items, max_len, sep):
+    result = []
+    stack, stack_len = [], 0
+
+    def flush():
+        nonlocal stack_len
+        if stack:
+            result.append(sep.join(stack))
+        stack.clear()
+        stack_len = 0
+
+    for item in items:
+        if stack_len and stack_len + len(sep) + len(item) > max_len:
+            flush()
+        stack.append(item)
+        stack_len += (len(sep) if stack_len else 0) + len(item)
+    flush()
+    return result
