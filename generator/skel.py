@@ -11,6 +11,7 @@ from .parser import parse_pureenums, parse_classes, parse_objenums
 from .proxy_replacements import MethodDiscarded, get_replacement
 from .common import atype_or_dots, get_full_argtype, get_full_rettype
 from .typereplacer2 import arg_replacer, NoReplacement
+from .additional import improve_container_class
 
 
 NODELETE_CLASSES = {'Client', 'Bullet', 'Force', 'Player', 'Region', 'Unit'}
@@ -23,6 +24,7 @@ UNPOINTED_CLASSES = {
 }
 FILTER_TYPES = {'UnitFilter', 'UnitFilter &'}
 UNITCOMMAND_TYPES = {'UnitCommand'}
+ITERABLE_CLASSES = {'Bulletset', 'Forceset', 'Playerset', 'Regionset', 'Unitset'}
 
 
 def duplicate_for_position_or_unit(class_data):
@@ -208,6 +210,12 @@ def make_default_arguments(class_data, class_name, game=False):
             func['defargs'] = (',\n    ' if len(s_lines) > 1 else ', ') + ',\n    '.join(s_lines)
 
 
+def join_modifiers(class_data):
+    for func in class_data['methods']:
+        if func.get('modifiers'):
+            func['jmods'] = ', ' + ', '.join(func['modifiers'])
+
+
 def render_pureenums():
     for py_name, v in parse_pureenums().items():
         yield render_template('pureenum.jinja2', py_name=py_name, **v)
@@ -222,10 +230,13 @@ def render_classes():
         duplicate_for_position_or_unit(v)
         remove_everything_with_required_filter(v)
         remove_everything_with_required_unitcommand(v)
+        if py_name in ITERABLE_CLASSES:
+            improve_container_class(v)
         make_overload_signatures(v, c)
         custom_replacements(v, c)
         make_lambda_overloads(v, c, force=is_game, game=is_game)
         make_default_arguments(v, c, game=is_game)
+        join_modifiers(v)
         all_type_list |= collect_type_list(v)
         if py_name in UNPOINTED_CLASSES:
             v['bw_class_full'] = 'BWAPI::{}'.format(UNPOINTED_CLASSES[py_name])

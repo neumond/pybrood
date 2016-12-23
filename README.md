@@ -12,14 +12,11 @@ Then run `build.bat` inside `output` folder.
 
 ## TODO:
 
-- Make sets (Unitset, etc) iterable.
-- Some arg still fails.
 - Unit and other objects equality operator (by ID).
-- setClientInfo
 - нужно передавать как reference не врапаные константные типы (UnitType например, наследники Type), чтобы
   pybind не пытался их удалить.
   хотя.. по идее пайбинд их скопирует. с другой стороны внутри тайпа нет никакого стейта кроме int id.
-- Object enums as attributes instead dict.
+- Object enums as attributes instead dict (python side?).
 
 ## Internals
 

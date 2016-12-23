@@ -1,5 +1,5 @@
 py::class_&lt;{{ bw_class_full }}{% if nodelete %}, std::unique_ptr<{{ bw_class_full }}, py::nodelete>{% endif %}&gt;(m, "{{ py_name }}")
 {%- for m in methods %}
-    .def("{{ m.name }}", {{ m.defcode|indent(4) }}{{ m.defargs }})
+    .def("{{ m.name }}", {{ m.defcode|indent(4) }}{{ m.defargs }}{{ m.jmods }})
 {%- endfor -%}
 ;

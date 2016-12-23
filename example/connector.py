@@ -27,7 +27,7 @@ def debug_code():
     print(units)
     print(type(units))
     for u in units:
-        print(u.getID(), u.getName())
+        print('Unit', u.getID(), u.getType().getName())
     # pybrood.Force()
     # fs = pybrood.game.get_forces()
     # print(fs)
