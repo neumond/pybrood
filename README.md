@@ -17,6 +17,11 @@ Then run `build.bat` inside `output` folder.
 - Default argument value handling: nullptr value cases.
 - Unit and other objects equality operator (by ID).
 - setClientInfo
+- нужно передавать как reference не врапаные константные типы (UnitType например, наследники Type), чтобы
+  pybind не пытался их удалить.
+  хотя.. по идее пайбинд их скопирует. с другой стороны внутри тайпа нет никакого стейта кроме int id.
+- Object enums as attributes instead dict.
+- Return values transformation: look at getStartLocations
 
 - Position::list&
 - Race::set
@@ -34,31 +39,9 @@ It returns data structure sufficient to generate binding module.
 
 There're several kinds of things to be passed between python and C++ sides:
 
-1. Usual C++ enums.
+1. Usual C++ enums (refer to pybind manual).
 2. Classes.
 3. Primitive types and STL containers automatically handled by pybind11.
-
-### C++ enums
-
-Most straightforward part. Just using them exactly as pybind11 documentation says:
-
-```
-enum BWAPI::Text::Size::Enum
-{
-  Small,
-  Default,
-  Large,
-  Huge
-};
-→
-py::enum_<BWAPI::Text::Size::Enum>(m, "TextSize")
-    .value("Small", BWAPI::Text::Size::Enum::Small)
-    .value("Default", BWAPI::Text::Size::Enum::Default)
-    .value("Large", BWAPI::Text::Size::Enum::Large)
-    .value("Huge", BWAPI::Text::Size::Enum::Huge);
-```
-
-We need only set (by hand) pythonic name here: `"TextSize"`.
 
 ### Classes
 
@@ -136,31 +119,8 @@ WeaponType      | | | |  |Y+| 3.1
 
 Note that handling of all type cases must also be done in return values and function/method parameters.
 
-#### Building proxy class
-
-There's no need to worry about lifetime of object. BWAPI returns pointers and we can freely transform them into weak references.
-
-```
-namespace Pybrood {
-class Bullet
-{
-public:
-    BWAPI::Bullet obj;  // be sure this type is pointer to object
-    Bullet(BWAPI::Bullet);
-    ...  // dummy methods following here
-};
-}
-```
-
-```
-py::class_<Pybrood::Bullet>(m, "Bullet")  // note how original class replaced with proxy
-    .def("getPlayer", ...)
-    .def("getType", ...)
-    .def("getSource", ...);
-```
-
-Dummy methods must not handle any specific type conversions. Instead, use pybind11 definitions
-for this. That is the way to place special conversions uniformly: they can happen even in straightforwardly binded classes.
+`BWAPI::Game` is now a separate module instead being class instance. Game instances are getting replaced
+during run time, we're forced to use static wrapper above it: `Broodwar->`.
 
 #### Straightforward description
 
@@ -211,121 +171,7 @@ Races.Terran.getRefinery()
 some_bwapi_method(Races.Terran)
 ```
 
-## developer notes
-
-Standard pybind11 method handling:
-
-```
-.def("isResourceDepot", &BWAPI::UnitType::isResourceDepot)
-```
-
-First problem, overloaded methods:
-
-```
-.def("canUseTechPosition", &BWAPI::Unit::canUseTechPosition)
-.def("canUseTechPosition", &BWAPI::Unit::canUseTechPosition)
-```
-
-Solution:
-
-```
-.def("canUseTechPosition", (bool (BWAPI::Unit::*)(BWAPI::TechType, bool, bool)) &BWAPI::Unit::canUseTechPosition)
-.def("canUseTechPosition", (bool (BWAPI::Unit::*)(BWAPI::TechType, Position, bool, bool, bool)) &BWAPI::Unit::canUseTechPosition)
-```
-
-Second problem, some types are actually pointers to classes:
-
-```
-typedef RegionInterface *Region;
-```
-
-Solution: create proxy classes. It is possible to return objects
-as weak references from function, but impossible to describe a class without accessble destructor.
-
-Third problem, `BWAPI::Game` class has protected destructor.
-
-Solution: create proxy class for Game. Same as previous.
-
-Some classes require wrapping, because pybind11 requires possibility to destruct object.
-This is impossible for entities like `Force`, `Player`, `Bullet`, etc.
-E.g. `BWAPI::Force` is getting wrapped into `PyBinding::Wrapper::Force`.
-This requires type replacement in any function using `Force` type.
-To solve this there's a `typereplacer.py`.
-
-Some classes require no transformation though.
-
-Without wrapping the usage is trivial for pybind11:
-```
-BWAPI::PlayerType
-    bool isLobbyType() const;
-→
-output/pybind/playertype.cpp
-    class_playertype.def_property_readonly("is_lobby_type",  &BWAPI::PlayerType::isLobbyType);
-```
-
-With wrapping here's the intermediate class:
-```
-BWAPI::Bullet
-    virtual Unit getSource() const = 0;
-→
-output/include/bullet.h
-    BWAPI::Unit getSource();
-output/pybind/bullet.cpp
-    class_bullet.def_property_readonly("source", [](PyBinding::Wrapper::Bullet& obj) -> PyBinding::Wrapper::Unit {
-        return PyBinding::Wrapper::Unit(obj.getSource());
-    });
-output/src/bullet.cpp
-    BWAPI::Unit Bullet::getSource(){
-        return obj->getSource();
-    }
-```
-
-```
-BWAPI::Bullet
-    virtual Unit getSource() const = 0;
-→
-output/include/bullet.h
-    BWAPI::Unit getSource();
-output/pybind/bullet.cpp
-    class_bullet.def_property_readonly("source", [](BWAPI::Bullet& obj) -> PyBinding::Wrapper::Unit {
-        return PyBinding::Wrapper::Unit(obj.getSource());
-    });
-output/src/bullet.cpp
-    BWAPI::Unit Bullet::getSource(){
-        return obj->getSource();
-    }
-```
-
-```
-BWAPI::Unitset
-    bool gather(Unit target, bool shiftQueueCommand = false) const;
-→
-output/pybind/unitset.cpp
-    class_unitset.def("gather", [](BWAPI::Unitset& obj, PyBinding::Wrapper::Unit target, bool shiftQueueCommand = false) -> bool {
-        return obj.gather(target.obj, shiftQueueCommand);
-    });
-```
-
-Wrapper class just keeps reference to an object `obj` and allows free destruction
-by pybind11 without affecting internals of BWAPI. `output/include/` and `output/src/` are folders
-for these "as is" wrappers. All type transformations, including instantiation of wrappers happens
-in lambda functions in `output/pybind/`. You can see how `BWAPI::Unit` becomes `PyBinding::Wrapper::Unit`
-and how methods of wrapper are getting called.
-
 ## todo
-
-Unitset не стоит сразу конвертировать в py::set, у него есть родные методы (в том числе конструкторы)
-Forceset ..
-Playerset ..
-Regionset ..
-
-обёртки нужны, так как pybind требует деструктор класса, описать класс иначе нельзя.
-
-добавляются ли динамически создаваемые классы в __subclasses__?
-
-нужно передавать как reference не врапаные константные типы (UnitType например, наследники Type), чтобы
-pybind не пытался их удалить.
-хотя.. по идее пайбинд их скопирует. с другой стороны внутри тайпа нет никакого стейта кроме int id.
 
 TODO: implement __all__ for:
 BulletType
