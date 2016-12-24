@@ -1,4 +1,4 @@
-from os import mkdir, listdir
+from os import mkdir
 from os.path import join, isdir
 from collections import defaultdict, OrderedDict
 from shutil import rmtree
@@ -169,26 +169,13 @@ def makedir(*path):
         mkdir(path)
 
 
-def pre():
-    # TODO: join pre and post
-    # TODO: remove separate headers and possibility to attach cpp files
-    makedir(GEN_OUTPUT_DIR)
-    makedir(GEN_OUTPUT_DIR, 'include')
-
-    with open(join(GEN_OUTPUT_DIR, 'build.bat'), 'w') as f:
-        f.write(VCXProjectConfig.MSBUILD_COMMAND)
-
-    with open(join(GEN_OUTPUT_DIR, 'include', 'common.h'), 'w') as f:
-        f.write(render_template('common_h.jinja2', classes=[]))
-
-
-def post():
+def main():
     pureenums = list(render_pureenums())
     classes = list(render_classes())
     objenums = list(render_objenums())
 
-    h_files = listdir(join(GEN_OUTPUT_DIR, 'include'))
-    h_files.remove('common.h')
+    makedir(GEN_OUTPUT_DIR)
+    mkdir(join(GEN_OUTPUT_DIR, 'docs'))
 
     with open(join(GEN_OUTPUT_DIR, 'pybrood.cpp'), 'w') as f:
         f.write(render_template(
@@ -196,12 +183,13 @@ def post():
             pureenums=pureenums,
             classes=classes,
             objenums=objenums,
-            h_files=h_files,
         ))
 
     with open(join(GEN_OUTPUT_DIR, 'pybrood.vcxproj'), 'w') as f:
         f.write(render_template(
             'vcproj.jinja2',
             config=VCXProjectConfig,
-            cpp_files=[],
         ))
+
+    with open(join(GEN_OUTPUT_DIR, 'build.bat'), 'w') as f:
+        f.write(VCXProjectConfig.MSBUILD_COMMAND)

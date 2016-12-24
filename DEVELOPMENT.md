@@ -5,6 +5,8 @@ I'm afraid I could forget something important, thus I've decided to keep it as i
 
 - Object enums as attributes instead dict (python side?).
 - generate pythonic doc.
+- make installable binary via pip.
+- test custom printing methods.
 
 ## Internals
 
