@@ -2,4 +2,3 @@
 /output/
 *.pyc
 __pycache__/
-/docs/
