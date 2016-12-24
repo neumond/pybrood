@@ -18,42 +18,42 @@ def connection_checker():
         reconnect()
 
 
-def debug_code():
-    force = game.getForce(0)
-    print(force)
-    print(force.getID())
-    print(force.getName())
+class BaseAI:
+    def prepare(self):
+        pass
 
-    units = game.getAllUnits()
-    for u in units:
-        print('Unit', u.getID(), u.getType().getName(), u.getPosition(), u.getTilePosition())
-    # pybrood.Force()
-    # fs = pybrood.game.get_forces()
-    # print(fs)
-    # print(type(fs))
-    # print(list(fs))
-    # for f in fs:
-    #     print(f)
-    #     print(f.id)
-    #     print(f.name)
+    def frame(self):
+        raise NotImplementedError
+
+    def run(self):
+        print('Connecting...')
+        reconnect()
+        while True:
+            print('Waiting to enter match...')
+            while not game.isInGame():
+                connection_checker()
+            print('Starting match!')
+            self.prepare()
+            while game.isInGame():
+                self.frame()
+                connection_checker()
+            print('Game ended')
 
 
-def main():
-    print('Connecting...')
-    reconnect()
-    while True:
-        print('Waiting to enter match...')
-        while not game.isInGame():
-            connection_checker()
-        print('Starting match!')
+class TestAI(BaseAI):
+    def prepare(self):
+        force = game.getForce(0)
+        print(force)
+        print(force.getID())
+        print(force.getName())
 
-        debug_code()
+        units = game.getAllUnits()
+        for u in units:
+            print('Unit', u.getID(), u.getType().getName(), u.getPosition(), u.getTilePosition())
 
-        while game.isInGame():
-            # ...
-            connection_checker()
-        print('Game ended')
+    def frame(self):
+        sleep(0.05)
 
 
 if __name__ == '__main__':
-    main()
+    TestAI().run()

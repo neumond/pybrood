@@ -1,10 +1,9 @@
 from os import mkdir, listdir
-from os.path import join, isdir, relpath
+from os.path import join, isdir
 from collections import defaultdict, OrderedDict
-from pathlib import PureWindowsPath
 from shutil import rmtree
 
-from .config import GEN_OUTPUT_DIR, BWAPI_DIR, PYBIND_DIR
+from .config import GEN_OUTPUT_DIR, VCXProjectConfig
 from .utils import render_template, indent_lines
 from .parser import parse_pureenums, parse_classes, parse_objenums
 from .proxy_replacements import custom_replacements
@@ -171,11 +170,13 @@ def makedir(*path):
 
 
 def pre():
+    # TODO: join pre and post
+    # TODO: remove separate headers and possibility to attach cpp files
     makedir(GEN_OUTPUT_DIR)
     makedir(GEN_OUTPUT_DIR, 'include')
 
     with open(join(GEN_OUTPUT_DIR, 'build.bat'), 'w') as f:
-        f.write('msbuild /p:PlatformToolset=v140 /p:Configuration=Release /p:Platform=Win32')
+        f.write(VCXProjectConfig.MSBUILD_COMMAND)
 
     with open(join(GEN_OUTPUT_DIR, 'include', 'common.h'), 'w') as f:
         f.write(render_template('common_h.jinja2', classes=[]))
@@ -201,7 +202,6 @@ def post():
     with open(join(GEN_OUTPUT_DIR, 'pybrood.vcxproj'), 'w') as f:
         f.write(render_template(
             'vcproj.jinja2',
-            bwapi_dir=PureWindowsPath(relpath(BWAPI_DIR, GEN_OUTPUT_DIR)),
-            pybind_dir=PureWindowsPath(relpath(PYBIND_DIR, GEN_OUTPUT_DIR)),
+            config=VCXProjectConfig,
             cpp_files=[],
         ))
