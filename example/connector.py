@@ -23,11 +23,10 @@ def debug_code():
     print(force)
     print(force.getID())
     print(force.getName())
+
     units = game.getAllUnits()
-    print(units)
-    print(type(units))
     for u in units:
-        print('Unit', u.getID(), u.getType().getName())
+        print('Unit', u.getID(), u.getType().getName(), u.getPosition(), u.getTilePosition())
     # pybrood.Force()
     # fs = pybrood.game.get_forces()
     # print(fs)

@@ -1,3 +1,7 @@
+class DiscardFunction(Exception):
+    pass
+
+
 def get_full_argtype(a):
     t = a['type']
     if a['const']:
@@ -20,3 +24,11 @@ def atype_or_dots(a):
 
 def get_all_used_types(f):
     return {f['rtype']} | {a['type'] for a in f['args']}
+
+
+def make_overload_signature(func, class_name):
+    argline = ', '.join(atype_or_dots(a) for a in func['args'] if 'type' in a)
+    r = '{} ({}::*)({})'.format(get_full_rettype(func), class_name, argline)
+    if func['selfconst']:
+        r += ' const'
+    return r

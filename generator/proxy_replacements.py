@@ -1,4 +1,4 @@
-from .common import atype_or_dots
+from .common import atype_or_dots, DiscardFunction
 
 
 STRF = 'Pybrood::string_replace(line, "%", "%%").c_str()'
@@ -9,7 +9,7 @@ for (auto it = c.begin(); it != c.end(); ++it){{{{
     result.append({element});
 }}}}
 return result;
-'''
+'''.strip()
 # element='*it'
 
 
@@ -20,7 +20,7 @@ REPLACEMENTS = {
         'args': [
             {'const': False, 'type': 'std::string', 'name': 'line', 'opt_value': None},
         ],
-        'custom_body': 'va_list elist; Broodwar->vPrintf({}, elist);'.format(STRF),
+        'ret_code': 'va_list elist; Broodwar->vPrintf({}, elist);'.format(STRF),
     },
     'Game::vSendText': {
         'name': 'sendText',
@@ -28,7 +28,7 @@ REPLACEMENTS = {
         'args': [
             {'const': False, 'type': 'std::string', 'name': 'line', 'opt_value': None},
         ],
-        'custom_body': 'va_list elist; Broodwar->vSendText({}, elist);'.format(STRF),
+        'ret_code': 'va_list elist; Broodwar->vSendText({}, elist);'.format(STRF),
     },
     'Game::vSendTextEx': {
         'name': 'sendTextEx',
@@ -37,7 +37,7 @@ REPLACEMENTS = {
             {'const': False, 'type': 'bool', 'name': 'toAllies', 'opt_value': None},
             {'const': False, 'type': 'std::string', 'name': 'line', 'opt_value': None},
         ],
-        'custom_body': 'va_list elist; Broodwar->vSendTextEx({{toAllies}}, {}, elist);'.format(STRF),
+        'ret_code': 'va_list elist; Broodwar->vSendTextEx({{toAllies}}, {}, elist);'.format(STRF),
     },
     'Game::vDrawText': NotImplemented,
     'Game::drawText': {
@@ -49,7 +49,7 @@ REPLACEMENTS = {
             {'const': False, 'type': 'int', 'name': 'y', 'opt_value': None},
             {'const': False, 'type': 'std::string', 'name': 'line', 'opt_value': None},
         ],
-        'custom_body': 'Broodwar->drawText({{ctype}}, {{x}}, {{y}}, {});'.format(STRF),
+        'ret_code': 'Broodwar->drawText({{ctype}}, {{x}}, {{y}}, {});'.format(STRF),
     },
     ('Game::drawTextMap', 'int', 'int', 'const char *', '...'): {
         'name': 'drawTextMap',
@@ -59,7 +59,7 @@ REPLACEMENTS = {
             {'const': False, 'type': 'int', 'name': 'y', 'opt_value': None},
             {'const': False, 'type': 'std::string', 'name': 'line', 'opt_value': None},
         ],
-        'custom_body': 'Broodwar->drawTextMap({{x}}, {{y}}, {});'.format(STRF),
+        'ret_code': 'Broodwar->drawTextMap({{x}}, {{y}}, {});'.format(STRF),
     },
     ('Game::drawTextMap', 'Position', 'const char *', '...'): {
         'name': 'drawTextMap',
@@ -68,7 +68,7 @@ REPLACEMENTS = {
             {'const': False, 'type': 'Position', 'name': 'p', 'opt_value': None},
             {'const': False, 'type': 'std::string', 'name': 'line', 'opt_value': None},
         ],
-        'custom_body': 'Broodwar->drawTextMap({{p}}, {});'.format(STRF),
+        'ret_code': 'Broodwar->drawTextMap({{p}}, {});'.format(STRF),
     },
     ('Game::drawTextMouse', 'int', 'int', 'const char *', '...'): {
         'name': 'drawTextMouse',
@@ -78,7 +78,7 @@ REPLACEMENTS = {
             {'const': False, 'type': 'int', 'name': 'y', 'opt_value': None},
             {'const': False, 'type': 'std::string', 'name': 'line', 'opt_value': None},
         ],
-        'custom_body': 'Broodwar->drawTextMouse({{x}}, {{y}}, {});'.format(STRF),
+        'ret_code': 'Broodwar->drawTextMouse({{x}}, {{y}}, {});'.format(STRF),
     },
     ('Game::drawTextMouse', 'Position', 'const char *', '...'): {
         'name': 'drawTextMouse',
@@ -87,7 +87,7 @@ REPLACEMENTS = {
             {'const': False, 'type': 'Position', 'name': 'p', 'opt_value': None},
             {'const': False, 'type': 'std::string', 'name': 'line', 'opt_value': None},
         ],
-        'custom_body': 'Broodwar->drawTextMouse({{p}}, {});'.format(STRF),
+        'ret_code': 'Broodwar->drawTextMouse({{p}}, {});'.format(STRF),
     },
     ('Game::drawTextScreen', 'int', 'int', 'const char *', '...'): {
         'name': 'drawTextScreen',
@@ -97,7 +97,7 @@ REPLACEMENTS = {
             {'const': False, 'type': 'int', 'name': 'y', 'opt_value': None},
             {'const': False, 'type': 'std::string', 'name': 'line', 'opt_value': None},
         ],
-        'custom_body': 'Broodwar->drawTextScreen({{x}}, {{y}}, {});'.format(STRF),
+        'ret_code': 'Broodwar->drawTextScreen({{x}}, {{y}}, {});'.format(STRF),
     },
     ('Game::drawTextScreen', 'Position', 'const char *', '...'): {
         'name': 'drawTextScreen',
@@ -106,7 +106,7 @@ REPLACEMENTS = {
             {'const': False, 'type': 'Position', 'name': 'p', 'opt_value': None},
             {'const': False, 'type': 'std::string', 'name': 'line', 'opt_value': None},
         ],
-        'custom_body': 'Broodwar->drawTextScreen({{p}}, {});'.format(STRF),
+        'ret_code': 'Broodwar->drawTextScreen({{p}}, {});'.format(STRF),
     },
     'Unitset::setClientInfo': NotImplemented,
     'Game::getEvents': NotImplemented,  # TODO: return back
@@ -122,13 +122,11 @@ for t in (
         'name': 'getID',
         'rconst': False, 'rtype': 'int', 'selfconst': True,
         'args': [],
-        'custom_body': 'return instance.getID();',
     }
     REPLACEMENTS['{}::getName'.format(t)] = {
         'name': 'getName',
         'rconst': True, 'rtype': 'std::string', 'selfconst': True,
         'args': [],
-        'custom_body': 'return instance.getName();',
     }
 
 
@@ -138,7 +136,7 @@ for t, pcls in (('Game::getNukeDots', 'Position'), ('Game::getStartLocations', '
         'name': m,
         'rconst': False, 'rtype': 'py::list', 'selfconst': True,
         'args': [],
-        'custom_body': TOLIST.format(
+        'ret_code': TOLIST.format(
             source='Broodwar->{}()'.format(m),
             element='Pybrood::convert_position<{}>(*it)'.format(pcls),
         ),
@@ -154,12 +152,8 @@ for t in (
     REPLACEMENTS[t] = {
         'name': m,
         'rconst': False, 'rtype': 'py::list', 'selfconst': True, 'args': [],
-        'custom_body': TOLIST.format(source='instance.{}()'.format(m), element='*it'),
+        'ret_code': TOLIST.format(source='instance.{}()'.format(m), element='*it'),
     }
-
-
-class MethodDiscarded(Exception):
-    pass
 
 
 def get_replacement_inner(func, class_name):
@@ -174,7 +168,17 @@ def get_replacement_inner(func, class_name):
 def get_replacement(func, class_name):
     repl = get_replacement_inner(func, class_name)
     if repl is NotImplemented:
-        raise MethodDiscarded
+        raise DiscardFunction
     elif repl is None:
         return func
     return repl
+
+
+def custom_replacements(class_data, class_name):
+    methods = []
+    for func in class_data['methods']:
+        try:
+            methods.append(get_replacement(func, class_name))
+        except DiscardFunction:
+            pass
+    class_data['methods'] = methods
