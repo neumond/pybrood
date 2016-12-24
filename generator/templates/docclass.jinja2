@@ -1,7 +1,20 @@
 {{ class_name }}
-=======
+{{ '=' * class_name|length }}
 
-.. py:class:: {{ class_name }}
+Class
+-----
+
+.. py:class:: pybrood.{{ class_name }}
 {% for m in methods %}
-.. py:method:: {{ m }}
+    .. py:method:: {{ m }}
 {% endfor %}
+
+{% if enum['items'] %}
+Enumeration
+-----------
+
+.. py:data:: pybrood.{{ class_name }}s
+{% for e in enum['items'] %}
+    .. py:attribute:: {{ e }}
+{%- endfor %}
+{% endif %}

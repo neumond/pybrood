@@ -166,6 +166,30 @@ def render_objenums():
         yield render_template('objenum.jinja2', py_name=py_name, **v)
 
 
+def render_documentation(class_names, class_docs, objenums):
+    oenums = parse_objenums()
+
+    mkdir(join(GEN_OUTPUT_DIR, 'docs'))
+    mkdir(join(GEN_OUTPUT_DIR, 'docs', '_build'))
+    mkdir(join(GEN_OUTPUT_DIR, 'docs', '_static'))
+    mkdir(join(GEN_OUTPUT_DIR, 'docs', '_templates'))
+    for cn, methods in zip(class_names, class_docs):
+        with open(join(GEN_OUTPUT_DIR, 'docs', cn.lower() + '.rst'), 'w') as f:
+            f.write(render_template(
+                'docclass.jinja2',
+                class_name=cn,
+                methods=methods,
+                enum=oenums.get(cn)
+            ))
+    with open(join(GEN_OUTPUT_DIR, 'docs', 'index.rst'), 'w') as f:
+        f.write(render_template(
+            'docindex.jinja2',
+            classes=class_names,
+        ))
+    with open(join(GEN_OUTPUT_DIR, 'docs', 'conf.py'), 'w') as f:
+        f.write(render_template('rstconf.jinja2'))
+
+
 def makedir(*path):
     path = join(*path)
     if isdir(path):
@@ -198,21 +222,4 @@ def main():
     with open(join(GEN_OUTPUT_DIR, 'build.bat'), 'w') as f:
         f.write(VCXProjectConfig.MSBUILD_COMMAND)
 
-    mkdir(join(GEN_OUTPUT_DIR, 'docs'))
-    mkdir(join(GEN_OUTPUT_DIR, 'docs', '_build'))
-    mkdir(join(GEN_OUTPUT_DIR, 'docs', '_static'))
-    mkdir(join(GEN_OUTPUT_DIR, 'docs', '_templates'))
-    for cn, methods in zip(class_names, class_docs):
-        with open(join(GEN_OUTPUT_DIR, 'docs', cn.lower() + '.rst'), 'w') as f:
-            f.write(render_template(
-                'docclass.jinja2',
-                class_name=cn,
-                methods=methods,
-            ))
-    with open(join(GEN_OUTPUT_DIR, 'docs', 'index.rst'), 'w') as f:
-        f.write(render_template(
-            'docindex.jinja2',
-            classes=class_names,
-        ))
-    with open(join(GEN_OUTPUT_DIR, 'docs', 'conf.py'), 'w') as f:
-        f.write(render_template('rstconf.jinja2'))
+    render_documentation(class_names, class_docs, objenums)

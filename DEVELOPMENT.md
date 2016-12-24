@@ -3,11 +3,11 @@ I'm afraid I could forget something important, thus I've decided to keep it as i
 
 ## TODO:
 
-- Object enums as attributes instead dict (python side?).
 - generate pythonic doc.
 - make installable binary via pip.
-- test custom printing methods.
+- test custom printing (printf) methods.
 - check there's no 'None' in enumerations/object enumerations.
+- make color constructor.
 
 `sphinx-build . -b html _build/html`
 

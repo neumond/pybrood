@@ -34,8 +34,7 @@ def make_docs_for_class(class_data, class_name):
             continue
         if func['rtype'] != 'void' and func['rtype'] not in TYPE_MAP:
             print('Unrecognized type', func['rtype'])
-        line = '{}.{}({}){}'.format(
-            class_name,
+        line = '{}({}){}'.format(
             func['name'],
             ', '.join(format_arg(a) for a in func['args'] if 'type' in a),
             '' if func['rtype'] == 'void' else ' -> {}'.format(type_name(func['rtype'])),
