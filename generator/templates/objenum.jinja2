@@ -1,7 +1,4 @@
-{
-    auto d = py::dict();
-    {% for name in items -%}
-    d["{{ name }}"] = py::cast(&{{ namespace }}{{ name }}, py::return_value_policy::reference);
-    {% endfor -%}
-    enum_instances["{{ py_name }}"] = d;
-}
+py::module mod_{{ py_name|lower }} = m.def_submodule("{{ py_name }}s");
+{% for name in items %}
+mod_{{ py_name|lower }}.attr("{{ name }}") = py::cast(&{{ namespace }}{{ name }}, py::return_value_policy::reference);
+{%- endfor -%}

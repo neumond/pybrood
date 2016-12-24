@@ -10,6 +10,7 @@ from .proxy_replacements import custom_replacements
 from .common import get_full_argtype, get_full_rettype, make_overload_signature
 from .typereplacer2 import arg_replacer, func_replacer, DiscardFunction
 from .additional import improve_container_class
+from .docgen import make_docs_for_class
 
 
 NODELETE_CLASSES = {'Client', 'Bullet', 'Force', 'Player', 'Region', 'Unit'}
@@ -149,10 +150,14 @@ def render_classes():
 
         if py_name in UNPOINTED_CLASSES:
             v['bw_class_full'] = 'BWAPI::{}'.format(UNPOINTED_CLASSES[py_name])
-        yield render_template(
-            'game.jinja2' if is_game else 'direct_class.jinja2',
-            py_name=py_name,
-            nodelete=py_name in NODELETE_CLASSES, **v
+        yield (
+            py_name,
+            render_template(
+                'game.jinja2' if is_game else 'direct_class.jinja2',
+                py_name=py_name,
+                nodelete=py_name in NODELETE_CLASSES, **v
+            ),
+            make_docs_for_class(v, py_name)
         )
 
 
@@ -171,11 +176,10 @@ def makedir(*path):
 
 def main():
     pureenums = list(render_pureenums())
-    classes = list(render_classes())
+    class_names, classes, class_docs = zip(*render_classes())
     objenums = list(render_objenums())
 
     makedir(GEN_OUTPUT_DIR)
-    mkdir(join(GEN_OUTPUT_DIR, 'docs'))
 
     with open(join(GEN_OUTPUT_DIR, 'pybrood.cpp'), 'w') as f:
         f.write(render_template(
@@ -193,3 +197,22 @@ def main():
 
     with open(join(GEN_OUTPUT_DIR, 'build.bat'), 'w') as f:
         f.write(VCXProjectConfig.MSBUILD_COMMAND)
+
+    mkdir(join(GEN_OUTPUT_DIR, 'docs'))
+    mkdir(join(GEN_OUTPUT_DIR, 'docs', '_build'))
+    mkdir(join(GEN_OUTPUT_DIR, 'docs', '_static'))
+    mkdir(join(GEN_OUTPUT_DIR, 'docs', '_templates'))
+    for cn, methods in zip(class_names, class_docs):
+        with open(join(GEN_OUTPUT_DIR, 'docs', cn.lower() + '.rst'), 'w') as f:
+            f.write(render_template(
+                'docclass.jinja2',
+                class_name=cn,
+                methods=methods,
+            ))
+    with open(join(GEN_OUTPUT_DIR, 'docs', 'index.rst'), 'w') as f:
+        f.write(render_template(
+            'docindex.jinja2',
+            classes=class_names,
+        ))
+    with open(join(GEN_OUTPUT_DIR, 'docs', 'conf.py'), 'w') as f:
+        f.write(render_template('rstconf.jinja2'))

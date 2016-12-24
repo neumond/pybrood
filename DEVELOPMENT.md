@@ -7,6 +7,9 @@ I'm afraid I could forget something important, thus I've decided to keep it as i
 - generate pythonic doc.
 - make installable binary via pip.
 - test custom printing methods.
+- check there's no 'None' in enumerations/object enumerations.
+
+`sphinx-build . -b html _build/html`
 
 ## Internals
 

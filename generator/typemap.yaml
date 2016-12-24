@@ -1,0 +1,78 @@
+bool:
+  'false': 'False'
+  'true': 'True'
+int:
+  '1': '1'
+  '0': '0'
+  '999999': '999999'
+  '-2': '-2'
+  '64': '64'
+double:
+  _name: float
+size_t:
+  _name: int
+
+'std::string': &str
+  _name: str
+'std::string &': *str
+'char *': *str
+char: *str
+
+'py::list':
+  _name: list
+
+Player:
+  nullptr: 'None'
+UnitType:
+  'UnitTypes::AllUnits': 'UnitTypes.AllUnits'
+  'UnitTypes::None': 'UnitTypes.None'
+'Pybrood::UniversalPosition':
+  _name: 'Tuple[int, int]'
+  'Pybrood::Positions::Unknown': 'POSITION_UNKNOWN'
+  'Pybrood::TilePositions::None': 'TILEPOSITION_NONE'
+'Bulletset&':
+  _name: Bulletset
+'Forceset&':
+  _name: Forceset
+Region: {}
+'Regionset &':
+  _name: Regionset
+Color: {}
+Unit:
+  nullptr: 'None'
+Unitset: &unitset
+  _name: Unitset
+'Unitset&': *unitset
+'Unitset &': *unitset
+Playerset: &playerset
+  _name: Playerset
+'Playerset&': *playerset
+TechType: {}
+Race:
+  'Races::None': 'Races.None'
+WeaponType: {}
+Order: {}
+'CoordinateType::Enum':
+  _name: CoordinateType
+Error:
+  'Errors::None': 'Errors.None'
+UnitCommandType: {}
+UpgradeType: {}
+Force: {}
+GameType: {}
+MouseButton: {}
+Key: {}
+UnitSizeType: {}
+DamageType: {}
+ExplosionType: {}
+BulletType: {}
+PlayerType: {}
+'UnitType::list':
+  _name: 'List[UnitType]'
+'std::pair< UnitType, int >':
+  _name: 'Tuple[UnitType, int]'
+'std::map< UnitType, int >&':
+  _name: 'Dict[UnitType, int]'
+'Text::Size::Enum':
+  _name: 'TextSize'
+  'Text::Size::Default': 'TextSize.Default'
