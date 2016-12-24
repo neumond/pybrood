@@ -1,5 +1,7 @@
 # Pybrood
 
+[![docs](https://readthedocs.org/projects/pybrood/badge/?version=latest)](http://pybrood.readthedocs.io/en/latest/)
+
 Binding made as from-scratch code generator, outputting msvc project.
 
 ## Requirements
@@ -45,4 +47,4 @@ Otherwise you can use usual cmd shell.
 
 ## Documentation
 
-In progress..
+[Read the docs](http://pybrood.readthedocs.io/en/latest/)
