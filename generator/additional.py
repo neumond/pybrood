@@ -28,3 +28,13 @@ def make_constructable(py_class_name, class_data):
             ],
             'ret_code': 'new (&instance) Color({_args});',
         })
+
+
+def make_equality_op(class_data, class_name):
+    class_data['methods'].append({
+        'name': '__eq__',
+        'rconst': False, 'rtype': 'bool', 'selfconst': False, 'args': [
+            {'const': False, 'type': class_name + '&', 'name': 'other', 'opt_value': None},
+        ],
+        'ret_code': 'return instance.getID() == other.getID();',
+    })

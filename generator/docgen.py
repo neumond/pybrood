@@ -30,7 +30,7 @@ def format_arg(a):
 def make_docs_for_class(class_data, class_name):
     output = []
     for func in class_data['methods']:
-        if func['name'] in ('__iter__', '__len__'):
+        if func['name'] in ('__iter__', '__len__', '__eq__'):
             continue
         if func['rtype'] != 'void' and func['rtype'] not in TYPE_MAP:
             print('Unrecognized type', func['rtype'])
