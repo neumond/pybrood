@@ -15,3 +15,16 @@ def improve_container_class(class_data):
         'rconst': False, 'rtype': 'size_t', 'selfconst': False, 'args': [],
         'ret_code': 'return instance.size();',
     })
+
+
+def make_constructable(py_class_name, class_data):
+    if py_class_name == 'Color':
+        class_data['methods'].insert(0, {
+            'name': '__init__',
+            'rconst': False, 'rtype': 'void', 'selfconst': False, 'args': [
+                {'const': False, 'type': 'int', 'name': 'red', 'opt_value': None},
+                {'const': False, 'type': 'int', 'name': 'green', 'opt_value': None},
+                {'const': False, 'type': 'int', 'name': 'blue', 'opt_value': None},
+            ],
+            'ret_code': 'new (&instance) Color({_args});',
+        })

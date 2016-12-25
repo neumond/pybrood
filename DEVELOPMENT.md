@@ -4,7 +4,6 @@ I'm afraid I could forget something important, thus I've decided to keep it as i
 ## TODO:
 
 - make installable binary via pip.
-- make color constructor.
 - tutorial like http://sscaitournament.com/index.php?action=tutorial
 - enrich docs with comments from BWAPI headers.
 

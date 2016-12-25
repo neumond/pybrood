@@ -56,6 +56,8 @@ class TestAI(BaseAI):
 
         game.print('suka')
 
+        print(pybrood.Color(255, 0, 0).getName())
+
     def frame(self):
         sleep(0.05)
 

@@ -9,7 +9,7 @@ from .parser import parse_pureenums, parse_classes, parse_objenums
 from .proxy_replacements import custom_replacements
 from .common import get_full_argtype, get_full_rettype, make_overload_signature
 from .typereplacer2 import arg_replacer, func_replacer, DiscardFunction
-from .additional import improve_container_class
+from .additional import improve_container_class, make_constructable
 from .docgen import make_docs_for_class
 
 
@@ -141,6 +141,7 @@ def render_classes():
         make_typereplacing(v)
         if py_name in ITERABLE_CLASSES:
             improve_container_class(v)
+        make_constructable(py_name, v)
 
         # here changes are locked, further calls only generate some "output" values
         make_overload_signatures(v, c)
