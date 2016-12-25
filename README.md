@@ -72,9 +72,17 @@ Otherwise you can use usual cmd shell.
 1. Setup paths in [config.py](generator/config.py).
 2. Run the generator `python3.5 -m generator`.
 3. `cd` to freshly generated `output` folder and run `build.bat` (it's just the same msbuild command).
-4. Now you can copy/symlink `output/Release/pybrood.pyd` into directory with your code.
-   It will be importable as usual python module: `import pybrood`.
+4. Copy/symlink `output/Release/inner.pyd` into `pybrood` directory.
+   `inner.pyd` is a required submodule of `pybrood`.
+5. Now you should be able to `import pybrood`.
 
 ## Documentation
 
 [Read the docs](http://pybrood.readthedocs.io/en/latest/)
+
+You can also build your local copy of documentation after running the generator:
+
+```
+cd output/docs/
+sphinx-build . -b html _build/html
+```

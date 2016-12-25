@@ -2,3 +2,4 @@
 /output/
 *.pyc
 __pycache__/
+/pybrood/inner.pyd

@@ -2,6 +2,9 @@ from pathlib import PureWindowsPath
 from os.path import join, relpath
 
 
+CPP_MODULE_NAME = 'inner'
+
+
 # paths used at code generation stage
 
 GEN_OUTPUT_DIR = 'output'

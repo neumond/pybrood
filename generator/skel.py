@@ -3,7 +3,7 @@ from os.path import join, isdir
 from collections import defaultdict, OrderedDict
 from shutil import rmtree
 
-from .config import GEN_OUTPUT_DIR, VCXProjectConfig
+from .config import GEN_OUTPUT_DIR, VCXProjectConfig, CPP_MODULE_NAME
 from .utils import render_template, indent_lines
 from .parser import parse_pureenums, parse_classes, parse_objenums
 from .proxy_replacements import custom_replacements
@@ -206,18 +206,20 @@ def main():
 
     makedir(GEN_OUTPUT_DIR)
 
-    with open(join(GEN_OUTPUT_DIR, 'pybrood.cpp'), 'w') as f:
+    with open(join(GEN_OUTPUT_DIR, '{}.cpp'.format(CPP_MODULE_NAME)), 'w') as f:
         f.write(render_template(
             'pybrood_cpp.jinja2',
             pureenums=pureenums,
             classes=classes,
             objenums=objenums,
+            cpp_module_name=CPP_MODULE_NAME,
         ))
 
-    with open(join(GEN_OUTPUT_DIR, 'pybrood.vcxproj'), 'w') as f:
+    with open(join(GEN_OUTPUT_DIR, '{}.vcxproj'.format(CPP_MODULE_NAME)), 'w') as f:
         f.write(render_template(
             'vcproj.jinja2',
             config=VCXProjectConfig,
+            cpp_module_name=CPP_MODULE_NAME,
         ))
 
     with open(join(GEN_OUTPUT_DIR, 'build.bat'), 'w') as f:

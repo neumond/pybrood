@@ -34,8 +34,8 @@ namespace Pybrood {
     {%- endfor %}
 }
 
-PYBIND11_PLUGIN(pybrood) {
-    py::module m("pybrood", "BWAPI module bridge");
+PYBIND11_PLUGIN({{ cpp_module_name }}) {
+    py::module m("{{ cpp_module_name }}", "BWAPI module bridge");
     {% for t in ('', 'Walk', 'Tile') %}
     m.attr("{{ t|upper }}POSITION_SCALE") = py::cast(BWAPI::{{ t|upper }}POSITION_SCALE);
     {%- for k in ('Invalid', 'None', 'Unknown', 'Origin') %}
