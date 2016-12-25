@@ -1,5 +1,8 @@
-/example/pybrood.pyd
 /output/
 *.pyc
 __pycache__/
 /pybrood/inner.pyd
+/build/
+/*.egg-info/
+/dist/
+README.rst
