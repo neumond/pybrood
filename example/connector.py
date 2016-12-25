@@ -18,6 +18,9 @@ def connection_checker():
         reconnect()
 
 
+# TODO: Re-instantiate AI for every game
+
+
 class BaseAI:
     def prepare(self):
         pass
@@ -50,6 +53,8 @@ class TestAI(BaseAI):
         units = game.getAllUnits()
         for u in units:
             print('Unit', u.getID(), u.getType().getName(), u.getPosition(), u.getTilePosition())
+
+        game.print('suka')
 
     def frame(self):
         sleep(0.05)

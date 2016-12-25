@@ -3,11 +3,10 @@ I'm afraid I could forget something important, thus I've decided to keep it as i
 
 ## TODO:
 
-- generate pythonic doc.
 - make installable binary via pip.
-- test custom printing (printf) methods.
-- check there's no 'None' in enumerations/object enumerations.
 - make color constructor.
+- tutorial like http://sscaitournament.com/index.php?action=tutorial
+- enrich docs with comments from BWAPI headers.
 
 `sphinx-build . -b html _build/html`
 

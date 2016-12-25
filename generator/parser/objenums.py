@@ -98,11 +98,19 @@ def parse_object_enums():
     return {k: take_enums(v()) for k, v in vars().items()}
 
 
+def transform_objenum_names(items):
+    for item in items:
+        if item == 'None':
+            yield 'None_'  # None is python keyword
+        else:
+            yield item
+
+
 def main():
     result = {}
     for k, v in parse_object_enums().items():
         result[k] = {
-            'items': v,
+            'items': list(zip(v, transform_objenum_names(v))),
             'namespace': OBJ_ENUM_NS_MAP[k],
         }
     return result

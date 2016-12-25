@@ -14,7 +14,7 @@ Enumeration
 -----------
 
 .. py:data:: pybrood.{{ class_name }}s
-{% for e in enum['items'] %}
+{% for _, e in enum['items'] %}
     .. py:attribute:: {{ e }}
 {%- endfor %}
 {% endif %}
