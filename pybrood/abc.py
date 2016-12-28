@@ -29,7 +29,7 @@ class BaseAI:
         pass
 
 
-def run(cls: BaseAI):
+def run(cls: BaseAI, once=False):
     print('Connecting...')
     reconnect()
     while True:
@@ -44,3 +44,5 @@ def run(cls: BaseAI):
             connection_checker()
         ai.finished()
         print('Game ended')
+        if once:
+            break

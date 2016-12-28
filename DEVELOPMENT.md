@@ -3,9 +3,10 @@ I'm afraid I could forget something important, thus I've decided to keep it as i
 
 ## TODO:
 
-- make installable binary via pip.
 - tutorial like http://sscaitournament.com/index.php?action=tutorial
 - enrich docs with comments from BWAPI headers.
+- designate different position types in docs.
+- remove methods requiring position as tuple, if duplicate method with x,y available
 
 `sphinx-build . -b html _build/html`
 
