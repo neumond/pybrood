@@ -3,11 +3,11 @@ from os.path import join, isdir
 from collections import defaultdict, OrderedDict
 from shutil import rmtree
 
-from .config import GEN_OUTPUT_DIR, VCXProjectConfig, CPP_MODULE_NAME
+from .config import GEN_OUTPUT_DIR, VCXProjectConfig
 from .utils import render_template, indent_lines
 from .parser import parse_pureenums, parse_classes, parse_objenums
 from .proxy_replacements import custom_replacements
-from .common import get_full_argtype, get_full_rettype, make_overload_signature
+from .common import CPP_MODULE_NAME, get_full_argtype, get_full_rettype, make_overload_signature
 from .typereplacer2 import arg_replacer, func_replacer, DiscardFunction
 from .additional import improve_container_class, make_constructable, make_equality_op
 from .docgen import make_docs_for_class

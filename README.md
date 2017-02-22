@@ -42,7 +42,7 @@ Otherwise you can use usual cmd shell.
 
 1. Make some changes in bwapi source files first:
 
-   - little fix in `bwapi/include/BWAPI/SetContainer.h:54`:
+   - little fix in `bwapi/include/BWAPI/SetContainer.h:53`:
      at very end of class add
 
      ```
@@ -85,7 +85,8 @@ Otherwise you can use usual cmd shell.
 
 #### Building Pybrood
 
-1. Setup paths in [config.py](generator/config.py).
+0. `pip install -r generator/requirements.txt`
+1. Setup paths in [generator/config.py](generator/config.py).
 2. Run the generator `python3.5 -m generator`.
 3. `cd` to freshly generated `output` folder and run `build.bat` (it's just the same msbuild command).
 4. Copy/symlink `output/Release/inner.pyd` into `pybrood` directory.
