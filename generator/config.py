@@ -11,8 +11,9 @@ BWAPI_INCLUDE_DIR = join(BWAPI_SOURCE_DIR, 'bwapi', 'include', 'BWAPI')
 # paths used at compilation stage
 # must be Windows-specific
 
+PYTHON_VERSION = '36'
 # default installation path for python libs
-PYTHON_DIR = PureWindowsPath('C:/Users/IEUser/AppData/Local/Programs/Python/Python35-32')
+PYTHON_DIR = PureWindowsPath('C:/Users/IEUser/AppData/Local/Programs/Python/Python{}-32'.format(PYTHON_VERSION))
 # your path to pybind11 here
 PYBIND_DIR = PureWindowsPath(relpath(join('..', 'pybind11'), GEN_OUTPUT_DIR))
 # your path to bwapi here
@@ -38,7 +39,7 @@ class VCXProjectConfig:
     RELEASE_LIBS = spaths(
         BWAPI_DIR.joinpath('bwapi', 'lib', 'BWAPI.lib'),
         BWAPI_DIR.joinpath('bwapi', 'lib', 'BWAPIClient.lib'),
-        PYTHON_DIR.joinpath('libs', 'python35.lib'),
+        PYTHON_DIR.joinpath('libs', 'python{}.lib'.format(PYTHON_VERSION)),
     )
     DEBUG_LIBS = spaths(
         BWAPI_DIR.joinpath('bwapi', 'lib', 'BWAPId.lib'),

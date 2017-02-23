@@ -19,7 +19,7 @@ if is_register_command(argv[1:]):
 
 setup(
     name='pybrood',
-    version='0.9.0',
+    version='0.9.1',
     description='Broodwar API binding',
     long_description=longdesc,
     url='https://github.com/neumond/pybrood',
@@ -31,6 +31,7 @@ setup(
         'Intended Audience :: Education',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         'Topic :: Games/Entertainment',
         'Operating System :: Microsoft :: Windows',
         'Operating System :: Microsoft :: Windows :: Windows 7',
