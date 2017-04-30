@@ -3,15 +3,11 @@ from .cdeclparser import lines_to_statements
 
 
 PURE_ENUM_MAP = {
-    'CoordinateType': 'BWAPI::CoordinateType::Enum',
-    'EventType': 'BWAPI::EventType::Enum',
-    'Flag': 'BWAPI::Flag::Enum',
-    'MouseButton': 'BWAPI::MouseButton',
-    'Key': 'BWAPI::Key',
-    'Latency': 'BWAPI::Latency::Enum',
-    'TournamentAction': 'BWAPI::Tournament::ActionID',
-    'TextColor': 'BWAPI::Text::Enum',
-    'TextSize': 'BWAPI::Text::Size::Enum',
+    'MouseButton': 'MouseButton',
+    'Key': 'Key',
+    'TournamentAction': 'Tournament::ActionID',
+    'TextColor': 'Text::Enum',
+    'TextSize': 'Text::Size::Enum',
 }
 
 
@@ -32,7 +28,7 @@ def parse_pure_enums(incflines):
         k = fn.__name__
         result[k] = {
             'items': take_pure_enums(fn()),
-            'bw_class_full': PURE_ENUM_MAP[k],
+            'bw_class_full': 'BWAPI::' + PURE_ENUM_MAP.get(k, '{}::Enum'.format(k)),
         }
         return fn
 

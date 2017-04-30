@@ -3,25 +3,6 @@ from .cdeclparser import lines_to_statements
 from ..utils import squash_spaces
 
 
-OBJ_ENUM_NS_MAP = {
-    'BulletType': 'BWAPI::BulletTypes::',
-    'Color': 'BWAPI::Colors::',
-    'DamageType': 'BWAPI::DamageTypes::',
-    'Error': 'BWAPI::Errors::',
-    'ExplosionType': 'BWAPI::ExplosionTypes::',
-    'GameType': 'BWAPI::GameTypes::',
-    'Order': 'BWAPI::Orders::',
-    'PlayerType': 'BWAPI::PlayerTypes::',
-    'Race': 'BWAPI::Races::',
-    'TechType': 'BWAPI::TechTypes::',
-    'UnitCommandType': 'BWAPI::UnitCommandTypes::',
-    'UnitSizeType': 'BWAPI::UnitSizeTypes::',
-    'UnitType': 'BWAPI::UnitTypes::',
-    'UpgradeType': 'BWAPI::UpgradeTypes::',
-    'WeaponType': 'BWAPI::WeaponTypes::',
-}
-
-
 def take_enums(line_gen):
     result = []
     for expr in lines_to_statements(line_gen):
@@ -51,7 +32,7 @@ def parse_object_enums(incflines):
         v = take_enums(fn())
         result[k] = {
             'items': list(zip(v, transform_objenum_names(v))),
-            'namespace': OBJ_ENUM_NS_MAP[k],
+            'namespace': 'BWAPI::{}s::'.format(k),
         }
         return fn
 

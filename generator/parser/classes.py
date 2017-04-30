@@ -2,37 +2,6 @@ from collections import OrderedDict
 from .cdeclparser import lines_to_statements, parse_func
 
 
-CLASS_MAP = {
-    'Bullet': 'BWAPI::Bullet',
-    'Bulletset': 'BWAPI::Bulletset',
-    'BulletType': 'BWAPI::BulletType',
-    'Client': 'BWAPI::Client',
-    'Color': 'BWAPI::Color',
-    'DamageType': 'BWAPI::DamageType',
-    'Error': 'BWAPI::Error',
-    'ExplosionType': 'BWAPI::ExplosionType',
-    'Force': 'BWAPI::Force',
-    'Forceset': 'BWAPI::Forceset',
-    'Game': 'BWAPI::Game',
-    'GameType': 'BWAPI::GameType',
-    'Order': 'BWAPI::Order',
-    'Player': 'BWAPI::Player',
-    'Playerset': 'BWAPI::Playerset',
-    'PlayerType': 'BWAPI::PlayerType',
-    'Race': 'BWAPI::Race',
-    'Region': 'BWAPI::Region',
-    'Regionset': 'BWAPI::Regionset',
-    'TechType': 'BWAPI::TechType',
-    'Unit': 'BWAPI::Unit',
-    'UnitCommandType': 'BWAPI::UnitCommandType',
-    'Unitset': 'BWAPI::Unitset',
-    'UnitSizeType': 'BWAPI::UnitSizeType',
-    'UnitType': 'BWAPI::UnitType',
-    'UpgradeType': 'BWAPI::UpgradeType',
-    'WeaponType': 'BWAPI::WeaponType',
-}
-
-
 def take_functions(line_gen):
     return [fnc for fnc in map(parse_func, lines_to_statements(line_gen))]
 
@@ -49,7 +18,7 @@ def parse_classes(incflines):
         k = fn.__name__
         result[k] = {
             'methods': take_functions(fn()),
-            'bw_class_full': CLASS_MAP[k],
+            'bw_class_full': 'BWAPI::{}'.format(k),
         }
         return fn
 
