@@ -9,6 +9,7 @@ def is_register_command(a):
         return item in ('register', 'bdist_wheel')
     return False
 
+
 longdesc = None
 if is_register_command(argv[1:]):
     # run before building a wheel:
