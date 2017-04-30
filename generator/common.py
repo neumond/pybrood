@@ -1,6 +1,3 @@
-CPP_MODULE_NAME = 'inner'
-
-
 class DiscardFunction(Exception):
     pass
 

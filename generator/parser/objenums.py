@@ -1,4 +1,5 @@
-from .cdeclparser import lines_to_statements, incflines
+from collections import OrderedDict
+from .cdeclparser import lines_to_statements
 from ..utils import squash_spaces
 
 
@@ -34,70 +35,6 @@ def take_enums(line_gen):
     return result
 
 
-def parse_object_enums():
-    def BulletType():
-        f = incflines('BulletType.h')
-        yield from f(87, 123)
-
-    def Color():
-        f = incflines('Color.h')
-        yield from f(61, 95)
-
-    def DamageType():
-        f = incflines('DamageType.h')
-        yield from f(60, 66)
-
-    def Error():
-        f = incflines('Error.h')
-        yield from f(75, 102)
-
-    def ExplosionType():
-        f = incflines('ExplosionType.h')
-        yield from f(68, 92)
-
-    def GameType():
-        f = incflines('GameType.h')
-        yield from f(62, 76)
-
-    def Order():
-        f = incflines('Order.h')
-        yield from f(235, 390)
-
-    def PlayerType():
-        f = incflines('PlayerType.h')
-        yield from f(68, 78)
-
-    def Race():
-        f = incflines('Race.h')
-        yield from f(98, 103)
-
-    def TechType():
-        f = incflines('TechType.h')
-        yield from f(165, 210)
-
-    def UnitCommandType():
-        f = incflines('UnitCommandType.h')
-        yield from f(89, 134)
-
-    def UnitSizeType():
-        f = incflines('UnitSizeType.h')
-        yield from f(55, 60)
-
-    def UnitType():
-        f = incflines('UnitType.h')
-        yield from f(951, 1234)
-
-    def UpgradeType():
-        f = incflines('UpgradeType.h')
-        yield from f(183, 245)
-
-    def WeaponType():
-        f = incflines('WeaponType.h')
-        yield from f(330, 439)
-
-    return {k: take_enums(v()) for k, v in vars().items()}
-
-
 def transform_objenum_names(items):
     for item in items:
         if item == 'None':
@@ -106,11 +43,91 @@ def transform_objenum_names(items):
             yield item
 
 
-def main():
-    result = {}
-    for k, v in parse_object_enums().items():
+def parse_object_enums(incflines):
+    result = OrderedDict()
+
+    def add(fn):
+        k = fn.__name__
+        v = take_enums(fn())
         result[k] = {
             'items': list(zip(v, transform_objenum_names(v))),
             'namespace': OBJ_ENUM_NS_MAP[k],
         }
+        return fn
+
+    @add
+    def BulletType():
+        f = incflines('BulletType.h')
+        yield from f(87, 123)
+
+    @add
+    def Color():
+        f = incflines('Color.h')
+        yield from f(61, 95)
+
+    @add
+    def DamageType():
+        f = incflines('DamageType.h')
+        yield from f(60, 66)
+
+    @add
+    def Error():
+        f = incflines('Error.h')
+        yield from f(75, 102)
+
+    @add
+    def ExplosionType():
+        f = incflines('ExplosionType.h')
+        yield from f(68, 92)
+
+    @add
+    def GameType():
+        f = incflines('GameType.h')
+        yield from f(62, 76)
+
+    @add
+    def Order():
+        f = incflines('Order.h')
+        yield from f(235, 390)
+
+    @add
+    def PlayerType():
+        f = incflines('PlayerType.h')
+        yield from f(68, 78)
+
+    @add
+    def Race():
+        f = incflines('Race.h')
+        yield from f(98, 103)
+
+    @add
+    def TechType():
+        f = incflines('TechType.h')
+        yield from f(165, 210)
+
+    @add
+    def UnitCommandType():
+        f = incflines('UnitCommandType.h')
+        yield from f(89, 134)
+
+    @add
+    def UnitSizeType():
+        f = incflines('UnitSizeType.h')
+        yield from f(55, 60)
+
+    @add
+    def UnitType():
+        f = incflines('UnitType.h')
+        yield from f(951, 1234)
+
+    @add
+    def UpgradeType():
+        f = incflines('UpgradeType.h')
+        yield from f(183, 245)
+
+    @add
+    def WeaponType():
+        f = incflines('WeaponType.h')
+        yield from f(330, 439)
+
     return result

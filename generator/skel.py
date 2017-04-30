@@ -3,16 +3,15 @@ from os.path import join, isdir
 from collections import defaultdict, OrderedDict
 from shutil import rmtree
 
-from .config import GEN_OUTPUT_DIR, VCXProjectConfig
 from .utils import render_template, indent_lines
-from .parser import parse_pureenums, parse_classes, parse_objenums
 from .proxy_replacements import custom_replacements
-from .common import CPP_MODULE_NAME, get_full_argtype, get_full_rettype, make_overload_signature
+from .common import get_full_argtype, get_full_rettype, make_overload_signature
 from .typereplacer2 import arg_replacer, func_replacer, DiscardFunction
 from .additional import improve_container_class, make_constructable, make_equality_op
 from .docgen import make_docs_for_class
 
 
+CPP_MODULE_NAME = 'inner'
 NODELETE_CLASSES = {'Client', 'Bullet', 'Force', 'Player', 'Region', 'Unit'}
 UNPOINTED_CLASSES = {
     'Bullet': 'BulletInterface',
@@ -144,13 +143,12 @@ def make_modifiers(class_data):
             func['str_modifiers'] = ', '.join(func['modifiers'])
 
 
-def render_pureenums():
-    for py_name, v in parse_pureenums().items():
+def render_pureenums(enums):
+    for py_name, v in enums.items():
         yield render_template('pureenum.jinja2', py_name=py_name, **v)
 
 
-def render_classes():
-    all_classes = parse_classes()
+def render_classes(all_classes):
     for py_name, v in all_classes.items():
         is_game = py_name == 'Game'
         lambda_kw = {'not_instance': is_game}
@@ -186,32 +184,30 @@ def render_classes():
         )
 
 
-def render_objenums():
-    for py_name, v in parse_objenums().items():
+def render_objenums(enums):
+    for py_name, v in enums.items():
         yield render_template('objenum.jinja2', py_name=py_name, **v)
 
 
-def render_documentation(class_names, class_docs, objenums):
-    oenums = parse_objenums()
-
-    mkdir(join(GEN_OUTPUT_DIR, 'docs'))
-    mkdir(join(GEN_OUTPUT_DIR, 'docs', '_build'))
-    mkdir(join(GEN_OUTPUT_DIR, 'docs', '_static'))
-    mkdir(join(GEN_OUTPUT_DIR, 'docs', '_templates'))
+def render_documentation(output_dir, class_names, class_docs, objenums):
+    mkdir(join(output_dir, 'docs'))
+    mkdir(join(output_dir, 'docs', '_build'))
+    mkdir(join(output_dir, 'docs', '_static'))
+    mkdir(join(output_dir, 'docs', '_templates'))
     for cn, methods in zip(class_names, class_docs):
-        with open(join(GEN_OUTPUT_DIR, 'docs', cn.lower() + '.rst'), 'w') as f:
+        with open(join(output_dir, 'docs', cn.lower() + '.rst'), 'w') as f:
             f.write(render_template(
                 'docclass.jinja2',
                 class_name=cn,
                 methods=methods,
-                enum=oenums.get(cn)
+                enum=objenums.get(cn)
             ))
-    with open(join(GEN_OUTPUT_DIR, 'docs', 'index.rst'), 'w') as f:
+    with open(join(output_dir, 'docs', 'index.rst'), 'w') as f:
         f.write(render_template(
             'docindex.jinja2',
             classes=class_names,
         ))
-    with open(join(GEN_OUTPUT_DIR, 'docs', 'conf.py'), 'w') as f:
+    with open(join(output_dir, 'docs', 'conf.py'), 'w') as f:
         f.write(render_template('rstconf.jinja2'))
 
 
@@ -223,14 +219,14 @@ def makedir(*path):
         mkdir(path)
 
 
-def main():
-    pureenums = list(render_pureenums())
-    class_names, classes, class_docs = zip(*render_classes())
-    objenums = list(render_objenums())
+def main(parser, output_dir, VCXProjectConfig):
+    pureenums = list(render_pureenums(parser.get_pureenums()))
+    class_names, classes, class_docs = zip(*render_classes(parser.get_classes()))
+    objenums = list(render_objenums(parser.get_objenums()))
 
-    makedir(GEN_OUTPUT_DIR)
+    makedir(output_dir)
 
-    with open(join(GEN_OUTPUT_DIR, '{}.cpp'.format(CPP_MODULE_NAME)), 'w') as f:
+    with open(join(output_dir, '{}.cpp'.format(CPP_MODULE_NAME)), 'w') as f:
         f.write(render_template(
             'pybrood_cpp.jinja2',
             pureenums=pureenums,
@@ -239,14 +235,14 @@ def main():
             cpp_module_name=CPP_MODULE_NAME,
         ))
 
-    with open(join(GEN_OUTPUT_DIR, '{}.vcxproj'.format(CPP_MODULE_NAME)), 'w') as f:
+    with open(join(output_dir, '{}.vcxproj'.format(CPP_MODULE_NAME)), 'w') as f:
         f.write(render_template(
             'vcproj.jinja2',
             config=VCXProjectConfig,
             cpp_module_name=CPP_MODULE_NAME,
         ))
 
-    with open(join(GEN_OUTPUT_DIR, 'build.bat'), 'w') as f:
+    with open(join(output_dir, 'build.bat'), 'w') as f:
         f.write(VCXProjectConfig.MSBUILD_COMMAND)
 
-    render_documentation(class_names, class_docs, objenums)
+    render_documentation(output_dir, class_names, class_docs, parser.get_objenums())

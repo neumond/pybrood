@@ -1,4 +1,5 @@
-from .cdeclparser import lines_to_statements, incflines
+from collections import OrderedDict
+from .cdeclparser import lines_to_statements
 
 
 PURE_ENUM_MAP = {
@@ -24,51 +25,60 @@ def take_pure_enums(line_gen):
     return result
 
 
-def parse_pure_enums():
+def parse_pure_enums(incflines):
+    result = OrderedDict()
+
+    def add(fn):
+        k = fn.__name__
+        result[k] = {
+            'items': take_pure_enums(fn()),
+            'bw_class_full': PURE_ENUM_MAP[k],
+        }
+        return fn
+
+    @add
     def CoordinateType():
         f = incflines('CoordinateType.h')
         yield from f(10, 20)
 
+    @add
     def EventType():
         f = incflines('EventType.h')
         yield from f(10, 29)
 
+    @add
     def Flag():
         f = incflines('Flag.h')
         yield from f(12, 20)
 
+    @add
     def MouseButton():
         f = incflines('Input.h')
         yield from f(8, 11)
 
+    @add
     def Key():
         f = incflines('Input.h')
         yield from f(18, 249)
 
+    @add
     def Latency():
         f = incflines('Latency.h')
         yield from f(12, 18)
 
+    @add
     def TournamentAction():
         f = incflines('TournamentAction.h')
         yield from f(13, 50)
 
+    @add
     def TextColor():
         f = incflines('Color.h')
         yield from f(105, 185)
 
+    @add
     def TextSize():
         f = incflines('Color.h')
         yield from f(194, 204)
 
-    return {k: take_pure_enums(v()) for k, v in vars().items()}
-
-
-def main():
-    result = {}
-    for k, v in parse_pure_enums().items():
-        result[k] = {
-            'items': v,
-            'bw_class_full': PURE_ENUM_MAP[k],
-        }
     return result

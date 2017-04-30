@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from .cdeclparser import lines_to_statements, parse_func, incflines
+from .cdeclparser import lines_to_statements, parse_func
 
 
 CLASS_MAP = {
@@ -42,11 +42,15 @@ def type_lines():
     yield 'const std::string &getName() const;'
 
 
-def parse_classes():
-    ITEMS = OrderedDict()
+def parse_classes(incflines):
+    result = OrderedDict()
 
     def add(fn):
-        ITEMS[fn.__name__] = fn
+        k = fn.__name__
+        result[k] = {
+            'methods': take_functions(fn()),
+            'bw_class_full': CLASS_MAP[k],
+        }
         return fn
 
     @add
@@ -193,14 +197,4 @@ def parse_classes():
         f = incflines('Client', 'Client.h')
         yield from f(20, 23)
 
-    return OrderedDict((k, take_functions(v())) for k, v in ITEMS.items())
-
-
-def main():
-    result = OrderedDict()
-    for k, v in parse_classes().items():
-        result[k] = {
-            'methods': v,
-            'bw_class_full': CLASS_MAP[k],
-        }
     return result
