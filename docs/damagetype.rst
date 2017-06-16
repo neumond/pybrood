@@ -7,9 +7,7 @@ Class
 .. py:class:: pybrood.DamageType
 
     .. py:method:: getID() -> int
-
     .. py:method:: getName() -> str
-
 
 
 Enumeration
@@ -22,5 +20,5 @@ Enumeration
     .. py:attribute:: Concussive
     .. py:attribute:: Normal
     .. py:attribute:: Ignore_Armor
-    .. py:attribute:: None
+    .. py:attribute:: None_
     .. py:attribute:: Unknown

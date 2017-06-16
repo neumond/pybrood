@@ -7,9 +7,7 @@ Class
 .. py:class:: pybrood.GameType
 
     .. py:method:: getID() -> int
-
     .. py:method:: getName() -> str
-
 
 
 Enumeration
@@ -30,5 +28,5 @@ Enumeration
     .. py:attribute:: Team_Free_For_All
     .. py:attribute:: Team_Capture_The_Flag
     .. py:attribute:: Top_vs_Bottom
-    .. py:attribute:: None
+    .. py:attribute:: None_
     .. py:attribute:: Unknown

@@ -7,33 +7,19 @@ Class
 .. py:class:: pybrood.TechType
 
     .. py:method:: getID() -> int
-
     .. py:method:: getName() -> str
-
     .. py:method:: getRace() -> Race
-
     .. py:method:: mineralPrice() -> int
-
     .. py:method:: gasPrice() -> int
-
     .. py:method:: researchTime() -> int
-
     .. py:method:: energyCost() -> int
-
     .. py:method:: whatResearches() -> UnitType
-
     .. py:method:: getWeapon() -> WeaponType
-
     .. py:method:: targetsUnit() -> bool
-
     .. py:method:: targetsPosition() -> bool
-
     .. py:method:: whatUses() -> list
-
     .. py:method:: getOrder() -> Order
-
     .. py:method:: requiredUnit() -> UnitType
-
 
 
 Enumeration
@@ -75,5 +61,5 @@ Enumeration
     .. py:attribute:: Dark_Archon_Meld
     .. py:attribute:: Feedback
     .. py:attribute:: Maelstrom
-    .. py:attribute:: None
+    .. py:attribute:: None_
     .. py:attribute:: Unknown

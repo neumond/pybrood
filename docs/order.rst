@@ -7,9 +7,7 @@ Class
 .. py:class:: pybrood.Order
 
     .. py:method:: getID() -> int
-
     .. py:method:: getName() -> str
-
 
 
 Enumeration
@@ -171,5 +169,5 @@ Enumeration
     .. py:attribute:: CastMaelstrom
     .. py:attribute:: JunkYardDog
     .. py:attribute:: Fatal
-    .. py:attribute:: None
+    .. py:attribute:: None_
     .. py:attribute:: Unknown

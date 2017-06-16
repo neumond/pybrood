@@ -7,31 +7,18 @@ Class
 .. py:class:: pybrood.UpgradeType
 
     .. py:method:: getID() -> int
-
     .. py:method:: getName() -> str
-
     .. py:method:: getRace() -> Race
-
     .. py:method:: mineralPrice(level: int=1) -> int
-
     .. py:method:: mineralPriceFactor() -> int
-
     .. py:method:: gasPrice(level: int=1) -> int
-
     .. py:method:: gasPriceFactor() -> int
-
     .. py:method:: upgradeTime(level: int=1) -> int
-
     .. py:method:: upgradeTimeFactor() -> int
-
     .. py:method:: maxRepeats() -> int
-
     .. py:method:: whatUpgrades() -> UnitType
-
     .. py:method:: whatsRequired(level: int=1) -> UnitType
-
     .. py:method:: whatUses() -> list
-
 
 
 Enumeration
@@ -90,5 +77,5 @@ Enumeration
     .. py:attribute:: Argus_Jewel
     .. py:attribute:: Argus_Talisman
     .. py:attribute:: Upgrade_60
-    .. py:attribute:: None
+    .. py:attribute:: None_
     .. py:attribute:: Unknown

@@ -7,13 +7,9 @@ Class
 .. py:class:: pybrood.PlayerType
 
     .. py:method:: getID() -> int
-
     .. py:method:: getName() -> str
-
     .. py:method:: isLobbyType() -> bool
-
     .. py:method:: isGameType() -> bool
-
 
 
 Enumeration
@@ -21,7 +17,7 @@ Enumeration
 
 .. py:data:: pybrood.PlayerTypes
 
-    .. py:attribute:: None
+    .. py:attribute:: None_
     .. py:attribute:: Computer
     .. py:attribute:: Player
     .. py:attribute:: RescuePassive

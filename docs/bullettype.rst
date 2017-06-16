@@ -7,9 +7,7 @@ Class
 .. py:class:: pybrood.BulletType
 
     .. py:method:: getID() -> int
-
     .. py:method:: getName() -> str
-
 
 
 Enumeration
@@ -52,5 +50,5 @@ Enumeration
     .. py:attribute:: Subterranean_Spines
     .. py:attribute:: Corrosive_Acid_Shot
     .. py:attribute:: Neutron_Flare
-    .. py:attribute:: None
+    .. py:attribute:: None_
     .. py:attribute:: Unknown

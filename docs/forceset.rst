@@ -8,4 +8,3 @@ Class
 
     .. py:method:: getPlayers() -> Playerset
 
-

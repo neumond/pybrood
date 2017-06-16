@@ -6,16 +6,12 @@ Class
 
 .. py:class:: pybrood.Color
 
+    .. py:method:: __init__(red: int, green: int, blue: int)
     .. py:method:: getID() -> int
-
     .. py:method:: getName() -> str
-
     .. py:method:: red() -> int
-
     .. py:method:: green() -> int
-
     .. py:method:: blue() -> int
-
 
 
 Enumeration

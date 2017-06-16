@@ -7,9 +7,7 @@ Class
 .. py:class:: pybrood.UnitSizeType
 
     .. py:method:: getID() -> int
-
     .. py:method:: getName() -> str
-
 
 
 Enumeration
@@ -21,5 +19,5 @@ Enumeration
     .. py:attribute:: Small
     .. py:attribute:: Medium
     .. py:attribute:: Large
-    .. py:attribute:: None
+    .. py:attribute:: None_
     .. py:attribute:: Unknown

@@ -7,9 +7,7 @@ Class
 .. py:class:: pybrood.UnitCommandType
 
     .. py:method:: getID() -> int
-
     .. py:method:: getName() -> str
-
 
 
 Enumeration
@@ -61,5 +59,5 @@ Enumeration
     .. py:attribute:: Use_Tech_Position
     .. py:attribute:: Use_Tech_Unit
     .. py:attribute:: Place_COP
-    .. py:attribute:: None
+    .. py:attribute:: None_
     .. py:attribute:: Unknown

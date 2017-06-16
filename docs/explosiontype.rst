@@ -7,9 +7,7 @@ Class
 .. py:class:: pybrood.ExplosionType
 
     .. py:method:: getID() -> int
-
     .. py:method:: getName() -> str
-
 
 
 Enumeration
@@ -17,7 +15,7 @@ Enumeration
 
 .. py:data:: pybrood.ExplosionTypes
 
-    .. py:attribute:: None
+    .. py:attribute:: None_
     .. py:attribute:: Normal
     .. py:attribute:: Radial_Splash
     .. py:attribute:: Enemy_Splash

@@ -7,55 +7,30 @@ Class
 .. py:class:: pybrood.WeaponType
 
     .. py:method:: getID() -> int
-
     .. py:method:: getName() -> str
-
     .. py:method:: getTech() -> TechType
-
     .. py:method:: whatUses() -> UnitType
-
     .. py:method:: damageAmount() -> int
-
     .. py:method:: damageBonus() -> int
-
     .. py:method:: damageCooldown() -> int
-
     .. py:method:: damageFactor() -> int
-
     .. py:method:: upgradeType() -> UpgradeType
-
     .. py:method:: damageType() -> DamageType
-
     .. py:method:: explosionType() -> ExplosionType
-
     .. py:method:: minRange() -> int
-
     .. py:method:: maxRange() -> int
-
     .. py:method:: innerSplashRadius() -> int
-
     .. py:method:: medianSplashRadius() -> int
-
     .. py:method:: outerSplashRadius() -> int
-
     .. py:method:: targetsAir() -> bool
-
     .. py:method:: targetsGround() -> bool
-
     .. py:method:: targetsMechanical() -> bool
-
     .. py:method:: targetsOrganic() -> bool
-
     .. py:method:: targetsNonBuilding() -> bool
-
     .. py:method:: targetsNonRobotic() -> bool
-
     .. py:method:: targetsTerrain() -> bool
-
     .. py:method:: targetsOrgOrMech() -> bool
-
     .. py:method:: targetsOwn() -> bool
-
 
 
 Enumeration
@@ -163,5 +138,5 @@ Enumeration
     .. py:attribute:: Feedback
     .. py:attribute:: Optical_Flare
     .. py:attribute:: Maelstrom
-    .. py:attribute:: None
+    .. py:attribute:: None_
     .. py:attribute:: Unknown

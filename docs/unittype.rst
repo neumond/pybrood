@@ -7,169 +7,88 @@ Class
 .. py:class:: pybrood.UnitType
 
     .. py:method:: getID() -> int
-
     .. py:method:: getName() -> str
-
     .. py:method:: getRace() -> Race
-
     .. py:method:: whatBuilds() -> Tuple[UnitType, int]
-
     .. py:method:: requiredUnits() -> Dict[UnitType, int]
-
     .. py:method:: requiredTech() -> TechType
-
     .. py:method:: cloakingTech() -> TechType
-
     .. py:method:: abilities() -> list
-
     .. py:method:: upgrades() -> list
-
     .. py:method:: armorUpgrade() -> UpgradeType
-
     .. py:method:: maxHitPoints() -> int
-
     .. py:method:: maxShields() -> int
-
     .. py:method:: maxEnergy() -> int
-
     .. py:method:: armor() -> int
-
     .. py:method:: mineralPrice() -> int
-
     .. py:method:: gasPrice() -> int
-
     .. py:method:: buildTime() -> int
-
     .. py:method:: supplyRequired() -> int
-
     .. py:method:: supplyProvided() -> int
-
     .. py:method:: spaceRequired() -> int
-
     .. py:method:: spaceProvided() -> int
-
     .. py:method:: buildScore() -> int
-
     .. py:method:: destroyScore() -> int
-
     .. py:method:: size() -> UnitSizeType
-
     .. py:method:: tileWidth() -> int
-
     .. py:method:: tileHeight() -> int
-
     .. py:method:: tileSize() -> Tuple[int, int]
-
     .. py:method:: dimensionLeft() -> int
-
     .. py:method:: dimensionUp() -> int
-
     .. py:method:: dimensionRight() -> int
-
     .. py:method:: dimensionDown() -> int
-
     .. py:method:: width() -> int
-
     .. py:method:: height() -> int
-
     .. py:method:: seekRange() -> int
-
     .. py:method:: sightRange() -> int
-
     .. py:method:: groundWeapon() -> WeaponType
-
     .. py:method:: maxGroundHits() -> int
-
     .. py:method:: airWeapon() -> WeaponType
-
     .. py:method:: maxAirHits() -> int
-
     .. py:method:: topSpeed() -> float
-
     .. py:method:: acceleration() -> int
-
     .. py:method:: haltDistance() -> int
-
     .. py:method:: turnRadius() -> int
-
     .. py:method:: canProduce() -> bool
-
     .. py:method:: canAttack() -> bool
-
     .. py:method:: canMove() -> bool
-
     .. py:method:: isFlyer() -> bool
-
     .. py:method:: regeneratesHP() -> bool
-
     .. py:method:: isSpellcaster() -> bool
-
     .. py:method:: hasPermanentCloak() -> bool
-
     .. py:method:: isInvincible() -> bool
-
     .. py:method:: isOrganic() -> bool
-
     .. py:method:: isMechanical() -> bool
-
     .. py:method:: isRobotic() -> bool
-
     .. py:method:: isDetector() -> bool
-
     .. py:method:: isResourceContainer() -> bool
-
     .. py:method:: isResourceDepot() -> bool
-
     .. py:method:: isRefinery() -> bool
-
     .. py:method:: isWorker() -> bool
-
     .. py:method:: requiresPsi() -> bool
-
     .. py:method:: requiresCreep() -> bool
-
     .. py:method:: isTwoUnitsInOneEgg() -> bool
-
     .. py:method:: isBurrowable() -> bool
-
     .. py:method:: isCloakable() -> bool
-
     .. py:method:: isBuilding() -> bool
-
     .. py:method:: isAddon() -> bool
-
     .. py:method:: isFlyingBuilding() -> bool
-
     .. py:method:: isNeutral() -> bool
-
     .. py:method:: isHero() -> bool
-
     .. py:method:: isPowerup() -> bool
-
     .. py:method:: isBeacon() -> bool
-
     .. py:method:: isFlagBeacon() -> bool
-
     .. py:method:: isSpecialBuilding() -> bool
-
     .. py:method:: isSpell() -> bool
-
     .. py:method:: producesCreep() -> bool
-
     .. py:method:: producesLarva() -> bool
-
     .. py:method:: isMineralField() -> bool
-
     .. py:method:: isCritter() -> bool
-
     .. py:method:: canBuildAddon() -> bool
-
     .. py:method:: buildsWhat() -> list
-
     .. py:method:: researchesWhat() -> list
-
     .. py:method:: upgradesWhat() -> list
-
+    .. py:method:: isSuccessorOf(type: UnitType) -> bool
 
 
 Enumeration
@@ -382,7 +301,7 @@ Enumeration
     .. py:attribute:: Special_Map_Revealer
     .. py:attribute:: Special_Mercenary_Gunship
     .. py:attribute:: Special_Start_Location
-    .. py:attribute:: None
+    .. py:attribute:: None_
     .. py:attribute:: AllUnits
     .. py:attribute:: Men
     .. py:attribute:: Buildings

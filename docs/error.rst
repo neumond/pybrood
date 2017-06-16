@@ -7,9 +7,7 @@ Class
 .. py:class:: pybrood.Error
 
     .. py:method:: getID() -> int
-
     .. py:method:: getName() -> str
-
 
 
 Enumeration
@@ -43,5 +41,5 @@ Enumeration
     .. py:attribute:: Access_Denied
     .. py:attribute:: File_Not_Found
     .. py:attribute:: Invalid_Parameter
-    .. py:attribute:: None
+    .. py:attribute:: None_
     .. py:attribute:: Unknown
