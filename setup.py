@@ -20,7 +20,7 @@ if is_register_command(argv[1:]):
 
 setup(
     name='pybrood',
-    version='0.9.1',
+    version='0.9.2',
     description='Broodwar API binding',
     long_description=longdesc,
     url='https://github.com/neumond/pybrood',

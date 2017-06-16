@@ -42,15 +42,6 @@ Otherwise you can use usual cmd shell.
 
 1. Make some changes in bwapi source files first:
 
-   - little fix in `bwapi/include/BWAPI/SetContainer.h:53`:
-     at very end of class add
-
-     ```
-     SetContainer& operator=(const SetContainer&) = default;
-     ```
-
-     to get rid of "attempting to reference a deleted function" error.
-
    - disable mass file copying in `bwapi/BWAPILIB/BWAPILIB.vcxproj`:
 
      - line 64: `<PreLinkEvent>` → `<!-- PreLinkEvent>`
@@ -58,7 +49,14 @@ Otherwise you can use usual cmd shell.
 
    - create file `bwapi/svnrev.h`:
 
+     Figure out revision number:
+
+     ```bash
+     cd bwapi
+     echo $(( $(git rev-list HEAD --count) + 2383 ))
      ```
+
+     ```cpp
      static const int SVN_REV = 4708;
      #include "starcraftver.h"
      ```

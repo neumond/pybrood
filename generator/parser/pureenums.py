@@ -75,6 +75,6 @@ def parse_pure_enums(incflines):
     @add
     def TextSize():
         f = incflines('Color.h')
-        yield from f(194, 204)
+        yield from f(202, 212)
 
     return result

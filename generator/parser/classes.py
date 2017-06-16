@@ -62,7 +62,8 @@ def parse_classes(incflines):
     def Race():
         yield from type_lines()
         f = incflines('Race.h')
-        yield from f(46, 87)
+        yield from f(46, 62)
+        yield from f(72, 97)
 
     @add
     def TechType():
@@ -82,7 +83,7 @@ def parse_classes(incflines):
     def UnitType():
         yield from type_lines()
         f = incflines('UnitType.h')
-        yield from f(279, 902)
+        yield from f(279, 914)
 
     @add
     def UpgradeType():
@@ -111,7 +112,7 @@ def parse_classes(incflines):
     @add
     def Player():
         f = incflines('Player.h')
-        yield from f(38, 641)
+        yield from f(38, 646)
 
     @add
     def Playerset():
@@ -121,7 +122,7 @@ def parse_classes(incflines):
     @add
     def Region():
         f = incflines('Region.h')
-        yield from f(30, 132)
+        yield from f(30, 134)
 
     @add
     def Regionset():
@@ -131,12 +132,12 @@ def parse_classes(incflines):
     @add
     def Unit():
         f = incflines('Unit.h')
-        yield from f(60, 2458)
+        yield from f(59, 2573)
 
     @add
     def Unitset():
         f = incflines('Unitset.h')
-        yield from f(27, 183)
+        yield from f(32, 198)
 
     @add
     def Force():
@@ -153,11 +154,13 @@ def parse_classes(incflines):
     @add
     def Game():
         f = incflines('Game.h')
-        yield from f(55, 783)
-        # skipping variadic printf-like functions
-        yield from f(801, 811)
-        yield from f(825, 834)
-        yield from f(852, 1705)
+        yield from f(55, 786)
+        # skipping variadic printf ...
+        yield from f(805, 814)  # vPrintf
+        # skipping variadic sendText ...
+        yield from f(829, 838)  # vSendText
+        # skipping variadic sendTextEx ...
+        yield from f(856, 1728)  # vSendTextEx and further
         # TODO: iostream operator <<
         # TODO: flush()
 

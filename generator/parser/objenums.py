@@ -7,12 +7,25 @@ def take_enums(line_gen):
     result = []
     for expr in lines_to_statements(line_gen):
         expr = squash_spaces(expr).split(' ')
-        assert expr[0] == 'extern'
-        assert expr[1] == 'const'
-        # assert expr[2] == cls.mapped_class
-        assert len(expr) == 4
-        # result[expr[3]] = cls.namespace + expr[3]
-        result.append(expr[3])
+        assert expr[0] in ('extern', 'constexpr')
+        if expr[0] == 'extern':
+            assert len(expr) == 4
+            assert expr[1] == 'const'
+            # assert expr[2] == cls.mapped_class
+            # result[expr[3]] = cls.namespace + expr[3]
+            result.append(expr[3])
+        else:
+            assert len(expr) in (3, 5)
+            if len(expr) == 5:
+                expr[2] = ' '.join(expr[2:])
+            name, rest = expr[2].split('{', 1)
+            assert rest.endswith('}')
+            rest = rest[:-1].strip()
+            if '::' in rest:
+                assert name == rest.rsplit('::', 1)[1]
+            else:
+                int(rest)
+            result.append(name)
     return result
 
 
@@ -39,7 +52,7 @@ def parse_object_enums(incflines):
     @add
     def BulletType():
         f = incflines('BulletType.h')
-        yield from f(87, 123)
+        yield from f(86, 122)
 
     @add
     def Color():
@@ -79,7 +92,7 @@ def parse_object_enums(incflines):
     @add
     def Race():
         f = incflines('Race.h')
-        yield from f(98, 103)
+        yield from f(108, 113)
 
     @add
     def TechType():
@@ -99,7 +112,7 @@ def parse_object_enums(incflines):
     @add
     def UnitType():
         f = incflines('UnitType.h')
-        yield from f(951, 1234)
+        yield from f(963, 1307)
 
     @add
     def UpgradeType():
