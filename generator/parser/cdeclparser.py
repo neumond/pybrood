@@ -85,21 +85,37 @@ def parse_func(line):
     }
 
 
+def strip_and_filter_empty_lines(lines):
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+        yield line
+
+
 def lines_to_statements(lines, separator=';'):
-    all_lines = []
+    lines = list(strip_and_filter_empty_lines(lines))
+    if lines and not lines[-1].endswith(separator):
+        lines[-1] += separator
+
+    EXCLUSIONS = ['//TriggerAction,']
+
+    docs = []
     for line in lines:
         line = line.strip()
         if not line:
             continue
         if line.startswith('//'):
+            if line in EXCLUSIONS:
+                EXCLUSIONS.remove(line)
+                continue
+            # if line != '///' and not line.startswith('/// '):
+            #     pass
+            docs.append(line)
             continue
-        all_lines.append(line)
-    all_lines = '\n'.join(all_lines)
-    for func in all_lines.split(separator):
-        func = func.strip()
-        if not func:
-            continue
-        yield func
+        assert line.endswith(separator)
+        assert separator not in line[:-1]
+        yield line[:-1]
 
 
 def incflines(BWAPI_INCLUDE_DIR, *fname):
