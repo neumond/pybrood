@@ -1,14 +1,17 @@
 [build-system]
-requires = ["flit"]
-build-backend = "flit.buildapi"
+requires = ["pytoml>=0.1", "import_scons"]
+build-backend = "enscons.api"
 
-[tool.flit.metadata]
-module = "pybrood"
+[tool.enscons]
+name = "pybrood"
+version = "0.9.3"
 author = "Vitalik Verhovodov"
-author-email = "knifeslaughter@gmail.com"
-home-page = "https://github.com/neumond/pybrood"
-keywords = "bwapi starcraft broodwar ai binding"
-requires-python = ">=3.5,<4"
+author_email = "knifeslaughter@gmail.com"
+license="MIT"
+description = "Broodwar API binding"
+description_file = "README.md"
+url = "https://github.com/neumond/pybrood"
+keywords = ["bwapi", "starcraft", "broodwar", "ai", "binding"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Education",
@@ -19,4 +22,3 @@ classifiers = [
     "Operating System :: Microsoft :: Windows",
     "Operating System :: Microsoft :: Windows :: Windows 7",
 ]
-description-file = "README.md"
